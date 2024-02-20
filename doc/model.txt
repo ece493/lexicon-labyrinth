@@ -1,0 +1,38 @@
+Lobby: {
+  state: GameState,
+  max_lives: int,
+  host: int, // set to host id
+  board_size: [int, int],
+  timer_setting: int,
+  lobby_code: str,
+  players: Player[],
+}
+
+GameState: {
+  turns: Turns,
+  board: Board,
+  timer: int,
+  memory: set(str)
+}
+
+Board: {
+  tiles: str[][]
+}
+
+Turns: {
+  order: int[],
+  curr_turn: int
+}
+
+Player: {
+  id: int,
+  name: string,
+  is_spectator: boolean,
+  lives: int,
+  money: int
+}
+
+Bot(Player): {
+  difficulty: int,
+  memory: set(str)
+}
