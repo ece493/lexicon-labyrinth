@@ -1,23 +1,10 @@
 import React from "react";
-import logo from "./logo.svg";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./routes";
 import "./App.css";
-import { Board } from "./data/model";
-import { GridComponent } from "./components/grid/grid";
 
 function App() {
-  return (
-    <div className="flex bg-blue-400 h-screen">
-      <GridComponent
-        board_size={[2, 2]}
-        grid={{
-          tiles: [
-            ["a", "b"],
-            ["c", "d"],
-          ],
-        }}
-      ></GridComponent>
-    </div>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
