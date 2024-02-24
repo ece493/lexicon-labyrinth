@@ -1,6 +1,8 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import logo from "./logo.svg";
+import "./App.css";
+import { Board } from "./data/model";
+import { GridComponent } from "./components/grid/grid";
 
 function App() {
   return (
@@ -19,6 +21,15 @@ function App() {
           Learn React
         </a>
       </header>
+      <GridComponent
+        board_size={[2, 2]}
+        grid={{
+          tiles: [
+            ["a", "b"],
+            ["c", "d"],
+          ],
+        }}
+      ></GridComponent>
     </div>
   );
 }
