@@ -1,2 +1,2 @@
-cd frontend\lexicon-labyrinth
+cd client
 npm start run
