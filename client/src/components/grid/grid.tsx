@@ -24,10 +24,12 @@ export const GridComponent: React.FC<GridComponentProps> = ({
   board_size,
 }) => {
   const buildGrid = () => {
+    var idx = 0;
     const arr = Array(board_size[0]*board_size[1]);
     for (let i = 0; i < board_size[0]; i++) {
       for (let j = 0; j < board_size[1]; j++) {
-        arr[i] = <Tile grid={grid} x={i} y={j} />;
+        arr[idx] = <Tile grid={grid} x={i} y={j} />;
+        idx++;
       }
     }
     return arr;
