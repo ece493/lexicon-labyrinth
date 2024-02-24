@@ -1,9 +1,13 @@
 import React from "react";
 
-const interface;
+import { Player } from "../../data/model";
 
-const Players: React.FC = () => {
-  return <div></div>;
+interface PlayersComponentProp {
+  players: Player[];
+}
+
+const Players: React.FC<PlayersComponentProp> = ({ players }) => {
+  return <div>{}</div>;
 };
 
 export default Players;
