@@ -35,7 +35,7 @@ export const GridComponent: React.FC<GridComponentProps> = ({
     return arr;
   }
   return (
-    <div className={`grid grid-rows-${board_size[0]} grid-cols-${board_size[1]} gap-4`} >
+    <div className={`grid grid-rows-${board_size[1]} grid-cols-${board_size[0]} gap-4`} >
       {buildGrid()}
     </div>
   );
