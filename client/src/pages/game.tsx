@@ -3,7 +3,7 @@ import { GridComponent } from "../components/grid/grid";
 
 const Game: React.FC = () => {
   return (
-    <div className="flex bg-blue-400 h-screen">
+    <div className="flex justify-center bg-blue-400 h-screen">
       <GridComponent
         board_size={[7, 7]}
         grid={{
