@@ -36,3 +36,9 @@ Bot(Player): {
   difficulty: int,
   memory: set(str)
 }
+
+Action: {
+  action: str,
+  player_id: str,
+  data: any
+}
