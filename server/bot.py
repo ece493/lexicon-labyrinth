@@ -27,7 +27,9 @@ class Bot:
             print(f"Invalid difficulty level: {self.difficulty}. Please choose from 'easy', 'medium', or 'hard'.")
             return []
 
-    def action(self, game_state):
+    def update(self, game_update):
+        game_state = game_update['game_state']
+        turn_info = game_update['turn_info']
         # Placeholder for bot's move logic based on game state
         # This should be implemented based on your game's rules and mechanics
 
