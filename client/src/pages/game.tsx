@@ -1,10 +1,19 @@
 import React from "react";
+import { GridComponent } from "../components/grid/grid";
 
 const Game: React.FC = () => {
   return (
-    <header>
-      <h1>Game Page</h1>
-    </header>
+    <div className="flex bg-blue-400 h-screen">
+      <GridComponent
+        board_size={[2, 2]}
+        grid={{
+          tiles: [
+            ["a", "b"],
+            ["c", "d"],
+          ],
+        }}
+      ></GridComponent>
+    </div>
   );
 };
 
