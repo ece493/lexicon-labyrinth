@@ -13,8 +13,8 @@ interface TileComponentProps {
 
 const Tile: React.FC<TileComponentProps> = ({ x, y, grid }) => {
   return (
-    <div>
-      <p className="text-bold text-lg text-slate-100">{grid.tiles[y][x]}</p>
+    <div className="bg-slate-300 rounded-lg w-16 h-16">
+      <p className="text-bold text-lg text-slate-100 text-center">{grid.tiles[y][x]}</p>
     </div>
   );
 };
