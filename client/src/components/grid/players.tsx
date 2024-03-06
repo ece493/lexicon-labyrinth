@@ -6,8 +6,8 @@ interface PlayersComponentProp {
   players: Player[];
 }
 
-const Players: React.FC<PlayersComponentProp> = ({ players }) => {
-  return <div>{}</div>;
+const PlayersComponent: React.FC<PlayersComponentProp> = ({ players }) => {
+  return <div>players{}</div>;
 };
 
-export default Players;
+export default PlayersComponent;
