@@ -7,8 +7,8 @@ const Game: React.FC = () => {
   return (
     <div className="flex bg-blue-400 h-screen">
       <div className="flex align-top justify-center width w-full">
-        <div className="flex flex-col">
-          <TurnComponent></TurnComponent>
+        <div className="flex flex-col items-center">
+          <TurnComponent word="test" potential_funds={15}/>
           <div className="flex flex-row justify-center">
             <PowerupsComponent funds={20}></PowerupsComponent>
             <GridComponent
