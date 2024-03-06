@@ -7,6 +7,10 @@ module.exports = {
     {pattern: /grid-cols-.+/,},
     {pattern: /grid-rows-.+/,}
   ],
+  important: '#root',
+  corePlugins: {
+    preflight: false,
+  },
   theme: {
     extend: {},
   },
