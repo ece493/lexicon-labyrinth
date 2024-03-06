@@ -1,8 +1,4 @@
-import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-} from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import Home from "./pages/home";
 import Game from "./pages/game";
 import Lobby from "./pages/lobby";
