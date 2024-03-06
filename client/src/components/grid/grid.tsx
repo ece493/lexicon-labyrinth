@@ -13,7 +13,7 @@ interface TileComponentProps {
 
 const Tile: React.FC<TileComponentProps> = ({ x, y, grid }) => {
   return (
-    <div className="bg-slate-300 rounded-lg w-12 h-12 flex flex-col justify-center items-center">
+    <div className="bg-blue-400 rounded-lg w-12 h-12 flex flex-col justify-center items-center">
       <p className="text-bold text-lg text-slate-100 text-center">
         {grid.tiles[y][x]}
       </p>
@@ -37,9 +37,8 @@ export const GridComponent: React.FC<GridComponentProps> = ({
     return arr;
   };
   return (
-    <div
-      className={`grid grid-rows-${board_size[0]} grid-cols-${board_size[1]} gap-4 my-auto`}
-    >
+    <div className={`grid grid-rows-${board_size[1]} grid-cols-${board_size[0]}
+      gap-4 my-auto bg-blue-500 p-12 rounded-3xl`} >
       {buildGrid()}
     </div>
   );
