@@ -13,10 +13,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   onClick,
 }) => {
   return (
-    // <div onClick={onClick} className="cursor-pointer px-2 flex align-center justify-center w-20 h-8 bg-blue-800  rounded-sm">
-    //   <p className="m-auto text-bold text-sm text-slate-100">{label}</p>
-    // </div>
-    <Button onClick={onClick} className="w-full h-8 bg-blue-800  rounded-sm text-bold text-sm text-slate-100">
+    <Button onClick={onClick} style={{textTransform: 'none'}}className="w-full h-8 bg-blue-600  rounded-sm text-bold text-sm text-slate-100">
       {label}
     </Button>
   );
