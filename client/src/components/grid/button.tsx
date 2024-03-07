@@ -16,6 +16,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   invert,
   long
 }) => {
+  //
   return (
     <Button
       onClick={onClick}
