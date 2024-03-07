@@ -18,12 +18,12 @@ const prices = {
 
 const PowerupsComponent: React.FC<PowerupsComponentProp> = ({ funds }) => {
   return (
-    <div className="flex flex-col m-2 p-2 justify-start bg-blue-500 rounded-sm">
+    <div className="flex flex-col mt-2 p-2 box-border justify-start bg-blue-500 rounded-sm w-40">
       <div className="space-x-1 items-center justify-center flex flex-row">
         <FundsIcon />
         <Typography className="text-bold text-lg text-slate-100 py-2">{funds}</Typography>
       </div>
-      <div className="space-y-2 w-40">
+      <div className="space-y-2">
         <ButtonComponent label={`${prices.rotate} Rotate`} onClick={() => {}} />
         <ButtonComponent label={`${prices.scramble} Scramble`} onClick={() => {}} />
         <ButtonComponent label={`${prices.transform} Transform`} onClick={() => {}} />

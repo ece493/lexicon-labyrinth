@@ -5,6 +5,7 @@ import FundsIcon from "../icons/fundsIcon";
 import { Typography } from "@mui/material";
 import TimerIcon from "../icons/timerIcon";
 import AddIcon from "../icons/addIcon";
+import ButtonComponent from "./button";
 
 interface TurnComponentProp {
   potential_funds: number;
@@ -42,17 +43,19 @@ const TurnComponent: React.FC<TurnComponentProp> = ({
       <Typography className="text-slate-200 text-sm">
         {player}'s turn
       </Typography>
-      <div className="flex flex-row space-x-5 items-center p-2">
+      
+
+      <Typography className="text-slate-100 text-4xl p-2">{word? word: "click and drag to select a word"}</Typography>
+      <div className="flex flex-row space-x-2 items-center p-1">
         <div className=" flex flex-row space-x-1 justify-center items-center p-1 ">
           <TimerIcon />
           <Typography className="text-slate-100">{time}</Typography>
         </div>
-
-        <Typography className="text-slate-100 text-4xl">{word}</Typography>
+        <ButtonComponent onClick={()=>{}}label="Submit" long invert/>
         <div className="flex flex-row space-x-1 items-center mr-3">
           <AddIcon />
           <FundsIcon />
-          <Typography className="text-slate-100">{potential_funds}</Typography>
+          <Typography className="text-slate-100">{word.length}</Typography>
         </div>
       </div>
     </div>

@@ -25,11 +25,11 @@ function getLivesIcons(lives: number) {
 
 const PlayersComponent: React.FC<PlayersComponentProp> = ({ players }) => {
   return (
-    <div className="flex flex-col w-40 p-2 space-y-2">
+    <div className="flex flex-col w-40 my-2 space-y-2">
       {players.map((player) => {
         return (
           <div key={player.name} className={`flex flex-col items-start  justify-center  bg-blue-500  overflow-hidden rounded-sm`}
-          style={{ opacity: player.lives === 0? "0.5":""}}>
+          style={{ opacity: player.lives === 0? "0.3":""}}>
             <div className="flex flex-row items-center px-2 py-1 justify-start space-x-1">
               {(player as Bot).difficulty ? (
                 <RobotIcon></RobotIcon>
