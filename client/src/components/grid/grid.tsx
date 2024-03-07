@@ -87,8 +87,9 @@ export const GridComponent: React.FC<GridComponentProps> = ({
   };
   return (
     <div
-      className={`my-2 mx-2 grid grid-rows-${board_size[1]} grid-cols-${board_size[0]}
-      gap-2 my-auto bg-blue-500 p-${board_size[0]} rounded-sm`}
+      className={`mt-2 mx-2 p-2 grid grid-rows-${board_size[1]} grid-cols-${board_size[0]}
+      gap-2 my-auto bg-blue-500 rounded-sm`}
+     
     >
       {buildGrid()}
     </div>
