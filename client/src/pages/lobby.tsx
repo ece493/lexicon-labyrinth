@@ -26,7 +26,7 @@ const LobbyPage: React.FC = () => {
     max_lives: 5,
     host: 0,
     board_size: [7, 7],
-    timer_setting: 0,
+    timer_setting: 30,
     lobby_code: "X3Y0EG",
     players: [host, host, host, bot]
   };
