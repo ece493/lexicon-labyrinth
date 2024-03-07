@@ -5,7 +5,7 @@ export type Lobby = {
     board_size: [number, number];
     timer_setting: number;
     lobby_code: string;
-    players: Player[];
+    players: (Player|Bot)[];
 };
 
 export type GameState = {
@@ -36,3 +36,7 @@ export type Bot = Player & {
     difficulty: number;
     memory: Set<string>;
 };
+
+export const isPlayerABot = (p: Player | Bot): p is Bot => {
+    return ((p as Bot).difficulty) ? true : false;
+}
