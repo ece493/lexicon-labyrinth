@@ -7,6 +7,30 @@ interface LobbyProps {
     player_id: number
 }
 
+const LobbySettingsComponent: React.FC<LobbyProps> = ({...p}) => {
+    return(
+        <div className="h-full w-full">
+            <div className="flex flex-col w-full">
+                <p className="text-slate-100">Lobby Code</p>
+                <h1 className="text-slate-100 text-3xl">{p.lobby.lobby_code}</h1>
+            </div>
+            <div className="py-4"></div>
+            <div className="flex flex-col w-full py-1">
+                <p className="text-slate-100">Number of Lives</p>
+                <input className="p-1 rounded-lg" value={p.lobby.max_lives}></input>
+            </div>
+            <div className="flex flex-col w-full py-1">
+                <p className="text-slate-100">Turn Timer</p>
+                <input className="p-1 rounded-lg" value={p.lobby.timer_setting}></input>
+            </div>
+            <div className="flex flex-col w-full py-1">
+                <p className="text-slate-100">Board Width</p>
+                <input className="p-1 rounded-lg" value={p.lobby.board_size[0]}></input>
+            </div>
+        </div>
+    );
+}
+
 const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id}) => {
     return (
         <div className="h-screen flex flex-col justify-center bg-blue-400 align-middle items-center">
@@ -20,7 +44,7 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id}) => {
                     </div>
                 </div>
                 <div className="h-full w-1/3 bg-blue-400 p-12 rounded-3xl" >
-                    
+                    <LobbySettingsComponent lobby={lobby} player_id={player_id} />
                 </div>
             </div>
             <div className="w-[75vw] h-16">
