@@ -17,15 +17,15 @@ const LobbySettingsComponent: React.FC<LobbyProps> = ({...p}) => {
             <div className="py-4"></div>
             <div className="flex flex-col w-full py-1">
                 <p className="text-slate-100">Number of Lives</p>
-                <h2 className="rounded-lg text-blue-100 text-xl font-bold">{p.lobby.max_lives}</h2>
+                <h2 className="rounded-lg text-blue-100 text-xl">{p.lobby.max_lives}</h2>
             </div>
             <div className="flex flex-col w-full py-1">
                 <p className="text-slate-100">Turn Timer</p>
-                <h2 className="rounded-lg text-blue-100 text-xl font-bold">{p.lobby.timer_setting}</h2>
+                <h2 className="rounded-lg text-blue-100 text-xl">{p.lobby.timer_setting}</h2>
             </div>
             <div className="flex flex-col w-full py-1">
                 <p className="text-slate-100">Board Width</p>
-                <h2 className="rounded-lg text-blue-100 text-xl font-bold">{p.lobby.board_size[0]}</h2>
+                <h2 className="rounded-lg text-blue-100 text-xl">{p.lobby.board_size[0]}</h2>
             </div>
         </div>
     );
