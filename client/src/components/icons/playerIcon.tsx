@@ -8,9 +8,9 @@ const PlayerIcon: React.FC<PlayerIconComponentProps> = ({}) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      height="24"
+      height="18"
       viewBox="0 -960 960 960"
-      width="24"
+      width="18"
       className=" fill-slate-100"
 
     >
