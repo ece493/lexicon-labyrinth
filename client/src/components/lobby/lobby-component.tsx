@@ -1,33 +1,10 @@
 import React from "react";
 import { Bot, Lobby, Player, isPlayerABot } from "../../data/model";
-import robotSvg from "./assets/robot.svg";
-import personSvg from "./assets/person.svg";
+import { BotComponent, PlayerComponent } from "./player-bot-component";
 
 interface LobbyProps {
     lobby: Lobby,
     player_id: number
-}
-
-interface PlayerBotComponentProps {
-    name: string,
-    img: string
-}
-
-const PlayerComponent: React.FC<Player> = ({...p}) => {
-    return (<BotPlayerComponent name={p.name} img={personSvg} />);
-}
-
-const BotComponent: React.FC<Bot> = ({...p}) => {
-    return (<BotPlayerComponent name={p.name} img={robotSvg} />);
-}
-
-const BotPlayerComponent: React.FC<PlayerBotComponentProps> = ({name, img}) => {
-    return (
-        <div className="flex flex-auto flex-col items-center justify-center h-40 w-32 bg-blue-500 p-4 rounded-3xl" >
-            <img className="h-16 w-16 opacity-80 invert" src={img}></img>
-            <h4 className="text-slate-100 text-center">{name}</h4>
-        </div>
-    );
 }
 
 const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id}) => {
@@ -43,7 +20,7 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id}) => {
                     </div>
                 </div>
                 <div className="h-full w-1/3 bg-blue-400 p-12 rounded-3xl" >
-
+                    
                 </div>
             </div>
             <div className="w-[75vw] h-16">
