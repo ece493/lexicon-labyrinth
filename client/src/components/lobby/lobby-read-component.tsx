@@ -7,7 +7,7 @@ interface LobbyProps {
     player_id: number
 }
 
-const LobbySettingsComponent: React.FC<LobbyProps> = ({...p}) => {
+const LobbySettingsReadOnlyComponent: React.FC<LobbyProps> = ({...p}) => {
     return(
         <div className="m-0 h-auto w-full">
             <div className="m-0 flex flex-col w-full">
@@ -31,7 +31,7 @@ const LobbySettingsComponent: React.FC<LobbyProps> = ({...p}) => {
     );
 }
 
-const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id}) => {
+const LobbyReadOnlyComponent: React.FC<LobbyProps> = ({lobby, player_id}) => {
     return (
         <div className="m-0 h-screen flex flex-col justify-center bg-blue-400 align-middle items-center">
             <div className="m-0 h-[70vh] w-[75vw] flex flex-row bg-blue-500 p-12 gap-12 rounded-3xl" >
@@ -44,7 +44,7 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id}) => {
                     </div>
                 </div>
                 <div className="m-0 h-auto w-1/3 bg-blue-400 p-12 rounded-3xl" >
-                    <LobbySettingsComponent lobby={lobby} player_id={player_id} />
+                    <LobbySettingsReadOnlyComponent lobby={lobby} player_id={player_id} />
                 </div>
             </div>
             <div className="m-0 w-[75vw] h-16">
@@ -56,4 +56,4 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id}) => {
     );
 };
 
-export default LobbyComponent;
+export default LobbyReadOnlyComponent;

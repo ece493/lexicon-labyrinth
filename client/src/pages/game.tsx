@@ -20,13 +20,17 @@ const Game: React.FC = () => {
             <GridComponent
               word={word}
               setWord={setWord}
-              board_size={[4, 4]}
+              board_size={[8, 8]}
               grid={{
                 tiles: [
-                  ["a", "b", "c", "d"],
-                  ["e", "f", "g", "h"],
-                  ["i", "j", "k", "l"],
-                  ["m", "n", "o", "p"],
+                  ["a", "b", "c", "d","a", "b", "c", "d"],
+                  ["e", "f", "g", "h","a", "b", "c", "d"],
+                  ["i", "j", "k", "l","a", "b", "c", "d"],
+                  ["m", "n", "o", "p","a", "b", "c", "d"],
+                  ["m", "n", "o", "p","a", "b", "c", "d"],
+                  ["m", "n", "o", "p","a", "b", "c", "d"],
+                  ["m", "n", "o", "p","a", "b", "c", "d"],
+                  ["m", "n", "o", "p","a", "b", "c", "d"],
                 ],
               }}
             ></GridComponent>
