@@ -71,7 +71,7 @@ const Tile: React.FC<TileComponentProps> = ({
     }else if (xdif < 0){
       if (ydif === 0) return 180
      if (ydif === -1) return 225
-     if (ydif === 1) return 125
+     if (ydif === 1) return 135
     }
   }
 
@@ -119,7 +119,7 @@ const Tile: React.FC<TileComponentProps> = ({
       {selected && !isFirstTileDuringMouseDown && !isFirstTileAfterMouseDown ? (
         <div
           draggable="false"
-          className="z-0 absolute h-0.5 w-20 bg-blue-300 top-1/2 left-1/2 transform  -translate-y-1/2"
+          className="z-0 absolute h-1 w-20 bg-blue-300 top-1/2 left-1/2 transform  -translate-y-1/2"
           style={{transform: `rotate(${getPrevTileDirection()}deg)`, transformOrigin:"center left"}}
         ></div>
       ) : null}
