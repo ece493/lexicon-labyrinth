@@ -102,7 +102,7 @@ const Tile: React.FC<TileComponentProps> = ({
             setPrevTile(lastSelectedTile)
           }
         }}
-        className={`relative cursor-pointer ${
+        className={`relative ${!selecting || (selecting && isAdjacent())? "cursor-pointer": "cursor-default"} ${
           selected ? "bg-blue-200" : "bg-blue-400"
         } rounded-sm w-12 h-12 flex flex-col justify-center items-center z-10`}
         style={{ opacity: selecting && !isAdjacent() && !selected ? 0.3 : "" }}
