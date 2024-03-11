@@ -1,10 +1,9 @@
 import { createContext } from 'react';
-import { Socket, io } from 'socket.io-client';
 import { connect } from '../client';
 
 export type ClientContextData = {
-    sock: Socket | null,
-    connect: () => Socket
+    sock: WebSocket | null,
+    connect: () => WebSocket
 }
 
 export const ClientContext = createContext <ClientContextData>({

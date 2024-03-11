@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { ClientContext } from "../ws-client/context/client-ctx";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const ctx = useContext(ClientContext);
 
   return (
     <header>
@@ -21,6 +23,16 @@ const Home: React.FC = () => {
       >
         Click to go to Game test page
       </h2>
+      <h2 onClick={() => {
+        const sock = ctx.connect();
+        sock.onopen = () => {
+          sock.send("test");
+        };
+        sock.onmessage = (m) => {
+          console.log(m.data);
+          sock.close();
+        }
+      }}>Test Sock</h2>
     </header>
   );
 };
