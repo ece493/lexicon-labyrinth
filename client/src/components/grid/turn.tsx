@@ -11,12 +11,14 @@ interface TurnComponentProp {
   potential_funds: number;
   word: string;
   player: string;
+  powerup: string | null;
 }
 
 const TurnComponent: React.FC<TurnComponentProp> = ({
   potential_funds,
   word,
   player,
+  powerup,
 }) => {
   const [time, setTime] = React.useState(60);
   const [startTime, setStartTime] = React.useState(Date.now())
@@ -51,7 +53,7 @@ const TurnComponent: React.FC<TurnComponentProp> = ({
           <TimerIcon />
           <Typography className="text-slate-100">{time}</Typography>
         </div>
-        <ButtonComponent onClick={()=>{}}label="Submit" long invert/>
+        <ButtonComponent onClick={()=>{}}label="Submit" long invert disabled={!!powerup}/>
         <div className="flex flex-row space-x-1 items-center mr-3">
           <AddIcon />
           <FundsIcon />
