@@ -33,7 +33,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       }`}
       disabled={disabled}
     > 
-      {children}{label}
+      {children}<div className={children? "ml-1":""}>{label}</div>
     </Button>
   );
 };
