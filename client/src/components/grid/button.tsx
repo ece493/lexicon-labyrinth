@@ -1,13 +1,16 @@
 import React from "react";
 import { Button } from "@mui/material";
 import { Player } from "../../data/model";
+import LeftIcon from "../icons/leftIcon";
+import RightIcon from "../icons/rightIcon";
 
 interface ButtonComponentProps {
-  label: string;
+  label?: string;
   onClick: any;
   disabled?: boolean;
   invert?: boolean;
   long?: boolean;
+  children?:any;
 }
 
 const ButtonComponent: React.FC<ButtonComponentProps> = ({
@@ -16,6 +19,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   invert,
   long,
   disabled,
+  children,
 }) => {
   //
   return (
@@ -28,8 +32,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         invert ? "text-blue-600" : "text-slate-100"
       }`}
       disabled={disabled}
-    >
-      {label}
+    > 
+      {children}{label}
     </Button>
   );
 };

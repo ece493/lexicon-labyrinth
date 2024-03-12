@@ -45,8 +45,8 @@ const Tile: React.FC<TileComponentProps> = ({
     isTileEqual(firstTile, [x, y]) || isTileEqual(secondTile, [x, y]);
 
   function handleClick(e: any) {
-    if(!isTileEqual(firstTile, nullTile) && !isTileEqual(secondTile, nullTile))  return //Selection is locked in
-    
+    if (!isTileEqual(firstTile, nullTile) && !isTileEqual(secondTile, nullTile))
+      return; //Selection is locked in
 
     if (isTileEqual(firstTile, [x, y])) {
       setFirstTile(nullTile);
@@ -57,10 +57,11 @@ const Tile: React.FC<TileComponentProps> = ({
     } else {
       setSecondTile([x, y]);
       // TODO: SEND TO BACKEND
-      setHelp("");
-      
-      setTimeout(()=>{
-      setPowerup(null)},500);
+
+      setTimeout(() => {
+        setHelp("");
+        setPowerup(null);
+      }, 500);
     }
   }
 

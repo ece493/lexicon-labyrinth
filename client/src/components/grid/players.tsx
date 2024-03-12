@@ -9,6 +9,7 @@ import DeadIcon from "../icons/deadIcon";
 
 interface PlayersComponentProp {
   players: Player[];
+  powerup: string |null
 }
 
 function getLivesIcons(lives: number) {
@@ -23,9 +24,9 @@ function getLivesIcons(lives: number) {
   return icons;
 }
 
-const PlayersComponent: React.FC<PlayersComponentProp> = ({ players }) => {
+const PlayersComponent: React.FC<PlayersComponentProp> = ({ players, powerup }) => {
   return (
-    <div className="flex flex-col w-40 my-2 space-y-2">
+    <div className="flex flex-col w-40 my-2 space-y-2" style={{ opacity: powerup ? "0.1" : "" }}>
       {players.map((player) => {
         return (
           <div key={player.name} className={`flex flex-col items-start  justify-center  bg-blue-500  overflow-hidden rounded-sm`}
