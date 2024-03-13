@@ -4,11 +4,12 @@ import { router } from "./routes";
 import "./App.css";
 import { GameContext } from "./context/ctx";
 import { connect } from "./ws-client/client";
-import { Screen } from "./data/model";
+import { ScreenState } from "./data/model";
 
 function App() {
-  const [screen, setScreen] = useState<Screen>(Screen.START);
-  return <GameContext.Provider value={{ connectWs: connect, sock: null, screen, setScreen }}>
+  const [screen, setScreen] = useState<ScreenState>(ScreenState.START);
+  const [lobbyCode, setLobbyCode] = useState<string|null>(null);
+  return <GameContext.Provider value={{ connectWs: connect, sock: null, screen, setScreen, lobbyCode, setLobbyCode }}>
     <RouterProvider router={router} />
   </GameContext.Provider>
 }

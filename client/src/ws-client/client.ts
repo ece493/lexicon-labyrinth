@@ -1,8 +1,8 @@
-import { Action, Screen, isAction } from "../data/model";
+import { Action, ScreenState, isAction } from "../data/model";
 import { ActionsList } from "./model";
 
 // https://socket.io/how-to/use-with-react
-export const connect = (setScreen: (s: Screen) => void) => {
+export const connect = (setScreen: (s: ScreenState) => void) => {
     // TO-DO: Remove undefined
     // const url = process.env.NODE_ENV === 'production' ? "undefined" : 'ws://localhost:8888/websocket';
     const ws = new WebSocket("ws://localhost:8888/websocket");
@@ -10,21 +10,21 @@ export const connect = (setScreen: (s: Screen) => void) => {
     return ws;
 }
 
-export const wsReceiveHandler = (setScreen: (s: Screen) => void, ev: MessageEvent<any>) => {
+export const wsReceiveHandler = (setScreen: (s: ScreenState) => void, ev: MessageEvent<any>) => {
     if (!isAction(ev.data)) return null;
     const action = ev.data as Action;
     switch (action.action) {
         case ActionsList.return_lobby_code:
             // Code for return_lobby_code
-            setScreen(Screen.LOBBY);
+            setScreen(ScreenState.LOBBY);
             break;
         case ActionsList.lobby_does_not_exist:
             // Code for lobby_does_not_exist
-            setScreen(Screen.GAME);
+            setScreen(ScreenState.GAME);
             break;
         case ActionsList.successfully_joined_lobby:
             // Code for successfully_joined_lobby
-            setScreen(Screen.LOBBY);
+            setScreen(ScreenState.LOBBY);
             break;
         case ActionsList.success:
             // Code for success
@@ -34,7 +34,7 @@ export const wsReceiveHandler = (setScreen: (s: Screen) => void, ev: MessageEven
             break;
         case ActionsList.start_game:
             // Code for start_game
-            setScreen(Screen.GAME);
+            setScreen(ScreenState.GAME);
             break;
         case ActionsList.player_joined:
             // Code for player_joined
@@ -68,7 +68,7 @@ export const wsReceiveHandler = (setScreen: (s: Screen) => void, ev: MessageEven
             break;
         case ActionsList.you_win:
             // Code for you_win
-            setScreen(Screen.END);
+            setScreen(ScreenState.END);
             break;
         default:
             break;

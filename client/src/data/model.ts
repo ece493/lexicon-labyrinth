@@ -45,7 +45,7 @@ export type Action = {
   data: any
 }
 
-export enum Screen {
+export enum ScreenState {
     START = 0,
     LOBBY_CODE_ENTRY = 1,
     LOBBY = 2,
