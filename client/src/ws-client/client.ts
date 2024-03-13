@@ -1,27 +1,30 @@
-import { Action, isAction } from "../data/model";
+import { Action, Screen, isAction } from "../data/model";
 import { ActionsList } from "./model";
 
 // https://socket.io/how-to/use-with-react
-export const connect = () => {
+export const connect = (setScreen: (s: Screen) => void) => {
     // TO-DO: Remove undefined
     // const url = process.env.NODE_ENV === 'production' ? "undefined" : 'ws://localhost:8888/websocket';
     const ws = new WebSocket("ws://localhost:8888/websocket");
-    ws.onmessage = (ev) => wsReceiveHandler(ev);
+    ws.onmessage = (ev) => wsReceiveHandler(setScreen, ev);
     return ws;
 }
 
-export const wsReceiveHandler = (ev: MessageEvent<any>) => {
+export const wsReceiveHandler = (setScreen: (s: Screen) => void, ev: MessageEvent<any>) => {
     if (!isAction(ev.data)) return null;
     const action = ev.data as Action;
     switch (action.action) {
         case ActionsList.return_lobby_code:
             // Code for return_lobby_code
+            setScreen(Screen.LOBBY);
             break;
         case ActionsList.lobby_does_not_exist:
             // Code for lobby_does_not_exist
+            setScreen(Screen.GAME);
             break;
         case ActionsList.successfully_joined_lobby:
             // Code for successfully_joined_lobby
+            setScreen(Screen.LOBBY);
             break;
         case ActionsList.success:
             // Code for success
@@ -31,6 +34,7 @@ export const wsReceiveHandler = (ev: MessageEvent<any>) => {
             break;
         case ActionsList.start_game:
             // Code for start_game
+            setScreen(Screen.GAME);
             break;
         case ActionsList.player_joined:
             // Code for player_joined
@@ -64,6 +68,7 @@ export const wsReceiveHandler = (ev: MessageEvent<any>) => {
             break;
         case ActionsList.you_win:
             // Code for you_win
+            setScreen(Screen.END);
             break;
         default:
             break;

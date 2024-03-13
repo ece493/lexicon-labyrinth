@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./routes";
 import "./App.css";
-import { ClientContext } from "./ws-client/context/client-ctx";
+import { ClientContext } from "./context/ctx";
 import { connect } from "./ws-client/client";
+import { Screen } from "./data/model";
 
 function App() {
-  return <ClientContext.Provider value={{ connect, sock: null }}>
+  const [screen, setScreen] = useState<Screen>(Screen.START);
+  return <ClientContext.Provider value={{ connectWs: connect, sock: null, screen, setScreen }}>
     <RouterProvider router={router} />
   </ClientContext.Provider>
 }

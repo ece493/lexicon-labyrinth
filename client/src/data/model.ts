@@ -50,7 +50,7 @@ export enum Screen {
     LOBBY_CODE_ENTRY = 1,
     LOBBY = 2,
     GAME = 3,
-    WIN = 4,
+    END = 4,
 };
 
 export const isAction = (d: any): d is Action => d?.action && d?.player_id;;

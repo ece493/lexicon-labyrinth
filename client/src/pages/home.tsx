@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { ClientContext } from "../ws-client/context/client-ctx";
+import { ClientContext } from "../context/ctx";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ const Home: React.FC = () => {
         Click to go to Game test page
       </h2>
       <h2 onClick={() => {
-        const sock = ctx.connect();
+        const sock = ctx.connectWs(ctx.setScreen);
         sock.onopen = () => {
           sock.send("test");
         };
