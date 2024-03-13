@@ -1,4 +1,4 @@
-import { ACTIONS_LIST } from "../ws-client/model";
+import { ActionsList } from "../ws-client/model";
 
 export type Lobby = {
     state: GameState;
@@ -40,10 +40,18 @@ export type Bot = Player & {
 };
 
 export type Action = {
-  action: ACTIONS_LIST,
+  action: ActionsList,
   player_id: number,
   data: any
 }
+
+export enum Screen {
+    START = 0,
+    LOBBY_CODE_ENTRY = 1,
+    LOBBY = 2,
+    GAME = 3,
+    WIN = 4,
+};
 
 export const isAction = (d: any): d is Action => d?.action && d?.player_id;;
 

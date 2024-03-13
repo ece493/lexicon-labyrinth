@@ -1,5 +1,5 @@
 import { Action, isAction } from "../data/model";
-import { ACTIONS_LIST } from "./model";
+import { ActionsList } from "./model";
 
 // https://socket.io/how-to/use-with-react
 export const connect = () => {
@@ -14,55 +14,55 @@ export const wsReceiveHandler = (ev: MessageEvent<any>) => {
     if (!isAction(ev.data)) return null;
     const action = ev.data as Action;
     switch (action.action) {
-        case ACTIONS_LIST.return_lobby_code:
+        case ActionsList.return_lobby_code:
             // Code for return_lobby_code
             break;
-        case ACTIONS_LIST.lobby_does_not_exist:
+        case ActionsList.lobby_does_not_exist:
             // Code for lobby_does_not_exist
             break;
-        case ACTIONS_LIST.successfully_joined_lobby:
+        case ActionsList.successfully_joined_lobby:
             // Code for successfully_joined_lobby
             break;
-        case ACTIONS_LIST.success:
+        case ActionsList.success:
             // Code for success
             break;
-        case ACTIONS_LIST.error:
+        case ActionsList.error:
             // Code for error
             break;
-        case ACTIONS_LIST.start_game:
+        case ActionsList.start_game:
             // Code for start_game
             break;
-        case ACTIONS_LIST.player_joined:
+        case ActionsList.player_joined:
             // Code for player_joined
             break;
-        case ACTIONS_LIST.player_left:
+        case ActionsList.player_left:
             // Code for player_left
             break;
-        case ACTIONS_LIST.update_lobby_settings:
+        case ActionsList.update_lobby_settings:
             // Code for update_lobby_settings
             break;
-        case ACTIONS_LIST.word_accepted:
+        case ActionsList.word_accepted:
             // Code for word_accepted
             break;
-        case ACTIONS_LIST.word_denied:
+        case ActionsList.word_denied:
             // Code for word_denied
             break;
-        case ACTIONS_LIST.end_turn:
+        case ActionsList.end_turn:
             // Code for end_turn
             break;
-        case ACTIONS_LIST.start_turn:
+        case ActionsList.start_turn:
             // Code for start_turn
             break;
-        case ACTIONS_LIST.powerup_denied:
+        case ActionsList.powerup_denied:
             // Code for powerup_denied
             break;
-        case ACTIONS_LIST.powerup_activated:
+        case ActionsList.powerup_activated:
             // Code for powerup_activated
             break;
-        case ACTIONS_LIST.you_died:
+        case ActionsList.you_died:
             // Code for you_died
             break;
-        case ACTIONS_LIST.you_win:
+        case ActionsList.you_win:
             // Code for you_win
             break;
         default:

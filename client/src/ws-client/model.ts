@@ -1,4 +1,4 @@
-export enum ACTIONS_LIST {
+export enum ActionsList {
     // Client Actions
     initialize = "initialize",
     join_lobby = "join_lobby",
