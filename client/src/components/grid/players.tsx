@@ -35,7 +35,9 @@ const PlayersComponent: React.FC<PlayersComponentProp> = ({
       if (j === turns.order.length) {
         j = 0;
       }
-      orderedLivePlayers.push(players.find((p) => p.id === j) as Player);
+      orderedLivePlayers.push(
+        players.find((p) => p.id === turns.order[j]) as Player
+      );
       j++;
     }
     return [...orderedLivePlayers, ...players.filter((p) => p.lives === 0)];

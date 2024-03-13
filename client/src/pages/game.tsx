@@ -39,7 +39,7 @@ const Game: React.FC = () => {
             ></GridComponent>
             <PlayersComponent
               turns={{
-                order: [1,0],
+                order: [1,0,3],
                 curr_turn: 0,
               }}
               players={[
