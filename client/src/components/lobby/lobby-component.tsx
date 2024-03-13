@@ -41,15 +41,15 @@ const LobbySettingsAdminComponent: React.FC<LobbyProps> = ({ ...p }) => {
             <div className="m-0 py-4"></div>
             <div className="m-0 flex flex-col w-full py-1">
                 <p className="m-0 text-slate-100">Number of Lives</p>
-                <input name="max_lives" value={p.lobby.max_lives} type="number" className="m-0 p-1 text-xl rounded-xl"></input>
+                <input name="max_lives" defaultValue={p.lobby.max_lives} type="number" className="m-0 p-1 text-xl rounded-xl"></input>
             </div>
             <div className="m-0 flex flex-col w-full py-1">
                 <p className="m-0 text-slate-100">Turn Timer</p>
-                <input name="timer_setting" value={p.lobby.timer_setting} type="number" className="m-0 p-1 text-xl rounded-xl"></input>
+                <input name="timer_setting" defaultValue={p.lobby.timer_setting} type="number" className="m-0 p-1 text-xl rounded-xl"></input>
             </div>
             <div className="m-0 flex flex-col w-full py-1">
                 <p className="m-0 text-slate-100">Board Width</p>
-                <input name="board_size" value={p.lobby.board_size[0]} type="number" className="m-0 p-1 text-xl rounded-xl"></input>
+                <input name="board_size" defaultValue={p.lobby.board_size[0]} type="number" className="m-0 p-1 text-xl rounded-xl"></input>
             </div>
         </div>
     );
