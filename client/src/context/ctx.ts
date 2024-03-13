@@ -9,7 +9,7 @@ export type GameContextData = {
     setScreen: (s: Screen) => void,
 }
 
-export const ClientContext = createContext <GameContextData>({
+export const GameContext = createContext <GameContextData>({
     sock: null,
     connectWs: connect,
     screen: Screen.START,

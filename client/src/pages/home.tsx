@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { ClientContext } from "../context/ctx";
+import { GameContext } from "../context/ctx";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const ctx = useContext(ClientContext);
+  const ctx = useContext(GameContext);
 
   return (
     <header>

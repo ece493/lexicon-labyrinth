@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
+import { GameContext } from "../../../context/ctx";
 
 const JoinLobbyComponent: React.FC = () => {
+    useContext(GameContext);
     return (
         <div className="m-0 h-screen flex flex-col justify-center bg-blue-400 align-middle items-center">
             <div className="m-0 h-[70vh] w-[75vw] flex flex-row bg-blue-500 p-12 gap-12 rounded-3xl" >
