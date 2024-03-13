@@ -5,11 +5,12 @@ import { ACTIONS_LIST } from "./model";
 export const connect = () => {
     // TO-DO: Remove undefined
     // const url = process.env.NODE_ENV === 'production' ? "undefined" : 'ws://localhost:8888/websocket';
-    return new WebSocket("ws://localhost:8888/websocket");
+    const ws = new WebSocket("ws://localhost:8888/websocket");
+    ws.onmessage = (ev) => wsReceiveHandler(ev);
+    return ws;
 }
 
-export const WebSocketReceiveHandler = (ev: MessageEvent<any>) => {
-    
+export const wsReceiveHandler = (ev: MessageEvent<any>) => {
     if (!isAction(ev.data)) return null;
     const action = ev.data as Action;
     switch (action.action) {

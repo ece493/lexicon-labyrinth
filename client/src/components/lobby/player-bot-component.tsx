@@ -53,6 +53,8 @@ export const PlayerBotManagerComponent: React.FC<PlayerBotManagerComponentProps>
                     setManageMode(!manageMode);
                     delete_player();
                     }}cycle_difficulty={cycle_difficulty} toggleManageMode={toggleManageMode}/>
-                : (isPlayerABot(player)) ? <BotComponent {...(player as Bot)} /> : <PlayerComponent {...player} />
+                : (isPlayerABot(player))
+                    ? <BotComponent {...(player as Bot)} />
+                    : <PlayerComponent {...player} />
         }</div>;
 }
