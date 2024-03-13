@@ -1,14 +1,11 @@
-import { Typography } from "@mui/material";
 import { Board } from "../../data/model";
 import { useState, useEffect, useRef } from "react";
-import TileComponent from "./tile";
+import {TileComponent, nullTile, isTileEqual} from "./tile";
 import ButtonComponent from "./button";
 import DownIcon from "../icons/downIcon";
 import UpIcon from "../icons/upIcon";
 import RightIcon from "../icons/rightIcon";
 import LeftIcon from "../icons/leftIcon";
-
-const nullTile = [-1, -1];
 
 interface RotateGridComponentProps {
   ogGrid: Board;
@@ -25,6 +22,8 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
   setHelp,
   setPowerup,
 }) => {
+  // TODO refactor with grid
+  
   const [tiles, setTiles] = useState(structuredClone(ogGrid.tiles));
   const [selectedRow, setSelectedRow] = useState(-1);
   const [selectedCol, setSelectedCol] = useState(-1);
@@ -87,6 +86,12 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
 
   function handleConfirm() {
     // TODO send new grid to server
+
+    const command = {
+      rowNum: selectedRow,
+      colNum: selectedCol,
+    };
+
     setTimeout(() => {
       setHelp("");
       setPowerup(null);
@@ -172,6 +177,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
 
     return arr;
   }
+  
   return (
     <div className="flex flex-col mt-2 mx-2">
       <div className="flex flex-row mb-2">

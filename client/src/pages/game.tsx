@@ -1,5 +1,5 @@
 import React from "react";
-import { GridComponent } from "../components/grid/grid";
+import { SelectionGridComponent } from "../components/grid/selectionGrid";
 import TurnComponent from "../components/grid/turn";
 import PowerupsComponent from "../components/grid/powerups";
 import PlayersComponent from "../components/grid/players";
@@ -7,6 +7,8 @@ import { Player } from "../data/model";
 import { useState } from "react";
 import { SwapGridComponent } from "../components/grid/swapGrid";
 import { RotateGridComponent } from "../components/grid/rotateGrid";
+import { TransformGridComponent } from "../components/grid/transformGrid";
+import { ScrambleGridComponent } from "../components/grid/scrambleGrid";
 
 const Game: React.FC = () => {
   const [word, setWord] = useState(""); // May have to change where this is stored to prevent too much re-rendering
@@ -48,9 +50,34 @@ const Game: React.FC = () => {
             }}
           />
         );
+      case "TRANSFORM":
+        return (
+          <TransformGridComponent
+            help={word}
+            setPowerup={setPowerup}
+            setHelp={setWord}
+            board_size={[8, 8]}
+            grid={{
+              tiles,
+            }}
+          />
+        );
+        case "SCRAMBLE":
+          return (
+            <ScrambleGridComponent
+              help={word}
+              setPowerup={setPowerup}
+              setHelp={setWord}
+              board_size={[8, 8]}
+              grid={{
+                tiles,
+              }}
+            />
+          );
+      
       default:
         return (
-          <GridComponent
+          <SelectionGridComponent
             word={word}
             setWord={setWord}
             board_size={[8, 8]}
@@ -63,7 +90,7 @@ const Game: React.FC = () => {
   }
 
   return (
-    <div className={`flex ${powerup ? "bg-blue-900" : "bg-blue-400"} h-screen`}>
+    <div className={`flex ${powerup ? "bg-blue-900" : "bg-blue-400"} pb-20 box-border min-h-screen`}>
       <div className="flex align-top justify-center width w-full">
         <div className="flex flex-col items-center pt-5">
           <TurnComponent word={word} player={"player name"} powerup={powerup} />

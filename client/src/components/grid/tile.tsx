@@ -8,6 +8,12 @@ interface TileComponentProps {
   children?: any;
 }
 
+const nullTile = [-1, -1];
+
+function isTileEqual(t1: number[], t2: number[]) {
+  return t1[1] === t2[1] && t1[0] === t2[0];
+}
+
 const TileComponent: React.FC<TileComponentProps> = ({
   value,
   transparent,
@@ -50,4 +56,4 @@ const TileComponent: React.FC<TileComponentProps> = ({
   );
 };
 
-export default TileComponent;
+export  {TileComponent, nullTile, isTileEqual};
