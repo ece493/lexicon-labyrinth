@@ -1,5 +1,5 @@
 import React from "react";
-import LobbyReadOnlyComponent from "../components/lobby/lobby-read-component";
+import LobbyComponent from "../components/lobby/lobby-component";
 import { Bot, Lobby, Player } from "../data/model";
 
 const LobbyPage: React.FC = () => {
@@ -31,7 +31,7 @@ const LobbyPage: React.FC = () => {
     players: [host, host, host, bot]
   };
   return (
-    <LobbyReadOnlyComponent lobby={lobby} player_id={0} />
+    <LobbyComponent lobby={lobby} player_id={0} />
   );
 };
 
