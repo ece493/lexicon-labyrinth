@@ -6,7 +6,7 @@ import { ClientContext } from "./ws-client/context/client-ctx";
 import { connect } from "./ws-client/client";
 
 function App() {
-  return <ClientContext.Provider value={{ connect: connect, sock: null }}>
+  return <ClientContext.Provider value={{ connect, sock: null }}>
     <RouterProvider router={router} />
   </ClientContext.Provider>
 }

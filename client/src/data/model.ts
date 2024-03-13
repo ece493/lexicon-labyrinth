@@ -1,3 +1,5 @@
+import { ACTIONS_LIST } from "../ws-client/model";
+
 export type Lobby = {
     state: GameState;
     max_lives: number;
@@ -36,6 +38,14 @@ export type Bot = Player & {
     difficulty: number;
     memory: Set<string>;
 };
+
+export type Action = {
+  action: ACTIONS_LIST,
+  player_id: number,
+  data: any
+}
+
+export const isAction = (d: any): d is Action => d?.action && d?.player_id;;
 
 export const isPlayerABot = (p: Player | Bot): p is Bot => {
     return ((p as Bot).difficulty) ? true : false;
