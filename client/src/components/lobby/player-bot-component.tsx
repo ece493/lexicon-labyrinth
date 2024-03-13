@@ -37,7 +37,7 @@ export const PlayerBotAdminComponent: React.FC<PlayerBotManagerComponentProps> =
                     onClick={delete_player}>Remove</button>
             }
             { cycle_difficulty &&
-                <button className="m-0 bg-red-400 rounded-xl h-10 py-2 px-4 text-pink-100"
+                <button className="m-0 bg-red-400 rounded-xl h-10 py-2 px-4 text-pink-100 z-10"
                     onClick={() => setDifficulty(cycle_difficulty())}>{difficulty}</button>
             }
         </div>

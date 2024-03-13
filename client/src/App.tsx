@@ -7,7 +7,7 @@ import { connect } from "./ws-client/client";
 
 function App() {
   return <ClientContext.Provider value={{ connect: connect, sock: null }}>
-    <RouterProvider router={router} />;
+    <RouterProvider router={router} />
   </ClientContext.Provider>
 }
 
