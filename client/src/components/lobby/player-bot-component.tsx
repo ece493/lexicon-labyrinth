@@ -7,6 +7,7 @@ type PlayerBotManagerComponentProps = {
     player: Player | Bot,
     delete_player?: () => void,
     cycle_difficulty?: () => string,
+    toggleManageMode?: () => void,
 }
 
 type PlayerBotDisplayComponentProps = {
@@ -26,12 +27,13 @@ export const BotPlayerComponent: React.FC<PlayerBotDisplayComponentProps> = ({na
     );
 }
 
-export const PlayerBotAdminComponent: React.FC<PlayerBotManagerComponentProps> = ({ delete_player, cycle_difficulty }) => {
+export const PlayerBotAdminComponent: React.FC<PlayerBotManagerComponentProps> = ({ delete_player, cycle_difficulty, toggleManageMode }) => {
     const [difficulty, setDifficulty] = useState<string>("Medium");
     return (
-        <div className="m-0 flex flex-auto flex-col items-center justify-center h-40 w-32 bg-blue-500 p-4 rounded-3xl" >
+        <div className="m-0 flex flex-auto flex-col items-center justify-center h-40 w-32 bg-blue-500 p-4 rounded-3xl"
+            onClick={toggleManageMode}>
             { delete_player &&
-                <button className="m-0 bg-red-400 rounded-xl h-10 py-2 px-4 text-pink-100"
+                <button className="m-0 bg-red-400 rounded-xl h-10 py-2 px-4 text-pink-100 z-10"
                     onClick={delete_player}>Remove</button>
             }
             { cycle_difficulty &&
@@ -44,13 +46,13 @@ export const PlayerBotAdminComponent: React.FC<PlayerBotManagerComponentProps> =
 
 export const PlayerBotManagerComponent: React.FC<PlayerBotManagerComponentProps> = ({ player, delete_player, cycle_difficulty })=> {
     const [manageMode, setManageMode] = useState<boolean>(false);
+    const toggleManageMode = () => setManageMode(m => !m);
     return <div className="h-auto w-auto p-0 m-0" onClick={(manageMode) ? () => { } : () => setManageMode(!manageMode)}>{
             (manageMode && delete_player)
-            ? <PlayerBotAdminComponent player={player} delete_player={() => {
-                setManageMode(!manageMode);
-                delete_player();
-            }}
-                cycle_difficulty={cycle_difficulty} />
+                ? <PlayerBotAdminComponent player={player} delete_player={() => {
+                    setManageMode(!manageMode);
+                    delete_player();
+                    }}cycle_difficulty={cycle_difficulty} toggleManageMode={toggleManageMode}/>
                 : (isPlayerABot(player)) ? <BotComponent {...(player as Bot)} /> : <PlayerComponent {...player} />
         }</div>;
 }

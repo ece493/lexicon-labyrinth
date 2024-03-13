@@ -69,6 +69,14 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id}) => {
         }
         : undefined;
 
+    const startButton = () => {
+        return <div className="m-0 w-[75vw] h-16">
+            <div className="m-0 flex flex-auto justify-end h-auto py-4">
+                <button className="m-0 bg-red-400 rounded-xl h-10 py-2 px-4 text-pink-100">Start</button>
+            </div>
+        </div>;
+    }
+
     return (
         <form>
             <div className="m-0 h-screen flex flex-col justify-center bg-blue-400 align-middle items-center">
@@ -89,11 +97,7 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id}) => {
                         }
                     </div>
                 </div>
-                <div className="m-0 w-[75vw] h-16">
-                    <div className="m-0 flex flex-auto justify-end h-auto py-4">
-                        <button className="m-0 bg-red-400 rounded-xl h-10 py-2 px-4 text-pink-100">Start</button>
-                    </div>
-                </div>
+                {(player_id === lobby.host) && startButton()}
             </div>
         </form>
     );
