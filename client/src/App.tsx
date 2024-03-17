@@ -9,14 +9,12 @@ import { TransitionManager } from "./ws-client/server/transitions";
 
 function App() {
   const [screen, setScreen] = useState<ScreenState>(ScreenState.START);
-  const [lobbyCode, setLobbyCode] = useState<string|null>(null);
   return <GameContext.Provider value={{
       connectWs: connect,
       sock: null,
       screen,
       setScreen,
-      lobbyCode,
-      setLobbyCode,
+      lobby: null,
       transitions: TransitionManager
       }}>
     <RouterProvider router={router} />

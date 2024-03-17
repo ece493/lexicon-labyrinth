@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 import { connect } from '../ws-client/client';
-import { ScreenState } from '../data/model';
+import { Lobby, ScreenState } from '../data/model';
 import { ServerTransitions, TransitionManager } from '../ws-client/server/transitions';
 
 export type GameContextData = {
@@ -8,8 +8,7 @@ export type GameContextData = {
     connectWs: (setScreen: (s: ScreenState) => void) => WebSocket,
     screen: ScreenState,
     setScreen: (s: ScreenState) => void,
-    lobbyCode: string | null,
-    setLobbyCode: (s: string) => void,
+    lobby: Lobby | null,
     transitions: ServerTransitions,
 }
 
@@ -18,7 +17,6 @@ export const GameContext = createContext <GameContextData>({
     connectWs: connect,
     screen: ScreenState.START,
     setScreen: (s: ScreenState) => {},
-    lobbyCode: "",
-    setLobbyCode: (s: string) => {},
+    lobby: null,
     transitions: TransitionManager,
 });
