@@ -1,10 +1,10 @@
 import React from "react";
-import LobbyReadOnlyComponent from "../components/lobby/lobby-read-component";
+import LobbyComponent from "../components/lobby/lobby-component";
 import { Bot, Lobby, Player } from "../data/model";
 
 const LobbyPage: React.FC = () => {
   const host: Player = { id: 0, name: "John Player", is_spectator: false, lives: 3, money: 100 };
-  const bot: Bot = { id: 0, name: "John Bot", is_spectator: false, lives: 3, money: 100, difficulty: 1, memory: new Set() };
+  const bot: Bot = { id: 0, name: "John Bot", is_spectator: false, lives: 3, money: 100, difficulty: 1, memory: [] };
   const lobby: Lobby = {
     state: {
       turns: {
@@ -21,7 +21,7 @@ const LobbyPage: React.FC = () => {
         ["Q", "R", "S", "T", "U", "V", "W"],]
       },
       timer: 0,
-      memory: new Set<string>(),
+      memory: [],
     },
     max_lives: 5,
     host: 0,
@@ -31,7 +31,7 @@ const LobbyPage: React.FC = () => {
     players: [host, host, host, bot]
   };
   return (
-    <LobbyReadOnlyComponent lobby={lobby} player_id={0} />
+    <LobbyComponent lobby={lobby} player_id={0} />
   );
 };
 

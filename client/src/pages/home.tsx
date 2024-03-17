@@ -1,8 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { GameContext } from "../context/ctx";
+import { Lobby, Action } from "../data/model";
+import { ActionsList } from "../ws-client/model";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const ctx = useContext(GameContext);
 
   return (
     <header>
@@ -21,6 +25,32 @@ const Home: React.FC = () => {
       >
         Click to go to Game test page
       </h2>
+      <h2 onClick={() => {
+        const sock = ctx.connectWs(ctx.setScreen);
+        sock.onopen = () => {
+          sock.send("test");
+        };
+        sock.onmessage = (m) => {
+          const lobby: Lobby = JSON.parse(m.data);
+          console.log(lobby);
+          sock.close();
+        }
+      }}>Test Sock Inwards</h2>
+      <h2 onClick={() => {
+        const sock = ctx.connectWs(ctx.setScreen);
+        const act: Action = {
+          action: ActionsList.initialize,
+          player_id: 0,
+          data: []
+        }
+        sock.onopen = () => {
+          sock.send(JSON.stringify(act));
+        };
+        sock.onmessage = (m) => {
+          console.log(m.data);
+          sock.close();
+        }
+      }}>Test Sock Outward</h2>
     </header>
   );
 };
