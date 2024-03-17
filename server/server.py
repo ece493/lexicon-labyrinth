@@ -23,7 +23,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         print(f"Received message '{message}' from {self.id}")
         self.lobbies[self.id] = Lobby(0, self.id)
         for conn in self.connections:
-            conn.write_message(f"{self.id} says: {jsonpickle.encode(self.lobbies[self.id], unpicklable=False)}")
+            conn.write_message(jsonpickle.encode(self.lobbies[self.id], unpicklable=False))
 
     def on_close(self) -> None:
         self.connections.remove(self)

@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { GameContext } from "../context/ctx";
+import { Lobby } from "../data/model";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -29,7 +30,8 @@ const Home: React.FC = () => {
           sock.send("test");
         };
         sock.onmessage = (m) => {
-          console.log(m.data);
+          const lobby: Lobby = JSON.parse(m.data);
+          console.log(lobby);
           sock.close();
         }
       }}>Test Sock</h2>
