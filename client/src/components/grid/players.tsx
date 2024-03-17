@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 
-import { Player, Bot } from "../../data/model";
+import { Player, Bot, Turns } from "../../data/model";
 import RobotIcon from "../icons/robotIcon";
 import PlayerIcon from "../icons/playerIcon";
 import { Typography } from "@mui/material";
@@ -9,6 +9,7 @@ import DeadIcon from "../icons/deadIcon";
 
 interface PlayersComponentProp {
   players: Player[];
+  turns: Turns;
 }
 
 function getLivesIcons(lives: number) {
@@ -23,20 +24,41 @@ function getLivesIcons(lives: number) {
   return icons;
 }
 
-const PlayersComponent: React.FC<PlayersComponentProp> = ({ players }) => {
+const PlayersComponent: React.FC<PlayersComponentProp> = ({
+  players,
+  turns,
+}) => {
+  function getOrderedPlayers() {
+    const orderedLivePlayers: Player[] = [];
+    let j = players.findIndex((p) => p.id === turns.curr_turn);
+    for (let i = 0; i < turns.order.length; i++) {
+      if (j === turns.order.length) {
+        j = 0;
+      }
+      orderedLivePlayers.push(
+        players.find((p) => p.id === turns.order[j]) as Player
+      );
+      j++;
+    }
+    return [...orderedLivePlayers, ...players.filter((p) => p.lives === 0)];
+  }
+
   return (
     <div className="flex flex-col w-40 my-2 space-y-2">
-      {players.map((player) => {
+      {getOrderedPlayers().map((player) => {
         return (
-          <div key={player.name} className={`flex flex-col items-start  justify-center  bg-blue-500  overflow-hidden rounded-sm`}
-          style={{ opacity: player.lives === 0? "0.3":""}}>
+          <div
+            key={player.name}
+            className={`flex flex-col items-start  justify-center  bg-blue-500  overflow-hidden rounded-sm`}
+            style={{ opacity: player.lives === 0 ? "0.3" : "" }}
+          >
             <div className="flex flex-row items-center px-2 py-1 justify-start space-x-1">
               {(player as Bot).difficulty ? (
                 <RobotIcon></RobotIcon>
+              ) : player.lives === 0 ? (
+                <DeadIcon />
               ) : (
-                player.lives === 0?
-                <DeadIcon/>:
-                <PlayerIcon/>
+                <PlayerIcon />
               )}
               <Typography className=" text-slate-100 ">
                 {player.name}
