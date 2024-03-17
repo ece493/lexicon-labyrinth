@@ -34,7 +34,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             lobby_id = action['data']
             if lobby_id in self.lobbies:
                 p = Player(self.id, None)
-                self.lobbies[lobby_id].players.append()
+                self.lobbies[lobby_id].players.append(p)
                 resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, -1, [self.id])
             else:
                 resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, -1, [])
