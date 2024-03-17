@@ -6,7 +6,7 @@ export type ServerTransitions = {
     joinLobby: (ws: WebSocket, code: string) => void,
     changeParam: (ws: WebSocket, param: string, value: string) => void,
     readyLobby: (ws: WebSocket) => void,
-    pickWord: (ws: WebSocket) => void,
+    pickWord: (ws: WebSocket, path: [number, number][]) => void,
     pickPowerup: (ws: WebSocket) => void,
     leaveGame: (ws: WebSocket) => void,
 };
@@ -54,4 +54,14 @@ const pickWord = (ws: WebSocket, path: [number, number][]) => {
         data: path
     };
     ws.send(JSON.stringify(msg));
+}
+
+export const TransitionManager: ServerTransitions = {
+    initialize: initialize,
+    joinLobby: joinLobby,
+    changeParam: changeParam,
+    readyLobby: readyLobby,
+    pickWord: pickWord,
+    pickPowerup: (ws: WebSocket) => {},
+    leaveGame: (ws: WebSocket) => {},
 }
