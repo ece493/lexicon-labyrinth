@@ -62,19 +62,19 @@ const Game: React.FC = () => {
             }}
           />
         );
-        case "SCRAMBLE":
-          return (
-            <ScrambleGridComponent
-              help={word}
-              setPowerup={setPowerup}
-              setHelp={setWord}
-              board_size={[8, 8]}
-              grid={{
-                tiles,
-              }}
-            />
-          );
-      
+      case "SCRAMBLE":
+        return (
+          <ScrambleGridComponent
+            help={word}
+            setPowerup={setPowerup}
+            setHelp={setWord}
+            board_size={[8, 8]}
+            grid={{
+              tiles,
+            }}
+          />
+        );
+
       default:
         return (
           <SelectionGridComponent
@@ -90,7 +90,11 @@ const Game: React.FC = () => {
   }
 
   return (
-    <div className={`flex ${powerup ? "bg-blue-900" : "bg-blue-400"} pb-20 box-border min-h-screen`}>
+    <div
+      className={`flex ${
+        powerup ? "bg-blue-900" : "bg-blue-400"
+      } pb-20 box-border min-h-screen`}
+    >
       <div className="flex align-top justify-center width w-full">
         <div className="flex flex-col items-center pt-5">
           <TurnComponent word={word} player={"player name"} powerup={powerup} />
@@ -102,6 +106,10 @@ const Game: React.FC = () => {
             ></PowerupsComponent>
             {getGrid()}
             <PlayersComponent
+              turns={{
+                order: [0, 1, 3],
+                curr_turn: 3,
+              }}
               powerup={powerup}
               players={[
                 {
