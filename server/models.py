@@ -91,7 +91,8 @@ class Action(object):
         self.player_id = player_id
         self.data = data
 
-class Actions(Enum):
+
+class ActionEnum(Enum):
     # client side
     INITIALIZE = "initialize"
     JOIN_LOBBY = "join_lobby"

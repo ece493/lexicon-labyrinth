@@ -25,7 +25,7 @@ Turns: {
 }
 
 Player: {
-  id: int,
+  id: string, // connection-id
   name: string,
   is_spectator: boolean,
   lives: int,

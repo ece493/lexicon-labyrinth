@@ -5,12 +5,12 @@ from tornado.web import Application
 import uuid
 import jsonpickle
 
-from models import Lobby  # Import UUID to generate unique IDs for clients
+from models import Lobby, Action, ActionEnum, Player
 
 # Define a WebSocketHandler
 class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     connections = set()
-    lobbies = {} # each lobby is assigned to a player UUID
+    lobbies: dict[str, Lobby] = {} # each lobby is assigned to a player UUID
 
     def open(self) -> None:
         # Assign a unique ID to the connection
@@ -22,8 +22,23 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         # Echo the message back to all connected clients
         print(f"Received message '{message}' from {self.id}")
         self.lobbies[self.id] = Lobby(0, self.id)
-        for conn in self.connections:
-            conn.write_message(f"{self.id} says: {jsonpickle.encode(self.lobbies[self.id], unpicklable=False)}")
+        # for conn in self.connections:
+        print(message)
+        action = jsonpickle.decode(string=message)
+        print(action)
+        # match message
+        actionEnum = ActionEnum(action['action'])
+        if actionEnum == ActionEnum.INITIALIZE:
+            resp = Action(ActionEnum.RETURN_LOBBY_CODE.value, -1, self.id)
+        elif actionEnum == ActionEnum.JOIN_LOBBY:
+            lobby_id = action['data']
+            if lobby_id in self.lobbies:
+                p = Player(self.id, None)
+                self.lobbies[lobby_id].players.append(p)
+                resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, -1, [self.id])
+            else:
+                resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, -1, [])
+        self.write_message(jsonpickle.encode(resp, unpicklable=False))
 
     def on_close(self) -> None:
         self.connections.remove(self)
