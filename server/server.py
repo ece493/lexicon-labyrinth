@@ -5,12 +5,12 @@ from tornado.web import Application
 import uuid
 import jsonpickle
 
-from models import Lobby, Action, ActionEnum
+from models import Lobby, Action, ActionEnum, Player
 
 # Define a WebSocketHandler
 class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     connections = set()
-    lobbies = {} # each lobby is assigned to a player UUID
+    lobbies: dict[str, Lobby] = {} # each lobby is assigned to a player UUID
 
     def open(self) -> None:
         # Assign a unique ID to the connection
@@ -29,7 +29,15 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         # match message
         actionEnum = ActionEnum(action['action'])
         if actionEnum == ActionEnum.INITIALIZE:
-            resp = Action(ActionEnum.INITIALIZE.value, 0, self.id)
+            resp = Action(ActionEnum.RETURN_LOBBY_CODE.value, -1, self.id)
+        elif actionEnum == ActionEnum.JOIN_LOBBY:
+            lobby_id = action['data']
+            if lobby_id in self.lobbies:
+                p = Player(self.id, None)
+                self.lobbies[lobby_id].players.append()
+                resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, -1, [self.id])
+            else:
+                resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, -1, [])
         self.write_message(jsonpickle.encode(resp, unpicklable=False))
 
     def on_close(self) -> None:
