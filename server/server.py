@@ -21,7 +21,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message) -> None:
         # Echo the message back to all connected clients
         print(f"Received message '{message}' from {self.id}")
-        self.lobbies[self.id] = Lobby(0, self.id)
+        
         # for conn in self.connections:
         print(message)
         action = jsonpickle.decode(string=message)
@@ -29,12 +29,20 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         # match message
         actionEnum = ActionEnum(action['action'])
         if actionEnum == ActionEnum.INITIALIZE:
+            # The player is creating a new lobby.
+            self.lobbies[self.id] = Lobby(0, self.id)
+            # Add the player to the lobby they just created
+            p = Player(self.id, None)
+            self.lobbies[self.id].add_player(p)
+            # Send them back the lobby code we created for them.
+            # TODO: Change the lobby code to a 4 character code for simplicity
             resp = Action(ActionEnum.RETURN_LOBBY_CODE.value, -1, self.id)
         elif actionEnum == ActionEnum.JOIN_LOBBY:
+            # The player is trying to join an existing lobby
             lobby_id = action['data']
             if lobby_id in self.lobbies:
                 p = Player(self.id, None)
-                self.lobbies[lobby_id].players.append(p)
+                self.lobbies[lobby_id].add_player(p)
                 resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, -1, [self.id])
             else:
                 resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, -1, [])
