@@ -104,6 +104,7 @@ class ActionEnum(Enum):
     # server side
     RETURN_LOBBY_CODE = "return_lobby_code"
     LOBBY_DOES_NOT_EXIST = "lobby_does_not_exist"
+    LOBBY_IS_FULL = "lobby_is_full"
     SUCCESSFULLY_JOINED_LOBBY = "successfully_joined_lobby"
     SUCCESS = "success"
     ERROR = "error"
