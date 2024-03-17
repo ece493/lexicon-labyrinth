@@ -36,3 +36,61 @@ Bot(Player): {
   difficulty: int,
   memory: set(str)
 }
+
+Action: {
+  action: str,
+  player_id: str,
+  data: any
+}
+
+enum CLIENT_ACTIONS {
+	"initialize",
+  "join_lobby",
+  "change_param",
+  "ready_lobby",
+  "pick_word",
+  "pick_powerup",
+  "leave_game"
+}
+
+server_to_client_payload = {
+	"global_state": 
+  "personal": you lost
+}
+
+Action: {
+  action: str,
+  player_id: str,
+  data: any
+}
+
+enum SERVER_ACTIONS {
+	"return_lobby_code",
+  "lobby_does_not_exist",
+  "successfully_joined_lobby",
+  "success",
+  "error",
+  "start_game",
+  "player_joined",
+  "player_left",
+  "update_lobby_settings",
+  "word_accepted",
+  "word_denied",
+  "end_turn",
+  "start_turn",
+  "powerup_denied",
+  "powerup_activated",
+  "you_died",
+  "you_win",
+}
+
+enum SCREEN {
+	"lobby",
+  "game"
+}
+
+{
+	"screen": SCREEN,
+  
+}
+
