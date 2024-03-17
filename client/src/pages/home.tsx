@@ -1,7 +1,8 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { GameContext } from "../context/ctx";
-import { Lobby } from "../data/model";
+import { Lobby, Action } from "../data/model";
+import { ActionsList } from "../ws-client/model";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -34,7 +35,22 @@ const Home: React.FC = () => {
           console.log(lobby);
           sock.close();
         }
-      }}>Test Sock</h2>
+      }}>Test Sock Inwards</h2>
+      <h2 onClick={() => {
+        const sock = ctx.connectWs(ctx.setScreen);
+        const act: Action = {
+          action: ActionsList.initialize,
+          player_id: 0,
+          data: []
+        }
+        sock.onopen = () => {
+          sock.send(JSON.stringify(act));
+        };
+        sock.onmessage = (m) => {
+          console.log(m.data);
+          sock.close();
+        }
+      }}>Test Sock Outward</h2>
     </header>
   );
 };

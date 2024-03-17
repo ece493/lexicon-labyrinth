@@ -14,7 +14,7 @@ export type GameState = {
     turns: Turns;
     board: Board;
     timer: number;
-    memory: Set<string>;
+    memory: string[];
 };
 
 export type Board = {
@@ -36,7 +36,7 @@ export type Player = {
 
 export type Bot = Player & {
     difficulty: number;
-    memory: Set<string>;
+    memory: string[];
 };
 
 export type Action = {
