@@ -2,11 +2,15 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 from tornado.web import Application
-import uuid  # Import UUID to generate unique IDs for clients
+import uuid
+import jsonpickle
+
+from models import Lobby  # Import UUID to generate unique IDs for clients
 
 # Define a WebSocketHandler
 class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     connections = set()
+    lobbies = {} # each lobby is assigned to a player UUID
 
     def open(self) -> None:
         # Assign a unique ID to the connection
@@ -17,8 +21,9 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message) -> None:
         # Echo the message back to all connected clients
         print(f"Received message '{message}' from {self.id}")
+        self.lobbies[self.id] = Lobby(0, self.id)
         for conn in self.connections:
-            conn.write_message(f"{self.id} says: {message}")
+            conn.write_message(f"{self.id} says: {jsonpickle.encode(self.lobbies[self.id], unpicklable=False)}")
 
     def on_close(self) -> None:
         self.connections.remove(self)
