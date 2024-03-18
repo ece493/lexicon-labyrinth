@@ -17,6 +17,7 @@ class Lobby(object):
         self.lives: int = 5
         self.is_in_game = False
         self.broadcast_func: Optional[Callable] = None  # Set this when starting the game
+        self.send_to_player_func: Optional[Callable] = None # Set this when starting the game
         self.game: Optional[Game] = None
 
     def __str__(self) -> str:
@@ -77,14 +78,17 @@ class Lobby(object):
     def remove_bot(self, bot_id) -> None:
         pass  # TODO
 
-    def set_broadcast_function(self, func) -> None:
+    def set_broadcast_function(self, func: Callable) -> None:
         self.broadcast_func = func
+    
+    def set_send_to_player_func(self, func: Callable) -> None:
+        self.send_to_player_func = func
 
     def start_game(self) -> None:
         # Ensure broadcast_func is set before starting the game
         print(f"Starting the game in lobby {self.lobby_id}")
         assert self.broadcast_func is not None, "Broadcast function wasn't set before starting the game!"
-        self.game = Game(self.lobby_id, self.players, self.broadcast_func)
+        self.game = Game(self.lobby_id, self.players, self.broadcast_func, self.send_to_player_func)
         self.game.start()
         self.is_in_game = True
 
@@ -93,10 +97,11 @@ class Lobby(object):
         return len(self.players) >= PLAYER_LIMIT
 
 class Game:
-    def __init__(self, lobby_id: str, players: list['Player'], broadcast_func: Callable, board_size: int) -> None:
+    def __init__(self, lobby_id: str, players: list['Player'], broadcast_func: Callable, send_to_player_func: Callable, board_size: int) -> None:
         self.lobby_id: str = lobby_id
         self.players: list['Player'] = players
         self.broadcast_func: Callable = broadcast_func  # Callback function for broadcasting messages
+        self.send_to_player_func: Callable = send_to_player_func  # Callback to send message to specific player
         self.board_size: int = board_size
         self.board: Optional[WordGrid] = WordGrid(board_size)
     

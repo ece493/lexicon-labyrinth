@@ -26,6 +26,13 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             if connection.lobby_id is not None and connection.lobby_id == lobby_id:  # Make sure to set conn.lobby_id when joining a lobby
                 connection.write_message(message)
 
+    @classmethod
+    def send_to_player_func(cls, player_id, message) -> None:
+        # TODO: Make more efficient
+        for connection in cls.connections:
+            if connection.id is not None and connection.id == player_id:
+                connection.write_message(message)
+
     def open(self) -> None:
         # Assign a unique ID to the connection
         self.id = str(uuid.uuid4())
@@ -33,7 +40,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         self.connections.add(self)
         print(f"New WebSocket connection with id (new player id): {self.id}")
         # Tell the client what their player ID is
-        resp = Action(ActionEnum.RETURN_PLAYER_ID.value, -1, self.id)
+        resp = Action(ActionEnum.RETURN_PLAYER_ID.value, self.id, self.id)
         self.write_message(jsonpickle.encode(resp, unpicklable=False))
 
     def on_message(self, message) -> None:
@@ -61,6 +68,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             print(f"Initializing a lobby with code {lobby_code}")
             self.lobbies[lobby_code] = Lobby(self.id, lobby_code)
             self.lobbies[lobby_code].set_broadcast_function(GameWebSocketHandler.broadcast_to_lobby)
+            self.lobbies[lobby_code].set_send_to_player_func(GameWebSocketHandler.send_to_player_func)
             
             # Add the player to the lobby they just created
             p = Player(self.id, None)
@@ -75,9 +83,9 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 p = Player(self.id, None)
                 self.lobbies[lobby_id].add_player(p)
                 self.lobby_id = lobby_id
-                resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, -1, [self.id])
+                resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, self.id)
             else:
-                resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, -1, [])
+                resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, self.id, None)
         elif actionEnum == ActionEnum.READY_LOBBY:
             # The owner of the lobby is trying to start the game.
             # Assert that the person starting the game is also the lobby owner
