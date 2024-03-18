@@ -27,7 +27,8 @@ export const SelectionGridComponent: React.FC<GridComponentProps> = ({
     if (wordPath.length < 1) return false;
     return (
       Math.abs(wordPath[wordPath.length - 1][0] - x) <= 1 &&
-      Math.abs(wordPath[wordPath.length - 1][1] - y) <= 1
+      Math.abs(wordPath[wordPath.length - 1][1] - y) <= 1 &&
+      !wordPath.some((n) => isTileEqual([x, y], n))
     );
   }
 

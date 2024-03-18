@@ -35,7 +35,6 @@ const Game: React.FC = () => {
   }
 
   function handleSubmit() {
-    console.log(wordPath);
     if (gameContext.sock !== null) {
       gameContext.transitions.pickWord(gameContext.sock as WebSocket, wordPath);
     }

@@ -38,6 +38,11 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, -1, [self.id])
             else:
                 resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, -1, [])
+        elif actionEnum == ActionEnum.PICK_WORD:
+            
+            resp = Action(ActionEnum.WORD_DENIED.value)
+            # resp = Action(ActionEnum.WORD_ACCEPTED)
+            
         self.write_message(jsonpickle.encode(resp, unpicklable=False))
 
     def on_close(self) -> None:
