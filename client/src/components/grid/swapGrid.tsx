@@ -9,6 +9,7 @@ interface SwapGridComponentProps {
   setPowerup: any;
   help: string;
   setHelp: any;
+  resetWordSelection: () => void;
 }
 
 export const SwapGridComponent: React.FC<SwapGridComponentProps> = ({
@@ -17,6 +18,7 @@ export const SwapGridComponent: React.FC<SwapGridComponentProps> = ({
   help,
   setHelp,
   setPowerup,
+  resetWordSelection,
 }) => {
   const [secondTile, setSecondTile] = useState(nullTile);
   const [firstTile, setFirstTile] = useState(nullTile);
@@ -45,7 +47,7 @@ export const SwapGridComponent: React.FC<SwapGridComponentProps> = ({
       // TODO: SEND TO BACKEND
 
       setTimeout(() => {
-        setHelp("");
+        resetWordSelection();
         setPowerup(null);
       }, 500);
     }

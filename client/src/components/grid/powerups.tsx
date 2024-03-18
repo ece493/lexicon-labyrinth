@@ -4,8 +4,6 @@ import { Player } from "../../data/model";
 import ButtonComponent from "./button";
 import FundsIcon from "../icons/fundsIcon";
 import { Typography } from "@mui/material";
-import LeftIcon from "../icons/leftIcon";
-import RightIcon from "../icons/rightIcon";
 import RotateIcon from "../icons/rotateIcon";
 import TransformIcon from "../icons/transformIcon";
 import SwapIcon from "../icons/swapIcon";

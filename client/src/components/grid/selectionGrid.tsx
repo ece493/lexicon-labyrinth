@@ -7,6 +7,8 @@ interface GridComponentProps {
   board_size: [number, number];
   word: string;
   setWord: any;
+  wordPath: number[][];
+  setWordPath: any;
 }
 
 interface TileComponentProps {
@@ -19,6 +21,8 @@ interface TileComponentProps {
   selecting: boolean;
   setLastSelectedTile: any;
   lastSelectedTile: number[];
+  wordPath: number[][];
+  setWordPath: any;
 }
 
 const Tile: React.FC<TileComponentProps> = ({
@@ -31,6 +35,8 @@ const Tile: React.FC<TileComponentProps> = ({
   setSelecting,
   lastSelectedTile,
   setLastSelectedTile,
+  wordPath,
+  setWordPath,
 }) => {
   // TODO refactor with grid
 
@@ -48,7 +54,7 @@ const Tile: React.FC<TileComponentProps> = ({
       // starting selection
       if (!isFirstTileDuringMouseDown) setSelected(false);
       if (isFirstTileAfterMouseDown) setIsFirstTileAfterMouseDown(false);
-    }else{
+    } else {
       // ending selection
       if (isFirstTileDuringMouseDown) {
         setIsFirstTileDuringMouseDown(false);
@@ -92,6 +98,7 @@ const Tile: React.FC<TileComponentProps> = ({
           setSelected(true);
           setSelecting(true);
           setWord(grid.tiles[y][x]);
+          setWordPath([[y,x]]);
           setLastSelectedTile([x, y]);
         }}
         onTouchStart={(e) => {
@@ -99,11 +106,13 @@ const Tile: React.FC<TileComponentProps> = ({
           setSelected(true);
           setSelecting(true);
           setWord(grid.tiles[y][x]);
+          setWordPath([[y,x]]);
           setLastSelectedTile([x, y]);
         }}
         onMouseEnter={(e) => {
           if (selecting && isAdjacent() && !selected) {
             setWord(word + grid.tiles[y][x]);
+            setWordPath([...wordPath, [y,x]]);
             setSelected(true);
             setLastSelectedTile([x, y]);
             setPrevTile(lastSelectedTile);
@@ -146,6 +155,8 @@ export const SelectionGridComponent: React.FC<GridComponentProps> = ({
   board_size,
   word,
   setWord,
+  wordPath,
+  setWordPath,
 }) => {
   const [selecting, setSelecting] = useState(false);
   const [lastSelectedTile, setLastSelectedTile] = useState([0, 0]);
@@ -166,6 +177,8 @@ export const SelectionGridComponent: React.FC<GridComponentProps> = ({
             selecting={selecting}
             lastSelectedTile={lastSelectedTile}
             setLastSelectedTile={setLastSelectedTile}
+            wordPath={wordPath}
+            setWordPath={setWordPath}
           />
         );
         idx++;

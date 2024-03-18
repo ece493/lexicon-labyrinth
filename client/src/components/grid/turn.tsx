@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 
 import { Player } from "../../data/model";
 import FundsIcon from "../icons/fundsIcon";
@@ -11,12 +11,14 @@ interface TurnComponentProp {
   word: string;
   player: string;
   powerup: string | null;
+  handleSubmit: () => void;
 }
 
 const TurnComponent: React.FC<TurnComponentProp> = ({
   word,
   player,
   powerup,
+  handleSubmit
 }) => {
   const [time, setTime] = React.useState(60);
   const [startTime, setStartTime] = React.useState(Date.now());
@@ -38,8 +40,11 @@ const TurnComponent: React.FC<TurnComponentProp> = ({
   }, [player]);
 
   return (
-    <div className="flex flex-col items-center p-1" >
-      <Typography className="text-slate-200 text-sm"  style={{ opacity: powerup ? "0.1" : "" }}>
+    <div className="flex flex-col items-center p-1">
+      <Typography
+        className="text-slate-200 text-sm"
+        style={{ opacity: powerup ? "0.1" : "" }}
+      >
         {player}'s turn
       </Typography>
 
@@ -53,7 +58,7 @@ const TurnComponent: React.FC<TurnComponentProp> = ({
         </div>
         <div style={{ opacity: powerup ? "0.1" : "" }}>
           <ButtonComponent
-            onClick={() => {}}
+            onClick={handleSubmit}
             label="Submit"
             long
             invert

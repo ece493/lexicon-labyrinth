@@ -19,6 +19,7 @@ interface TransformGridComponentProps {
   setPowerup: any;
   help: string;
   setHelp: any;
+  resetWordSelection: () => void;
 }
 
 export const TransformGridComponent: React.FC<TransformGridComponentProps> = ({
@@ -27,6 +28,7 @@ export const TransformGridComponent: React.FC<TransformGridComponentProps> = ({
   help,
   setHelp,
   setPowerup,
+  resetWordSelection,
 }) => {
   const [selectedTile, setSelectedTile] = useState<number[]>(nullTile);
   const [selectedReplacement, setSelectedReplacement] =
@@ -64,7 +66,7 @@ export const TransformGridComponent: React.FC<TransformGridComponentProps> = ({
             newCharacter: v,
           };
           setTimeout(() => {
-            setHelp("");
+            resetWordSelection()
             setPowerup(null);
           }, 500);
         }}
@@ -83,7 +85,7 @@ export const TransformGridComponent: React.FC<TransformGridComponentProps> = ({
         />
       ) : (
         <GridComponent
-          grid={{tiles: alphabetTiles}}
+          grid={{ tiles: alphabetTiles }}
           board_size={[6, 5]}
           buildChild={buildAlphabetTile}
         />

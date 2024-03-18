@@ -1,8 +1,5 @@
 import React from "react";
 import { Button } from "@mui/material";
-import { Player } from "../../data/model";
-import LeftIcon from "../icons/leftIcon";
-import RightIcon from "../icons/rightIcon";
 
 interface ButtonComponentProps {
   label?: string;

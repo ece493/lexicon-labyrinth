@@ -9,6 +9,8 @@ interface ScrambleGridComponentProps {
   setPowerup: any;
   help: string;
   setHelp: any;
+  resetWordSelection: () => void;
+
 }
 
 export const ScrambleGridComponent: React.FC<ScrambleGridComponentProps> = ({
@@ -16,6 +18,7 @@ export const ScrambleGridComponent: React.FC<ScrambleGridComponentProps> = ({
   board_size,
   help,
   setHelp,
+  resetWordSelection,
   setPowerup,
 }) => {
   useEffect(() => {
@@ -23,7 +26,7 @@ export const ScrambleGridComponent: React.FC<ScrambleGridComponentProps> = ({
 
     //TODO get scrambled grid
     setTimeout(() => {
-      setHelp("");
+      resetWordSelection()
       setPowerup(null);
     }, 500);
   }, []);

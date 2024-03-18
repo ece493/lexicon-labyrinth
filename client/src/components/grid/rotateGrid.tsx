@@ -1,6 +1,6 @@
 import { Board } from "../../data/model";
 import { useState, useEffect, useRef } from "react";
-import {TileComponent, nullTile, isTileEqual} from "./tile";
+import { TileComponent, nullTile, isTileEqual } from "./tile";
 import ButtonComponent from "./button";
 import DownIcon from "../icons/downIcon";
 import UpIcon from "../icons/upIcon";
@@ -13,6 +13,7 @@ interface RotateGridComponentProps {
   setPowerup: any;
   help: string;
   setHelp: any;
+  resetWordSelection: () => void;
 }
 
 export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
@@ -21,9 +22,10 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
   help,
   setHelp,
   setPowerup,
+  resetWordSelection
 }) => {
   // TODO refactor with grid
-  
+
   const [tiles, setTiles] = useState(structuredClone(ogGrid.tiles));
   const [selectedRow, setSelectedRow] = useState(-1);
   const [selectedCol, setSelectedCol] = useState(-1);
@@ -66,8 +68,6 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
     const tilesCopy =
       prevSelectedCol === colNum ? [...tiles] : structuredClone(ogGrid.tiles);
 
-    
-
     if (down) {
       const temp = tilesCopy[board_size[0] - 1][colNum];
       for (let i = board_size[0] - 1; i > 0; i--) {
@@ -93,7 +93,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
     };
 
     setTimeout(() => {
-      setHelp("");
+      resetWordSelection()
       setPowerup(null);
     }, 500);
   }
@@ -177,7 +177,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
 
     return arr;
   }
-  
+
   return (
     <div className="flex flex-col mt-2 mx-2">
       <div className="flex flex-row mb-2">
