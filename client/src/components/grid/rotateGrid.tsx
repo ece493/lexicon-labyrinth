@@ -6,6 +6,7 @@ import DownIcon from "../icons/downIcon";
 import UpIcon from "../icons/upIcon";
 import RightIcon from "../icons/rightIcon";
 import LeftIcon from "../icons/leftIcon";
+import { GridComponent } from "./grid";
 
 interface RotateGridComponentProps {
   ogGrid: Board;
@@ -22,10 +23,8 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
   help,
   setHelp,
   setPowerup,
-  resetWordSelection
+  resetWordSelection,
 }) => {
-  // TODO refactor with grid
-
   const [tiles, setTiles] = useState(structuredClone(ogGrid.tiles));
   const [selectedRow, setSelectedRow] = useState(-1);
   const [selectedCol, setSelectedCol] = useState(-1);
@@ -86,115 +85,118 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
 
   function handleConfirm() {
     // TODO send new grid to server
-
     const command = {
       rowNum: selectedRow,
       colNum: selectedCol,
     };
 
     setTimeout(() => {
-      resetWordSelection()
+      resetWordSelection();
       setPowerup(null);
     }, 500);
   }
 
-  function buildGrid() {
-    var idx = 0;
-    const arr = Array(board_size[0] * board_size[1]);
-    for (let i = 0; i < board_size[0]; i++) {
-      arr.push(
-        <TileComponent
-          onClick={() => {
-            setSelectedCol(-1);
-            rotateRow(i, selectedRow);
-            setSelectedRow(i);
-          }}
-          dark
-        >
-          <LeftIcon />
-        </TileComponent>
-      );
+  function buildFullGrid() {
+    const tileCopy = structuredClone(tiles);
 
-      for (let j = 0; j < board_size[1]; j++) {
-        arr.push(
+    for (let i = 0; i < board_size[1]; i++) {
+      const row = tileCopy[i];
+      row.unshift(":<");
+      row.push(":>");
+      tileCopy[i] = row;
+    }
+
+    const upArrows = [""];
+    for (let i = 0; i < board_size[0]; i++) upArrows.push(":^");
+    upArrows.push("");
+    tileCopy.unshift(upArrows);
+
+    const downArrows = [""];
+    for (let i = 0; i < board_size[0]; i++) downArrows.push(":v");
+    downArrows.push("");
+    tileCopy.push(downArrows);
+
+    return { tiles: tileCopy };
+  }
+
+  function buildTile(x: number, y: number, v: string) {
+    switch (v) {
+      case ":v":
+        return (
           <TileComponent
-            selected={selectedCol === j || selectedRow === i}
+            dark
+            onClick={() => {
+              setSelectedRow(-1);
+              rotateCol(x - 1, selectedCol - 1, true);
+              setSelectedCol(x);
+            }}
+            value=""
+          >
+            <DownIcon />
+          </TileComponent>
+        );
+      case ":^":
+        return (
+          <TileComponent
+            dark
+            onClick={() => {
+              setSelectedRow(-1);
+              rotateCol(x - 1, selectedCol - 1);
+              setSelectedCol(x);
+            }}
+          >
+            <UpIcon />
+          </TileComponent>
+        );
+      case ":>":
+        return (
+          <TileComponent
+            onClick={() => {
+              setSelectedCol(-1);
+              rotateRow(y - 1, selectedRow - 1, true);
+              setSelectedRow(y);
+            }}
+            dark
+          >
+            <RightIcon />
+          </TileComponent>
+        );
+      case ":<":
+        return (
+          <TileComponent
+            onClick={() => {
+              setSelectedCol(-1);
+              rotateRow(y - 1, selectedRow - 1);
+              setSelectedRow(y);
+            }}
+            dark
+          >
+            <LeftIcon />
+          </TileComponent>
+        );
+      case "":
+        return <TileComponent value="" transparent />;
+      default:
+        return (
+          <TileComponent
+            selected={selectedCol === x || selectedRow === y}
             readonly
-            value={tiles[i][j]}
+            value={v}
           />
         );
-        idx++;
-      }
-
-      arr.push(
-        <TileComponent
-          onClick={() => {
-            setSelectedCol(-1);
-            rotateRow(i, selectedRow, true);
-            setSelectedRow(i);
-          }}
-          dark
-        >
-          <RightIcon />
-        </TileComponent>
-      );
     }
-
-    arr.unshift(<TileComponent value="" transparent />);
-    for (let i = board_size[0] - 1; i >= 0; i--) {
-      arr.unshift(
-        <TileComponent
-          dark
-          onClick={() => {
-            setSelectedRow(-1);
-            rotateCol(i, selectedCol);
-            setSelectedCol(i);
-          }}
-        >
-          <UpIcon />
-        </TileComponent>
-      );
-    }
-    arr.unshift(<TileComponent value="" transparent />);
-
-    arr.push(<TileComponent value="" transparent />);
-    for (let i = 0; i < board_size[0]; i++) {
-      arr.push(
-        <TileComponent
-          dark
-          onClick={() => {
-            setSelectedRow(-1);
-            rotateCol(i, selectedCol, true);
-            setSelectedCol(i);
-          }}
-          value=""
-        >
-          <DownIcon />
-        </TileComponent>
-      );
-    }
-    arr.push(<TileComponent value="" transparent />);
-
-    return arr;
   }
 
   return (
     <div className="flex flex-col mt-2 mx-2">
-      <div className="flex flex-row mb-2">
+      <div className="flex flex-row px-2">
         <ButtonComponent label="Confirm" onClick={handleConfirm} />
       </div>
-      <div
-        draggable="false"
-        onDragStart={(e) => {
-          e.preventDefault();
-        }}
-        className={` p-4 grid grid-rows-${board_size[1] + 2} grid-cols-${
-          board_size[0] + 2
-        }
-      gap-4 my-auto bg-blue-500 rounded-sm`}
-      >
-        {buildGrid()}
-      </div>
+      <GridComponent
+        grid={buildFullGrid()}
+        buildChild={buildTile}
+        board_size={[board_size[0] + 2, board_size[1] + 2]}
+      />
     </div>
   );
 };
