@@ -31,7 +31,10 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         self.id = str(uuid.uuid4())
         self.lobby_id: Optional[str] = None
         self.connections.add(self)
-        print(f"New WebSocket connection: {self.id}")
+        print(f"New WebSocket connection with id (new player id): {self.id}")
+        # Tell the client what their player ID is
+        resp = Action(ActionEnum.RETURN_PLAYER_ID.value, -1, self.id)
+        self.write_message(jsonpickle.encode(resp, unpicklable=False))
 
     def on_message(self, message) -> None:
         # Echo the message back to all connected clients
@@ -55,7 +58,9 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                     break  # Exit the loop if the generated code is unique
 
             # Initialize the lobby with the generated code
+            print(f"Initializing a lobby with code {lobby_code}")
             self.lobbies[lobby_code] = Lobby(self.id, lobby_code)
+            self.lobbies[lobby_code].set_broadcast_function(GameWebSocketHandler.broadcast_to_lobby)
             
             # Add the player to the lobby they just created
             p = Player(self.id, None)

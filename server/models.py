@@ -1,31 +1,65 @@
 from enum import Enum
+from typing import Optional, Callable
 
 PLAYER_LIMIT = 5
 
 class Lobby(object):
-    def __init__(self, host, lobby_code) -> None:
+    def __init__(self, host, lobby_id) -> None:
         self.host = host,
-        self.lobby_code = lobby_code
+        self.lobby_id = lobby_id
         self.players = []  # List of Player objects, and bots go in here too
         #self.bots = []  # List of Bot objects
         self.board_size: int = 4
         self.timer_setting: float = 15.0
         self.lives: int = 5
         self.is_in_game = False
-        self.broadcast_func = None  # Set this when starting the game
-    
+        self.broadcast_func: Optional[Callable] = None  # Set this when starting the game
+
+    def change_lobby_settings(self, settings: dict) -> None:
+        # Example settings could include 'board_size', 'timer_setting', and 'lives'
+        print(f"Updating lobby {self.lobby_id}'s settings with: {settings}")
+        for key, value in settings.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        
+        # After updating settings, broadcast the new settings to all players
+        self.broadcast_lobby_settings()
+
+    def broadcast_lobby_settings(self) -> None:
+        if self.broadcast_func:
+            lobby_settings_message = {
+                "action": ActionEnum.UPDATE_LOBBY_SETTINGS.value,
+                "data": {
+                    "board_size": self.board_size,
+                    "timer_setting": self.timer_setting,
+                    "lives": self.lives
+                }
+            }
+            print(f"Broadcasting new lobby settings to all players within lobby {self.lobby_id}: {lobby_settings_message}")
+            self.broadcast_func(self.lobby_code, lobby_settings_message)
+
     def add_player(self, player) -> bool:
-        success = False
         if not self.is_full:
             self.players.append(player)
-            print(f"Player {player} added to lobby {self.lobby_id}.")
-            success = True
-        else:
-            print(f"Lobby {self.lobby_id} is full. Cannot add player {player}.")
+            print(f"Player {player.name} added to lobby {self.lobby_id}.")
 
-        if self.is_full:
-            print(f"Lobby {self.lobby_id} is now full.")
-        return success
+            # Broadcast that a new player has joined the lobby
+            if self.broadcast_func:
+                join_message = {
+                    "action": ActionEnum.PLAYER_JOINED.value,
+                    "data": {
+                        "PlayerID": player.player_id,
+                        "PlayerName": player.name
+                    }
+                }
+                self.broadcast_func(self.lobby_id, join_message)
+            else:
+                raise Exception("The lobby's broadcast function doesn't exist!")
+            return True
+        else:
+            print(f"Lobby {self.lobby_id} is full. Cannot add player {player.name}.")
+            return False
+
     
     def remove_player(self, player_id) -> None:
         pass  # TODO
@@ -44,6 +78,7 @@ class Lobby(object):
         assert self.broadcast_func is not None, "Broadcast function wasn't set before starting the game!"
         self.game = Game(self.lobby_id, self.players, self.broadcast_func)
         self.game.start()
+        self.is_in_game = True
 
     @property
     def is_full(self) -> bool:
@@ -64,7 +99,7 @@ class Game:
         # Logic to update the game state based on the move
         # Then broadcast the new state
         update_message = {
-            "action": ActionEnum.WORD_ACCEPTED,
+            "action": ActionEnum.WORD_ACCEPTED.value,
             "data": {
                 "PlayerID": player_id,
                 "Move": move,
@@ -150,6 +185,7 @@ class ActionEnum(Enum):
     PICK_POWERUP = "pick_powerup"
     LEAVE_GAME = "leave_game"
     # server side
+    RETURN_PLAYER_ID = "return_player_id"
     RETURN_LOBBY_CODE = "return_lobby_code"
     LOBBY_DOES_NOT_EXIST = "lobby_does_not_exist"
     LOBBY_IS_FULL = "lobby_is_full"
