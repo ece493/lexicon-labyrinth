@@ -8,9 +8,9 @@ class Lobby(object):
         self.lobby_code = lobby_code
         self.players = []  # List of Player objects, and bots go in here too
         #self.bots = []  # List of Bot objects
-        self.board_size = [4, 4]
-        self.timer_setting = 15
-        self.lives = 5
+        self.board_size: int = 4
+        self.timer_setting: float = 15.0
+        self.lives: int = 5
         self.is_in_game = False
         self.broadcast_func = None  # Set this when starting the game
     
@@ -41,6 +41,7 @@ class Lobby(object):
 
     def start_game(self) -> None:
         # Ensure broadcast_func is set before starting the game
+        assert self.broadcast_func is not None, "Broadcast function wasn't set before starting the game!"
         self.game = Game(self.lobby_id, self.players, self.broadcast_func)
         self.game.start()
 
