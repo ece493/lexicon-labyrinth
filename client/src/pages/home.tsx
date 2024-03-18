@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { GameContext } from "../context/ctx";
-import { Lobby, Action } from "../data/model";
+import { Lobby, Action, ScreenState } from "../data/model";
 import { ActionsList } from "../ws-client/model";
 import { connect } from "../ws-client/client";
 
@@ -12,19 +12,14 @@ const Home: React.FC = () => {
   return (
     <header>
       <h1>Home Page</h1>
-      <h2
-        onClick={() => {
-          navigate("/lobby/testId");
-        }}
-      >
+      <h2 onClick={() => ctx.setScreen(ScreenState.LOBBY)} >
         Click to go to Lobby test page
       </h2>
-      <h2
-        onClick={() => {
-          navigate("/game/testId");
-        }}
-      >
+      <h2 onClick={() => ctx.setScreen(ScreenState.GAME)} >
         Click to go to Game test page
+      </h2>
+      <h2 onClick={() => ctx.setScreen(ScreenState.LOBBY_CODE_ENTRY)} >
+        Click to go to Lobby Code Entry test page
       </h2>
       <h2 onClick={() => {
         const sock = connect(ctx.setScreen);
