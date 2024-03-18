@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { GameContext } from "../context/ctx";
 import { Lobby, Action } from "../data/model";
 import { ActionsList } from "../ws-client/model";
+import { connect } from "../ws-client/client";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const Home: React.FC = () => {
         Click to go to Game test page
       </h2>
       <h2 onClick={() => {
-        const sock = ctx.connectWs(ctx.setScreen);
+        const sock = connect(ctx.setScreen);
         sock.onopen = () => {
           sock.send("test");
         };
@@ -37,7 +38,7 @@ const Home: React.FC = () => {
         }
       }}>Test Sock Inwards</h2>
       <h2 onClick={() => {
-        const sock = ctx.connectWs(ctx.setScreen);
+        const sock = connect(ctx.setScreen);
         const act: Action = {
           action: ActionsList.initialize,
           player_id: 0,
