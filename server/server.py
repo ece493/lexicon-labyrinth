@@ -78,6 +78,14 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, -1, [self.id])
             else:
                 resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, -1, [])
+        elif actionEnum == ActionEnum.READY_LOBBY:
+            # The owner of the lobby is trying to start the game.
+            # Assert that the person starting the game is also the lobby owner
+            assert self.lobbies[self.lobby_id].host == self.id
+            resp = Action(ActionEnum.START_GAME, -1, None)
+            GameWebSocketHandler.broadcast_to_lobby(self.lobby_id, resp)
+            # Call the game logic to start the game
+            self.lobbies[self.lobby_id].start_game()
         self.write_message(jsonpickle.encode(resp, unpicklable=False))
 
     def on_close(self) -> None:

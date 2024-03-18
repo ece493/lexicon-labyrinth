@@ -1,3 +1,6 @@
+import random
+import string
+
 from enum import Enum
 from typing import Optional, Callable
 
@@ -14,6 +17,10 @@ class Lobby(object):
         self.lives: int = 5
         self.is_in_game = False
         self.broadcast_func: Optional[Callable] = None  # Set this when starting the game
+        self.game: Optional[Game] = None
+
+    def __str__(self) -> str:
+        return f"{self.game}"
 
     def change_lobby_settings(self, settings: dict) -> None:
         # Example settings could include 'board_size', 'timer_setting', and 'lives'
@@ -75,6 +82,7 @@ class Lobby(object):
 
     def start_game(self) -> None:
         # Ensure broadcast_func is set before starting the game
+        print(f"Starting the game in lobby {self.lobby_id}")
         assert self.broadcast_func is not None, "Broadcast function wasn't set before starting the game!"
         self.game = Game(self.lobby_id, self.players, self.broadcast_func)
         self.game.start()
@@ -85,16 +93,19 @@ class Lobby(object):
         return len(self.players) >= PLAYER_LIMIT
 
 class Game:
-    def __init__(self, lobby_id, players, broadcast_func) -> None:
-        self.lobby_id = lobby_id
-        self.players = players
-        self.broadcast_func = broadcast_func  # Callback function for broadcasting messages
+    def __init__(self, lobby_id: str, players: list['Player'], broadcast_func: Callable, board_size: int) -> None:
+        self.lobby_id: str = lobby_id
+        self.players: list['Player'] = players
+        self.broadcast_func: Callable = broadcast_func  # Callback function for broadcasting messages
+        self.board_size: int = board_size
+        self.board: Optional[WordGrid] = WordGrid(board_size)
     
+    #def initialize_random_board(self) -> None:
+
     def broadcast_game_state(self, state_message) -> None:
         # Use the broadcast function to send a message to all players
         self.broadcast_func(state_message)
 
-    # Example usage within the class
     def player_made_move(self, player_id, move) -> None:
         # Logic to update the game state based on the move
         # Then broadcast the new state
@@ -119,57 +130,62 @@ class Player(object):
         self.currency = 0
 
 class Bot(Player, object):
-    def __init__(self, player_id, name, difficulty):
+    def __init__(self, player_id, name, difficulty) -> None:
         super().__init__(player_id, name)
         self.is_bot = True
         self.difficulty = difficulty
         # Additional properties and methods specific to bot behavior
 
-class WordGrid(object):
-    def __init__(self, size):
+class WordGrid:
+    def __init__(self, size) -> None:
         self.size = size
         self.grid = self.generate_grid(size)
         self.valid_words = set()  # Words found in the dictionary
     
-    def generate_grid(self, size):
-        pass  # Implementation to generate a random grid of letters
+    def generate_grid(self, size) -> list[list[str]]:
+        return [
+            [random.choice(string.ascii_uppercase) for _ in range(size)]
+            for _ in range(size)
+        ]
     
     def check_word(self, word):
-        pass  # Implementation to check if a word is valid
+        # Implementation to check if a word is valid
+        pass
     
     def apply_powerup(self, powerup):
-        pass  # Implementation for applying power-up effects
+        # Implementation for applying power-up effects
+        pass
 
 class GameDictionary(object):
-    def __init__(self):
+    def __init__(self) -> None:
         self.words = self.load_words()
     
-    def load_words(self):
+    def load_words(self) -> None:
         pass  # Implementation to load words from the SCOWL dataset
     
-    def is_valid_word(self, word):
+    def is_valid_word(self, word) -> bool:
         return word.lower() in self.words
 
 class Powerup(object):
-    def __init__(self, name, cost):
+    def __init__(self, name, cost) -> None:
         self.name = name
         self.cost = cost
     
-    def apply_effect(self, target):
+    def apply_effect(self, target) -> None:
         pass  # Implementation of the power-up's effect
 
 class Refresh(Powerup, object):
-    def apply_effect(self, target):
+    def apply_effect(self, target) -> None:
         # Refresh the word grid
         pass
 
 class Swap(Powerup, object):
-    def apply_effect(self, target):
+    def apply_effect(self, target) -> None:
         # Swap two tiles
         pass
 
 class Action(object):
-    def __init__(self, action, player_id, data):
+    def __init__(self, action, player_id, data) -> None:
         self.action = action
         self.player_id = player_id
         self.data = data
