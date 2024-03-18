@@ -4,6 +4,8 @@ import tornado.websocket
 from tornado.web import Application
 import uuid
 import jsonpickle
+import random
+import string
 
 from typing import Optional
 
@@ -46,14 +48,21 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         # match message
         actionEnum = ActionEnum(action['action'])
         if actionEnum == ActionEnum.INITIALIZE:
-            # The player is creating a new lobby.
-            self.lobbies[self.id] = Lobby(0, self.id)
+            # Generate a unique 4-letter lobby code
+            while True:
+                lobby_code = ''.join(random.choices(string.ascii_uppercase, k=4))
+                if lobby_code not in self.lobbies:
+                    break  # Exit the loop if the generated code is unique
+
+            # Initialize the lobby with the generated code
+            self.lobbies[lobby_code] = Lobby(self.id, lobby_code)
+            
             # Add the player to the lobby they just created
             p = Player(self.id, None)
-            self.lobbies[self.id].add_player(p)
-            # Send them back the lobby code we created for them.
-            # TODO: Change the lobby code to a 4 character code for simplicity
-            resp = Action(ActionEnum.RETURN_LOBBY_CODE.value, -1, self.id)
+            self.lobbies[lobby_code].add_player(p)
+            
+            # Send them back the lobby code we created for them
+            resp = Action(ActionEnum.RETURN_LOBBY_CODE.value, -1, lobby_code)
         elif actionEnum == ActionEnum.JOIN_LOBBY:
             # The player is trying to join an existing lobby
             lobby_id = action['data']
