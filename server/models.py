@@ -1,32 +1,80 @@
 from enum import Enum
 
+PLAYER_LIMIT = 5
+
 class Lobby(object):
-    def __init__(self, host, lobby_code):
+    def __init__(self, host, lobby_code) -> None:
         self.host = host,
         self.lobby_code = lobby_code
-        self.players = []  # List of Player objects
-        self.bots = []  # List of Bot objects
-        self.board_size = [4,4]
+        self.players = []  # List of Player objects, and bots go in here too
+        #self.bots = []  # List of Bot objects
+        self.board_size = [4, 4]
         self.timer_setting = 15
         self.lives = 5
+        self.is_in_game = False
+        self.broadcast_func = None  # Set this when starting the game
     
-    def add_player(self, player):
-        pass  # Implementation
+    def add_player(self, player) -> bool:
+        success = False
+        if not self.is_full:
+            self.players.append(player)
+            print(f"Player {player} added to lobby {self.lobby_id}.")
+            success = True
+        else:
+            print(f"Lobby {self.lobby_id} is full. Cannot add player {player}.")
+
+        if self.is_full:
+            print(f"Lobby {self.lobby_id} is now full.")
+        return success
     
-    def remove_player(self, player_id):
-        pass  # Implementation
+    def remove_player(self, player_id) -> None:
+        pass  # TODO
     
-    def add_bot(self, bot):
-        pass  # Implementation
+    def add_bot(self, bot) -> None:
+        pass  # TODO
     
-    def remove_bot(self, bot_id):
-        pass  # Implementation
+    def remove_bot(self, bot_id) -> None:
+        pass  # TODO
+
+    def set_broadcast_function(self, func) -> None:
+        self.broadcast_func = func
+
+    def start_game(self) -> None:
+        # Ensure broadcast_func is set before starting the game
+        self.game = Game(self.lobby_id, self.players, self.broadcast_func)
+        self.game.start()
+
+    @property
+    def is_full(self) -> bool:
+        return len(self.players) >= PLAYER_LIMIT
+
+class Game:
+    def __init__(self, lobby_id, players, broadcast_func) -> None:
+        self.lobby_id = lobby_id
+        self.players = players
+        self.broadcast_func = broadcast_func  # Callback function for broadcasting messages
     
-    def start_game(self):
-        pass  # Implementation
+    def broadcast_game_state(self, state_message) -> None:
+        # Use the broadcast function to send a message to all players
+        self.broadcast_func(state_message)
+
+    # Example usage within the class
+    def player_made_move(self, player_id, move) -> None:
+        # Logic to update the game state based on the move
+        # Then broadcast the new state
+        update_message = {
+            "action": ActionEnum.WORD_ACCEPTED,
+            "data": {
+                "PlayerID": player_id,
+                "Move": move,
+                # TODO: Include other relevant game state information
+            }
+        }
+        self.broadcast_game_state(update_message)
+
 
 class Player(object):
-    def __init__(self, player_id, name):
+    def __init__(self, player_id, name) -> None:
         self.player_id = player_id
         self.name = name
         self.is_bot = False
@@ -74,7 +122,6 @@ class Powerup(object):
     def apply_effect(self, target):
         pass  # Implementation of the power-up's effect
 
-# Example power-up classes
 class Refresh(Powerup, object):
     def apply_effect(self, target):
         # Refresh the word grid
