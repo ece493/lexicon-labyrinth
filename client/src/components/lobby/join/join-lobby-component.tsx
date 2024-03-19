@@ -14,7 +14,7 @@ const JoinLobbyComponent: React.FC = () => {
                     <input defaultValue={code} onChange={(e) => setCode(e.target.value)}
                         className="p-1 text-3xl rounded-2xl"></input>
                     <button
-                        onClick={() => ctx.sock && ctx.transitions.joinLobby(ctx.sock, code)}
+                        onClick={() => ctx.sock && ctx.transitions.joinLobby( code, ctx )}
                         className="m-6 bg-red-400 text-lg rounded-2xl h-12 px-6 text-pink-100"
                         disabled={!code.length
                             || !ctx.sock || ctx.sock.readyState !== WebSocket.OPEN}>Start</button>

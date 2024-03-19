@@ -25,7 +25,7 @@ export const ScrambleGridComponent: React.FC<ScrambleGridComponentProps> = ({
 
   useEffect(() => {
     if (gameContext.sock !== null) {
-      gameContext.transitions.pickScramblePowerup(gameContext.sock);
+      gameContext.transitions.pickScramblePowerup(gameContext);
       resetWordSelection();
       setPowerup(null);
     }

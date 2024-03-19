@@ -66,9 +66,9 @@ export const TransformGridComponent: React.FC<TransformGridComponentProps> = ({
 
           if (gameContext.sock !== null) {
             gameContext.transitions.pickTransformPowerup(
-              gameContext.sock,
               selectedTile,
-              alphabetTiles[y][x]
+              alphabetTiles[y][x],
+              gameContext
             );
             resetWordSelection();
             setPowerup(null);

@@ -89,10 +89,10 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
   function handleConfirm() {
     if (gameContext.sock !== null) {
       gameContext.transitions.pickRotatePowerup(
-        gameContext.sock,
         selectedRow === -1 ? "col" : "row",
         selectedRow === -1 ? selectedCol - 1 : selectedRow - 1,
-        rotations
+        rotations,
+        gameContext,
       );
 
       resetWordSelection();

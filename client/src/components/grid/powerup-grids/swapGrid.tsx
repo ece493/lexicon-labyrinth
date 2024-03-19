@@ -44,10 +44,10 @@ export const SwapGridComponent: React.FC<SwapGridComponentProps> = ({
       setSecondTile([x, y]);
 
       if (gameContext.sock !== null) {
-        gameContext.transitions.pickSwapPowerup(gameContext.sock, [
-          firstTile,
-          [x, y],
-        ]);
+        gameContext.transitions.pickSwapPowerup(
+          [firstTile, [x, y]],
+          gameContext
+        );
         resetWordSelection();
         setPowerup(null);
       }

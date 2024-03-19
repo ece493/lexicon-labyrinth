@@ -37,7 +37,8 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({ initScreen = ScreenS
         screen,
         setScreen,
         lobby: null,
-        transitions: TransitionManager
+        transitions: TransitionManager,
+        sequenceNumber:0
     }}>
         { stateToScreen(screen) }
     </GameContext.Provider>
