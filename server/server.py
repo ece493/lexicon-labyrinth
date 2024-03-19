@@ -45,6 +45,14 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
 
             resp = Action(ActionEnum.WORD_DENIED.value)
             # resp = Action(ActionEnum.WORD_ACCEPTED)
+        elif actionEnum == ActionEnum.PICK_ROTATE_POWERUP:
+            resp = Action(ActionEnum.POWERUP_DENIED.value)
+        elif actionEnum == ActionEnum.PICK_SCRAMBLE_POWERUP:
+            resp = Action(ActionEnum.POWERUP_DENIED.value)
+        elif actionEnum == ActionEnum.PICK_TRANSFORM_POWERUP:
+            resp = Action(ActionEnum.POWERUP_DENIED.value)
+        elif actionEnum == ActionEnum.PICK_SWAP_POWERUP:
+            resp = Action(ActionEnum.POWERUP_DENIED.value)
 
         print("resp", jsonpickle.encode(resp, unpicklable=False))
         self.write_message(jsonpickle.encode(resp, unpicklable=False))

@@ -60,6 +60,7 @@ const readyLobby = (ws: WebSocket) => {
 };
 
 const pickWord = (ws: WebSocket, path: [number, number][]) => {
+  console.log("sending word pick request with: ", path);
   const msg: Action = {
     action: ActionsList.pick_word,
     player_id: 0,
