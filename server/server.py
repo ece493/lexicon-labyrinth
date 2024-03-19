@@ -12,18 +12,21 @@ from typing import Optional
 from models import Lobby, Action, ActionEnum, Player
 
 # Define a WebSocketHandler
+
+
 class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     connections: set['GameWebSocketHandler'] = set()
-    lobbies: dict[str, Lobby] = {} # each lobby is assigned to a player UUID
+    lobbies: dict[str, Lobby] = {}  # each lobby is assigned to a player UUID
 
-    #def __init__(self) -> None:
+    # def __init__(self) -> None:
 
     @classmethod
     def broadcast_to_lobby(cls, lobby_id, message) -> None:
         # Broadcast a message to all connections in a specific lobby
         # TODO: Perhaps more efficient way would be to maintain a mapping from lobby IDs to a set of connection, but this is fine for now
         for connection in cls.connections:
-            if connection.lobby_id is not None and connection.lobby_id == lobby_id:  # Make sure to set conn.lobby_id when joining a lobby
+            # Make sure to set conn.lobby_id when joining a lobby
+            if connection.lobby_id is not None and connection.lobby_id == lobby_id:
                 connection.write_message(message)
 
     @classmethod
@@ -46,7 +49,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message) -> None:
         # Echo the message back to all connected clients
         print(f"Received message '{message}' from {self.id}")
-        
+
         # for conn in self.connections:
         print(message)
         try:
@@ -60,20 +63,23 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         if actionEnum == ActionEnum.INITIALIZE:
             # Generate a unique 4-letter lobby code
             while True:
-                lobby_code = ''.join(random.choices(string.ascii_uppercase, k=4))
+                lobby_code = ''.join(random.choices(
+                    string.ascii_uppercase, k=4))
                 if lobby_code not in self.lobbies:
                     break  # Exit the loop if the generated code is unique
 
             # Initialize the lobby with the generated code
             print(f"Initializing a lobby with code {lobby_code}")
             self.lobbies[lobby_code] = Lobby(self.id, lobby_code)
-            self.lobbies[lobby_code].set_broadcast_function(GameWebSocketHandler.broadcast_to_lobby)
-            self.lobbies[lobby_code].set_send_to_player_func(GameWebSocketHandler.send_to_player_func)
-            
+            self.lobbies[lobby_code].set_broadcast_function(
+                GameWebSocketHandler.broadcast_to_lobby)
+            self.lobbies[lobby_code].set_send_to_player_func(
+                GameWebSocketHandler.send_to_player_func)
+
             # Add the player to the lobby they just created
             p = Player(self.id, None)
             self.lobbies[lobby_code].add_player(p)
-            
+
             # Send them back the lobby code we created for them
             resp = Action(ActionEnum.RETURN_LOBBY_CODE.value, -1, lobby_code)
         elif actionEnum == ActionEnum.JOIN_LOBBY:
@@ -83,9 +89,11 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 p = Player(self.id, None)
                 self.lobbies[lobby_id].add_player(p)
                 self.lobby_id = lobby_id
-                resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, self.id)
+                resp = Action(
+                    ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, self.id)
             else:
-                resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, self.id, None)
+                resp = Action(
+                    ActionEnum.LOBBY_DOES_NOT_EXIST.value, self.id, None)
         elif actionEnum == ActionEnum.READY_LOBBY:
             # The owner of the lobby is trying to start the game.
             # Assert that the person starting the game is also the lobby owner
@@ -94,6 +102,14 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             GameWebSocketHandler.broadcast_to_lobby(self.lobby_id, resp)
             # Call the game logic to start the game
             self.lobbies[self.lobby_id].start_game()
+        elif actionEnum == ActionEnum.PICK_ROTATE_POWERUP:
+            resp = Action(ActionEnum.POWERUP_DENIED.value, self.id, None)
+        elif actionEnum == ActionEnum.PICK_SCRAMBLE_POWERUP:
+            resp = Action(ActionEnum.POWERUP_DENIED.value, self.id, None)
+        elif actionEnum == ActionEnum.PICK_TRANSFORM_POWERUP:
+            resp = Action(ActionEnum.POWERUP_DENIED.value, self.id, None)
+        elif actionEnum == ActionEnum.PICK_SWAP_POWERUP:
+            resp = Action(ActionEnum.POWERUP_DENIED.value, self.id, None)
         self.write_message(jsonpickle.encode(resp, unpicklable=False))
 
     def on_close(self) -> None:
@@ -107,17 +123,22 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         return True
 
 # Define the MainHandler for HTTP requests
+
+
 class MainHandler(tornado.web.RequestHandler):
     def get(self) -> None:
         # Simple HTTP GET handler
         self.write("Welcome to Lexicon Labyrinth!")
 
 # Create the Tornado application and define routes
+
+
 def make_app() -> Application:
     return tornado.web.Application([
         (r"/", MainHandler),
         (r"/websocket", GameWebSocketHandler),  # WebSocket route
     ])
+
 
 if __name__ == "__main__":
     app = make_app()

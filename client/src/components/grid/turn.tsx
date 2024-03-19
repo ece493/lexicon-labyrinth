@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 
 import { Player } from "../../data/model";
 import FundsIcon from "../icons/fundsIcon";
@@ -11,12 +11,16 @@ interface TurnComponentProp {
   word: string;
   player: string;
   powerup: string | null;
+  handleSubmit: () => void;
+  error: string | null;
 }
 
 const TurnComponent: React.FC<TurnComponentProp> = ({
   word,
   player,
   powerup,
+  handleSubmit,
+  error,
 }) => {
   const [time, setTime] = React.useState(60);
   const [startTime, setStartTime] = React.useState(Date.now());
@@ -38,10 +42,19 @@ const TurnComponent: React.FC<TurnComponentProp> = ({
   }, [player]);
 
   return (
-    <div className="flex flex-col items-center p-1" >
-      <Typography className="text-slate-200 text-sm"  style={{ opacity: powerup ? "0.1" : "" }}>
-        {player}'s turn
-      </Typography>
+    <div className="flex flex-col items-center p-1">
+      {error ? (
+        <Typography className="text-slate-200 text-sm bg-purple-900 px-3 py-1 rounded-sm">
+          {error}
+        </Typography>
+      ) : (
+        <Typography
+          className="text-slate-200 text-sm  px-3 py-1"
+          style={{ opacity: powerup ? "0.1" : "" }}
+        >
+          {player}'s turn
+        </Typography>
+      )}
 
       <Typography className="text-slate-100 text-4xl p-2">
         {word ? word : "click and drag to select a word"}
@@ -53,7 +66,7 @@ const TurnComponent: React.FC<TurnComponentProp> = ({
         </div>
         <div style={{ opacity: powerup ? "0.1" : "" }}>
           <ButtonComponent
-            onClick={() => {}}
+            onClick={handleSubmit}
             label="Submit"
             long
             invert

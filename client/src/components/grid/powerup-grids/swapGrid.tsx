@@ -1,7 +1,8 @@
-import { Board } from "../../data/model";
-import { useState, useEffect, useRef } from "react";
-import { TileComponent, isTileEqual, nullTile } from "./tile";
-import { GridComponent } from "./grid";
+import { Board } from "../../../data/model";
+import { useState, useEffect, useRef, useContext } from "react";
+import { TileComponent, isTileEqual, nullTile } from "../tile";
+import { GridComponent } from "../grid";
+import { GameContext } from "../../../context/ctx";
 
 interface SwapGridComponentProps {
   grid: Board;
@@ -9,6 +10,7 @@ interface SwapGridComponentProps {
   setPowerup: any;
   help: string;
   setHelp: any;
+  resetWordSelection: () => void;
 }
 
 export const SwapGridComponent: React.FC<SwapGridComponentProps> = ({
@@ -17,7 +19,10 @@ export const SwapGridComponent: React.FC<SwapGridComponentProps> = ({
   help,
   setHelp,
   setPowerup,
+  resetWordSelection,
 }) => {
+  const gameContext = useContext(GameContext);
+
   const [secondTile, setSecondTile] = useState(nullTile);
   const [firstTile, setFirstTile] = useState(nullTile);
 
@@ -38,16 +43,14 @@ export const SwapGridComponent: React.FC<SwapGridComponentProps> = ({
     } else {
       setSecondTile([x, y]);
 
-      const command = {
-        firstTile: firstTile,
-        secondTile: secondTile,
-      };
-      // TODO: SEND TO BACKEND
-
-      setTimeout(() => {
-        setHelp("");
+      if (gameContext.sock !== null) {
+        gameContext.transitions.pickSwapPowerup(gameContext.sock, [
+          firstTile,
+          [x, y],
+        ]);
+        resetWordSelection();
         setPowerup(null);
-      }, 500);
+      }
     }
   }
 

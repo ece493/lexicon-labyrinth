@@ -1,70 +1,39 @@
-import { Typography } from "@mui/material";
 import { Board } from "../../data/model";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
+import { GridComponent } from "./grid";
+import { TileComponent, nullTile, isTileEqual } from "./tile";
 
 interface GridComponentProps {
   grid: Board;
   board_size: [number, number];
   word: string;
   setWord: any;
+  wordPath: number[][];
+  setWordPath: any;
 }
 
-interface TileComponentProps {
-  grid: Board;
-  x: number;
-  y: number;
-  word: string;
-  setWord: any;
-  setSelecting: any;
-  selecting: boolean;
-  setLastSelectedTile: any;
-  lastSelectedTile: number[];
-}
-
-const Tile: React.FC<TileComponentProps> = ({
-  x,
-  y,
+export const SelectionGridComponent: React.FC<GridComponentProps> = ({
   grid,
+  board_size,
   word,
   setWord,
-  selecting,
-  setSelecting,
-  lastSelectedTile,
-  setLastSelectedTile,
+  wordPath,
+  setWordPath,
 }) => {
-  // TODO refactor with grid
+  const [firstTile, setFirstTile] = useState(nullTile);
+  const [selecting, setSelecting] = useState(false);
 
-  const [selected, setSelected] = useState(false);
-  const [isFirstTileDuringMouseDown, setIsFirstTileDuringMouseDown] =
-    useState(false);
-  const [isFirstTileAfterMouseDown, setIsFirstTileAfterMouseDown] =
-    useState(false);
-
-  const [prevTile, setPrevTile] = useState([0, 0]);
-  const selfRef = useRef(null);
-
-  useEffect(() => {
-    if (selecting) {
-      // starting selection
-      if (!isFirstTileDuringMouseDown) setSelected(false);
-      if (isFirstTileAfterMouseDown) setIsFirstTileAfterMouseDown(false);
-    }else{
-      // ending selection
-      if (isFirstTileDuringMouseDown) {
-        setIsFirstTileDuringMouseDown(false);
-        setIsFirstTileAfterMouseDown(true);
-      }
-    }
-  }, [selecting]);
-
-  function isAdjacent() {
+  function isSelectableNonFirstTile(x: number, y: number) {
+    if (wordPath.length < 1) return false;
     return (
-      Math.abs(lastSelectedTile[0] - x) <= 1 &&
-      Math.abs(lastSelectedTile[1] - y) <= 1
+      Math.abs(wordPath[wordPath.length - 1][0] - x) <= 1 &&
+      Math.abs(wordPath[wordPath.length - 1][1] - y) <= 1 &&
+      !wordPath.some((n) => isTileEqual([x, y], n))
     );
   }
 
-  function getPrevTileDirection() {
+  function getPrevTileDirection(x: number, y: number, indexInPath: number) {
+    const prevTile = wordPath[indexInPath - 1];
     const xdif = prevTile[0] - x;
     const ydif = prevTile[1] - y;
 
@@ -82,105 +51,70 @@ const Tile: React.FC<TileComponentProps> = ({
     }
   }
 
-  return (
-    <div draggable="false" className="relative">
+  function handleSelectStart(x: number, y: number) {
+    setFirstTile([x, y]);
+    setWord(grid.tiles[y][x]);
+    setWordPath([[x, y]]);
+    setSelecting(true);
+  }
+
+  function handleSelectNonFirstTile(x: number, y: number) {
+    if (selecting && isSelectableNonFirstTile(x, y)) {
+      setWord(word + grid.tiles[y][x]);
+      setWordPath([...wordPath, [x, y]]);
+    }
+  }
+
+  function renderPathLine(indexInPath: number, x: number, y: number) {
+    return (
       <div
-        ref={selfRef}
         draggable="false"
-        onMouseDown={(e) => {
-          setIsFirstTileDuringMouseDown(true);
-          setSelected(true);
-          setSelecting(true);
-          setWord(grid.tiles[y][x]);
-          setLastSelectedTile([x, y]);
+        className="z-0 absolute h-1 w-20 bg-blue-300 top-1/2 left-1/2 transform  -translate-y-1/2"
+        style={{
+          transform: `rotate(${getPrevTileDirection(x, y, indexInPath)}deg)`,
+          transformOrigin: "center left",
         }}
-        onTouchStart={(e) => {
-          setIsFirstTileDuringMouseDown(true);
-          setSelected(true);
-          setSelecting(true);
-          setWord(grid.tiles[y][x]);
-          setLastSelectedTile([x, y]);
-        }}
-        onMouseEnter={(e) => {
-          if (selecting && isAdjacent() && !selected) {
-            setWord(word + grid.tiles[y][x]);
-            setSelected(true);
-            setLastSelectedTile([x, y]);
-            setPrevTile(lastSelectedTile);
-          }
-        }}
-        className={`relative ${
-          !selecting || (selecting && isAdjacent())
-            ? "cursor-pointer"
-            : "cursor-default"
-        } ${
-          selected ? "bg-blue-200" : "bg-blue-400"
-        } rounded-sm w-12 h-12 flex flex-col justify-center items-center z-10`}
-        style={{ opacity: selecting && !isAdjacent() && !selected ? 0.3 : "" }}
-      >
-        <p
-          draggable="false"
-          className={`relative text-bold text-lg select-none z-1 ${
-            selected ? "text-blue-600" : "text-slate-100"
-          } text-center ${selected ? "bg-blue-200" : "bg-blue-400"}`}
-        >
-          {grid.tiles[y][x]}
-        </p>
-      </div>
-      {selected && !isFirstTileDuringMouseDown && !isFirstTileAfterMouseDown ? (
+      />
+    );
+  }
+
+  function buildTile(x: number, y: number, v: string) {
+    const indexInPath = wordPath.findIndex((n) => n[0] === x && n[1] === y);
+    const selected = indexInPath >= 0;
+    return (
+      <div draggable="false" className="relative">
         <div
           draggable="false"
-          className="z-0 absolute h-1 w-20 bg-blue-300 top-1/2 left-1/2 transform  -translate-y-1/2"
+          onMouseDown={(e) => handleSelectStart(x, y)}
+          onTouchStart={(e) => handleSelectStart(x, y)}
+          onMouseEnter={(e) => handleSelectNonFirstTile(x, y)}
+          className={`${
+            !selecting || (selecting && isSelectableNonFirstTile(x, y))
+              ? "cursor-pointer"
+              : "cursor-default"
+          }`}
           style={{
-            transform: `rotate(${getPrevTileDirection()}deg)`,
-            transformOrigin: "center left",
+            opacity:
+              selecting && !isSelectableNonFirstTile(x, y) && !selected
+                ? 0.3
+                : "",
           }}
-        ></div>
-      ) : null}
-    </div>
-  );
-};
+        >
+          <TileComponent value={v} selected={selected} />
+        </div>
+        {selected && !isTileEqual([x, y], firstTile)
+          ? renderPathLine(indexInPath, x, y)
+          : null}
+      </div>
+    );
+  }
 
-export const SelectionGridComponent: React.FC<GridComponentProps> = ({
-  grid,
-  board_size,
-  word,
-  setWord,
-}) => {
-  const [selecting, setSelecting] = useState(false);
-  const [lastSelectedTile, setLastSelectedTile] = useState([0, 0]);
-  const buildGrid = () => {
-    var idx = 0;
-    const arr = Array(board_size[0] * board_size[1]);
-    for (let i = 0; i < board_size[0]; i++) {
-      for (let j = 0; j < board_size[1]; j++) {
-        arr[idx] = (
-          <Tile
-            key={`${i}-${j}`}
-            grid={grid}
-            x={j}
-            y={i}
-            word={word}
-            setWord={setWord}
-            setSelecting={setSelecting}
-            selecting={selecting}
-            lastSelectedTile={lastSelectedTile}
-            setLastSelectedTile={setLastSelectedTile}
-          />
-        );
-        idx++;
-      }
-    }
-    return arr;
-  };
   return (
     <div
       draggable="false"
       onDragStart={(e) => {
         e.preventDefault();
       }}
-      className={`mt-2 mx-2 p-4 grid grid-rows-${board_size[1]} grid-cols-${board_size[0]}
-      gap-4 my-auto bg-blue-500 rounded-sm`}
       onMouseUp={(e) => {
         setSelecting(false);
       }}
@@ -188,7 +122,11 @@ export const SelectionGridComponent: React.FC<GridComponentProps> = ({
         setSelecting(false);
       }}
     >
-      {buildGrid()}
+      <GridComponent
+        grid={grid}
+        board_size={board_size}
+        buildChild={buildTile}
+      />
     </div>
   );
 };
