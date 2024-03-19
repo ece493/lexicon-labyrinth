@@ -11,7 +11,7 @@ export type Lobby = {
 };
 
 export type GameState = {
-    turns: Turns;
+    curr_turn: string;
     board: Board;
     timer: number;
     memory: string[];
@@ -21,13 +21,8 @@ export type Board = {
     tiles: string[][];
 };
 
-export type Turns = {
-    order: number[];
-    curr_turn: number;
-};
-
 export type Player = {
-    id: number;
+    id: string;
     name: string;
     is_spectator: boolean;
     lives: number;

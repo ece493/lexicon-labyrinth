@@ -7,7 +7,7 @@ import { connect } from "../ws-client/client";
 import Home from "./home";
 import LobbyPage from "./lobby";
 import Game from "./game";
-import JoinLobbyPage from "./join-lobby";
+import JoinLobbyPage, { JoinLobbyErrorPage } from "./join-lobby";
 import JoinLobbyComponent from "../components/lobby/join/join-lobby-component";
 
 interface StateWrapperProps {
@@ -27,7 +27,7 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({ initScreen = ScreenS
             case ScreenState.LOBBY_CODE_ENTRY:
                 return <JoinLobbyPage />;
             case ScreenState.LOBBY_CODE_ENTRY_FAILED:
-                return <Home />;
+                return <JoinLobbyErrorPage />;
             default:
                 return <Home />;
         }
