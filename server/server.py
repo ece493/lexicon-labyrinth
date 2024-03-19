@@ -19,42 +19,51 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     #def __init__(self) -> None:
 
     @classmethod
-    def broadcast_to_lobby(cls, lobby_id, message) -> None:
+    def broadcast_to_lobby(cls, lobby_id: str, message: Action) -> None:
         # Broadcast a message to all connections in a specific lobby
         # TODO: Perhaps more efficient way would be to maintain a mapping from lobby IDs to a set of connection, but this is fine for now
         for connection in cls.connections:
             if connection.lobby_id is not None and connection.lobby_id == lobby_id:  # Make sure to set conn.lobby_id when joining a lobby
-                connection.write_message(message)
+                connection.send_message(message)
 
     @classmethod
-    def send_to_player_func(cls, player_id, message) -> None:
+    def send_to_player_func(cls, player_id: str, message: Action) -> None:
         # TODO: Make more efficient
         for connection in cls.connections:
             if connection.id is not None and connection.id == player_id:
-                connection.write_message(message)
+                connection.send_message(message)
 
     def open(self) -> None:
         # Assign a unique ID to the connection
         self.id = str(uuid.uuid4())
         self.lobby_id: Optional[str] = None
         self.connections.add(self)
+        self.sequence: int = 0
         print(f"New WebSocket connection with id (new player id): {self.id}")
         # Tell the client what their player ID is
         resp = Action(ActionEnum.RETURN_PLAYER_ID.value, self.id, self.id)
-        self.write_message(jsonpickle.encode(resp, unpicklable=False))
+        self.send_message(resp)
+
+    def send_message(self, message: Action) -> None:
+        # Sends a message to this specific player attached to this connection
+        print(message)
+        message.sequence = self.sequence # Set the monotonic sequence number
+        print(f"Sending message #{self.sequence} {message} to player {self.id} in lobby {self.lobby_id}")
+        self.write_message(jsonpickle.encode(message, unpicklable=False))
+        self.sequence += 1
 
     def on_message(self, message) -> None:
         # Echo the message back to all connected clients
         print(f"Received message '{message}' from {self.id}")
         
         # for conn in self.connections:
-        print(message)
+        #print(message)
         try:
             action = jsonpickle.decode(string=message)
         except ValueError as e:
             print(f"Error decoding received message: {e}")
             return
-        print(action)
+        #print(action)
         # match message
         actionEnum = ActionEnum(action['action'])
         if actionEnum == ActionEnum.INITIALIZE:
@@ -63,20 +72,24 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 lobby_code = ''.join(random.choices(string.ascii_uppercase, k=4))
                 if lobby_code not in self.lobbies:
                     break  # Exit the loop if the generated code is unique
-
+            lobby_code = "ABCD" # TODO: REMOVE
             # Initialize the lobby with the generated code
             print(f"Initializing a lobby with code {lobby_code}")
             self.lobbies[lobby_code] = Lobby(self.id, lobby_code)
             self.lobbies[lobby_code].set_broadcast_function(GameWebSocketHandler.broadcast_to_lobby)
             self.lobbies[lobby_code].set_send_to_player_func(GameWebSocketHandler.send_to_player_func)
-            
-            # Add the player to the lobby they just created
+            print(f"Created a new player class and added them to the lobby they just created")
+            # Create a new player, and add them to the lobby they just created
             p = Player(self.id, None)
             p.set_send_message_func(GameWebSocketHandler.send_to_player_func)
             self.lobbies[lobby_code].add_player(p)
-            
+            self.lobby_id = lobby_code
             # Send them back the lobby code we created for them
-            resp = Action(ActionEnum.RETURN_LOBBY_CODE.value, -1, lobby_code)
+            resp = Action(ActionEnum.RETURN_LOBBY_CODE.value, self.id, lobby_code)
+            self.send_message(resp)
+            # Tell the player they joined their own lobby. Technically we should be telling everyone within the lobby, but it's only the player in there right now.
+            resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, lobby_code)
+            self.send_message(resp)
         elif actionEnum == ActionEnum.JOIN_LOBBY:
             # The player is trying to join an existing lobby
             lobby_id = action['data']
@@ -85,9 +98,11 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 p.set_send_message_func(GameWebSocketHandler.send_to_player_func)
                 self.lobbies[lobby_id].add_player(p)
                 self.lobby_id = lobby_id
-                resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, self.id)
+                resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, lobby_id)
+                GameWebSocketHandler.broadcast_to_lobby(self.lobby_id, resp)
             else:
                 resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, self.id, None)
+                self.send_message(resp)
         elif actionEnum == ActionEnum.READY_LOBBY:
             # The owner of the lobby is trying to start the game.
             # Assert that the person starting the game is also the lobby owner
@@ -96,7 +111,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             GameWebSocketHandler.broadcast_to_lobby(self.lobby_id, resp)
             # Call the game logic to start the game
             self.lobbies[self.lobby_id].start_game()
-        self.write_message(jsonpickle.encode(resp, unpicklable=False))
+            #self.send_message(resp)
 
     def on_close(self) -> None:
         self.connections.remove(self)

@@ -43,35 +43,36 @@ class Lobby(object):
 
     def broadcast_lobby_settings(self) -> None:
         if self.broadcast_func:
-            lobby_settings_message = {
-                "timestamp": time.perf_counter_ns(),
-                "action": ActionEnum.UPDATE_LOBBY_SETTINGS.value,
-                "data": {
-                    "board_size": self.board_size,
-                    "timer_setting": self.timer_setting,
-                    "max_lives": self.lives
-                }
-            }
+            lobby_settings_message = Action(action=ActionEnum.UPDATE_LOBBY_SETTINGS.value,
+                                            player_id=-1,
+                                            data={
+                                                    "board_size": self.board_size,
+                                                    "timer_setting": self.timer_setting,
+                                                    "max_lives": self.lives
+                                                }
+            )
             print(f"Broadcasting new lobby settings to all players within lobby {self.lobby_id}: {lobby_settings_message}")
             self.broadcast_func(self.lobby_code, lobby_settings_message)
 
-    def add_player(self, player) -> bool:
+    def add_player(self, player: 'Player') -> bool:
         if not self.is_full:
             self.players.append(player)
-            print(f"Player {player.name} added to lobby {self.lobby_id}.")
+            print(f"Player of name {player.name} and id {player.player_id} added to lobby {self.lobby_id}.")
 
             # Broadcast that a new player has joined the lobby
+            '''
             if self.broadcast_func:
-                join_message = {
-                    "action": ActionEnum.PLAYER_JOINED.value,
-                    "data": {
-                        "PlayerID": player.player_id,
-                        "PlayerName": player.name
-                    }
-                }
+                join_message = Action(action=ActionEnum.PLAYER_JOINED.value,
+                                      player_id=player.player_id,
+                                      data={
+                                                "PlayerID": player.player_id,
+                                                "PlayerName": player.name
+                                            }
+                )
                 self.broadcast_func(self.lobby_id, join_message)
             else:
                 raise Exception("The lobby's broadcast function doesn't exist!")
+            '''
             return True
         else:
             print(f"Lobby {self.lobby_id} is full. Cannot add player {player.name}.")
@@ -233,6 +234,13 @@ class Action(object):
         self.action = action
         self.player_id = player_id
         self.data = data
+        self.sequence: int = -1 # This gets set before sending!
+
+    def __str__(self) -> str:
+        return f"Action({self.action}, Player ID: {self.player_id}, Data: {self.data}, Sequence: {self.sequence})"
+
+    def __repr__(self) -> str:
+        return f"Action(action={repr(self.action)}, player_id={repr(self.player_id)}, data={repr(self.data)}, sequence={self.sequence})"
 
 
 class ActionEnum(Enum):
