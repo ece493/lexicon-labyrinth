@@ -10,6 +10,7 @@ interface GridComponentProps {
   setWord: any;
   wordPath: number[][];
   setWordPath: any;
+  setError: any;
 }
 
 export const SelectionGridComponent: React.FC<GridComponentProps> = ({
@@ -19,6 +20,7 @@ export const SelectionGridComponent: React.FC<GridComponentProps> = ({
   setWord,
   wordPath,
   setWordPath,
+  setError,
 }) => {
   const [firstTile, setFirstTile] = useState(nullTile);
   const [selecting, setSelecting] = useState(false);
@@ -54,6 +56,7 @@ export const SelectionGridComponent: React.FC<GridComponentProps> = ({
   function handleSelectStart(x: number, y: number) {
     setFirstTile([x, y]);
     setWord(grid.tiles[y][x]);
+    setError(null);
     setWordPath([[x, y]]);
     setSelecting(true);
   }

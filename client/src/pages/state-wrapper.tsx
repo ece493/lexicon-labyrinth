@@ -45,6 +45,7 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
         lobby: null,
         transitions: TransitionManager,
         receiveCallBacks: dReceiveCallbacks,
+        playerId: null
       }}
     >
       {stateToScreen(screen)}

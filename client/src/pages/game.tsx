@@ -56,7 +56,7 @@ const Game: React.FC = () => {
 
   const gameContext = useContext(GameContext);
   const [word, setWord] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<null | string>(null);
 
   // May have to change where this is stored to prevent too much re-rendering
   const [wordPath, setWordPath] = useState([]);
@@ -85,7 +85,18 @@ const Game: React.FC = () => {
   }
 
   function loadReceiveCallBacks() {
-    gameContext.receiveCallBacks.handleWordDeny = () => console.log("denied");
+    gameContext.receiveCallBacks.handleWordDeny = (path: number[][]) => {
+      setError("Word has already been played!");
+      setWord(reconstructWord(path));
+    };
+  }
+
+  function reconstructWord(path: number[][]) {
+    let word = "";
+    for (let wCoord of path) {
+      word += lobby.state.board.tiles[wCoord[0]][wCoord[1]];
+    }
+    return word;
   }
 
   useEffect(() => {
@@ -154,6 +165,7 @@ const Game: React.FC = () => {
             setWordPath={setWordPath}
             word={word}
             setWord={setWord}
+            setError={setError}
             board_size={[8, 8]}
             grid={{
               tiles,
