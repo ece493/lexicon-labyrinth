@@ -104,6 +104,32 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             else:
                 resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, self.id, None)
                 self.send_message(resp)
+        elif actionEnum == ActionEnum.LEAVE_LOBBY:
+            # The player is trying to leave the lobby
+            assert action['data']['lobby_code'] == self.lobby_id, f"The lobby code the client passed to leave of {action['data']['lobby_code']} doesn't match the client's actual current lobby {self.lobby_id}!"
+            if self.lobby_id in self.lobbies:
+                lobby = self.lobbies[self.lobby_id]
+                is_host_leaving = lobby.remove_player(self.id)
+
+                if is_host_leaving:
+                    # Delete the lobby if the host is leaving
+                    del self.lobbies[self.lobby_id]
+                    print(f"Lobby {self.lobby_id} deleted as the host has left.")
+                    # Send a message to each player saying that they were removed from the game
+                    for player in self.lobbies[self.lobby_id].players:
+                        deletion_message = Action(ActionEnum.PLAYER_LEFT.value, player.player_id, {"lobby_code": self.lobby_id})
+                        player.send_message(deletion_message)
+                else:
+                    # Broadcast to all remaining players that this player has left the lobby
+                    leave_message = Action(ActionEnum.PLAYER_LEFT.value, self.id, {"lobby_code": self.lobby_id})
+                    self.broadcast_to_lobby(self.lobby_id, leave_message)
+
+                self.lobby_id = None  # Clear the player's lobby_id since they've left the lobby
+            else:
+                print(f"Player {self.id} attempted to leave a lobby but wasn't part of any.")
+                # Optionally, send a message back to the player that they weren't in a lobby
+                error_resp = Action(ActionEnum.ERROR.value, self.id, "Not part of any lobby to leave.")
+                self.send_message(error_resp)
         elif actionEnum == ActionEnum.CHANGE_PARAM:
             # The owner of the lobby is trying to change the lobby's settings
             self.lobbies[self.lobby_id].change_lobby_settings(action['data'])

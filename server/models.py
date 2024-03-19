@@ -12,14 +12,14 @@ PLAYER_LIMIT = 5
 
 class Lobby(object):
     def __init__(self, host, lobby_id) -> None:
-        self.host = host
-        self.lobby_id = lobby_id
-        self.players = []  # List of Player objects, and bots go in here too
+        self.host: str = host
+        self.lobby_id: str = lobby_id
+        self.players: list[Player] = []  # List of Player objects, and bots go in here too
         #self.bots = []  # List of Bot objects
         self.board_size: int = 4
         self.timer_setting: float = 15.0
         self.max_lives: int = 5
-        self.is_in_game = False
+        self.is_in_game: bool = False
         self.broadcast_func: Optional[Callable] = None  # Set this when starting the game
         self.send_to_player_func: Optional[Callable] = None # Set this when starting the game
         self.game: Optional[Game] = None
@@ -79,8 +79,19 @@ class Lobby(object):
             return False
 
     
-    def remove_player(self, player_id) -> None:
-        pass  # TODO
+    def remove_player(self, player_id: str) -> bool:
+        # Attempt to remove the player
+        player_found = any(player.player_id == player_id for player in self.players)
+        if player_found:
+            # Remove player
+            self.players = [player for player in self.players if player.player_id != player_id]
+            print(f"Player (ID: {player_id}) removed from lobby {self.lobby_id}.")
+
+            # If the host leaves, we'll handle lobby deletion outside this method
+            return self.host == player_id
+        else:
+            print(f"No player with ID {player_id} found in lobby {self.lobby_id}.")
+            return False
     
     def add_bot(self, bot) -> None:
         pass  # TODO
@@ -247,6 +258,7 @@ class ActionEnum(Enum):
     # client side
     INITIALIZE = "initialize"
     JOIN_LOBBY = "join_lobby"
+    LEAVE_LOBBY = "leave_lobby"
     CHANGE_PARAM = "change_param"
     READY_LOBBY = "ready_lobby"
     PICK_WORD = "pick_word"
