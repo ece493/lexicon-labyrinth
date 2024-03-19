@@ -1,8 +1,9 @@
 import { Typography } from "@mui/material";
-import { Board } from "../../data/model";
-import { useState, useEffect, useRef } from "react";
-import { TileComponent, nullTile, isTileEqual } from "./tile";
-import { GridComponent } from "./grid";
+import { Board } from "../../../data/model";
+import { useState, useEffect, useRef, useContext } from "react";
+import { TileComponent, nullTile, isTileEqual } from "../tile";
+import { GridComponent } from "../grid";
+import { GameContext } from "../../../context/ctx";
 
 const alphabetTiles = [
   ["a", "b", "c", "d", "e"],
@@ -30,6 +31,8 @@ export const TransformGridComponent: React.FC<TransformGridComponentProps> = ({
   setPowerup,
   resetWordSelection,
 }) => {
+  const gameContext = useContext(GameContext);
+
   const [selectedTile, setSelectedTile] = useState<number[]>(nullTile);
   const [selectedReplacement, setSelectedReplacement] =
     useState<number[]>(nullTile);
@@ -60,15 +63,16 @@ export const TransformGridComponent: React.FC<TransformGridComponentProps> = ({
         selected={isTileEqual(selectedReplacement, [x, y])}
         onClick={() => {
           setSelectedReplacement([x, y]);
-          //TODO SEND TRANSFORM REQUEST
-          const command = {
-            coordinated: selectedTile,
-            newCharacter: v,
-          };
-          setTimeout(() => {
-            resetWordSelection()
+
+          if (gameContext.sock !== null) {
+            gameContext.transitions.pickTransformPowerup(
+              gameContext.sock,
+              selectedTile,
+              alphabetTiles[y][x]
+            );
+            resetWordSelection();
             setPowerup(null);
-          }, 500);
+          }
         }}
         key={`${x}-${y}`}
         value={v}

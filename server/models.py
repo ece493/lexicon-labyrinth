@@ -99,7 +99,10 @@ class ActionEnum(Enum):
     CHANGE_PARAM = "change_param"
     READY_LOBBY = "ready_lobby"
     PICK_WORD = "pick_word"
-    PICK_POWERUP = "pick_powerup"
+    PICK_ROTATE_POWERUP = "pick_rotate_powerup"
+    PICK_SCRAMBLE_POWERUP = "pick_scramble_powerup"
+    PICK_SWAP_POWERUP = "pick_swap_powerup"
+    PICK_TRANSFORM_POWERUP = "pick_transform_powerup"
     LEAVE_GAME = "leave_game"
     # server side
     RETURN_LOBBY_CODE = "return_lobby_code"

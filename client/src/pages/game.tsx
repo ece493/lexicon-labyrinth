@@ -5,10 +5,10 @@ import PowerupsComponent from "../components/grid/powerups";
 import PlayersComponent from "../components/grid/players";
 import { Player } from "../data/model";
 import { useState, useContext } from "react";
-import { SwapGridComponent } from "../components/grid/swapGrid";
-import { RotateGridComponent } from "../components/grid/rotateGrid";
-import { TransformGridComponent } from "../components/grid/transformGrid";
-import { ScrambleGridComponent } from "../components/grid/scrambleGrid";
+import { SwapGridComponent } from "../components/grid/powerup-grids/swapGrid";
+import { RotateGridComponent } from "../components/grid/powerup-grids/rotateGrid";
+import { TransformGridComponent } from "../components/grid/powerup-grids/transformGrid";
+import { ScrambleGridComponent } from "../components/grid/powerup-grids/scrambleGrid";
 import { GameContext } from "../context/ctx";
 
 const Game: React.FC = () => {

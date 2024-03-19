@@ -1,7 +1,8 @@
-import { useEffect } from "react";
-import { Board } from "../../data/model";
-import { GridComponent } from "./grid";
-import { TileComponent } from "./tile";
+import { useContext, useEffect } from "react";
+import { Board } from "../../../data/model";
+import { GridComponent } from "../grid";
+import { TileComponent } from "../tile";
+import { GameContext } from "../../../context/ctx";
 
 interface ScrambleGridComponentProps {
   grid: Board;
@@ -10,7 +11,6 @@ interface ScrambleGridComponentProps {
   help: string;
   setHelp: any;
   resetWordSelection: () => void;
-
 }
 
 export const ScrambleGridComponent: React.FC<ScrambleGridComponentProps> = ({
@@ -21,14 +21,14 @@ export const ScrambleGridComponent: React.FC<ScrambleGridComponentProps> = ({
   resetWordSelection,
   setPowerup,
 }) => {
-  useEffect(() => {
-    setHelp("Scrambling...");
+  const gameContext = useContext(GameContext);
 
-    //TODO get scrambled grid
-    setTimeout(() => {
-      resetWordSelection()
+  useEffect(() => {
+    if (gameContext.sock !== null) {
+      gameContext.transitions.pickScramblePowerup(gameContext.sock);
+      resetWordSelection();
       setPowerup(null);
-    }, 500);
+    }
   }, []);
 
   function buildTile(x: number, y: number, v: string) {

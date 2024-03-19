@@ -1,12 +1,13 @@
-import { Board } from "../../data/model";
-import { useState, useEffect, useRef } from "react";
-import { TileComponent, nullTile, isTileEqual } from "./tile";
-import ButtonComponent from "./button";
-import DownIcon from "../icons/downIcon";
-import UpIcon from "../icons/upIcon";
-import RightIcon from "../icons/rightIcon";
-import LeftIcon from "../icons/leftIcon";
-import { GridComponent } from "./grid";
+import { Board } from "../../../data/model";
+import { useState, useEffect, useRef, useContext } from "react";
+import { TileComponent, nullTile, isTileEqual } from "../tile";
+import ButtonComponent from "../button";
+import DownIcon from "../../icons/downIcon";
+import UpIcon from "../../icons/upIcon";
+import RightIcon from "../../icons/rightIcon";
+import LeftIcon from "../../icons/leftIcon";
+import { GridComponent } from "../grid";
+import { GameContext } from "../../../context/ctx";
 
 interface RotateGridComponentProps {
   ogGrid: Board;
@@ -28,6 +29,8 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
   const [tiles, setTiles] = useState(structuredClone(ogGrid.tiles));
   const [selectedRow, setSelectedRow] = useState(-1);
   const [selectedCol, setSelectedCol] = useState(-1);
+  const [rotations, setRotations] = useState(0);
+  const gameContext = useContext(GameContext);
 
   useEffect(() => {
     setHelp("Rotate a row or column by clicking an arrow");
@@ -84,16 +87,17 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
   }
 
   function handleConfirm() {
-    // TODO send new grid to server
-    const command = {
-      rowNum: selectedRow,
-      colNum: selectedCol,
-    };
+    if (gameContext.sock !== null) {
+      gameContext.transitions.pickRotatePowerup(
+        gameContext.sock,
+        selectedRow === -1 ? "col" : "row",
+        selectedRow === -1 ? selectedCol - 1 : selectedRow - 1,
+        rotations
+      );
 
-    setTimeout(() => {
       resetWordSelection();
       setPowerup(null);
-    }, 500);
+    }
   }
 
   function buildFullGrid() {
@@ -119,6 +123,38 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
     return { tiles: tileCopy };
   }
 
+  function incrementRotCount(type: string) {
+    if (type === "row") {
+      if (selectedRow !== -1) {
+        setRotations(rotations + 1);
+      } else {
+        setRotations(1);
+      }
+    } else {
+      if (selectedCol !== -1) {
+        setRotations(rotations + 1);
+      } else {
+        setRotations(1);
+      }
+    }
+  }
+
+  function decrementRotCount(type: string) {
+    if (type === "row") {
+      if (selectedRow !== -1) {
+        setRotations(rotations - 1);
+      } else {
+        setRotations(-1);
+      }
+    } else {
+      if (selectedCol !== -1) {
+        setRotations(rotations - 1);
+      } else {
+        setRotations(-1);
+      }
+    }
+  }
+
   function buildTile(x: number, y: number, v: string) {
     switch (v) {
       case ":v":
@@ -129,6 +165,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
               setSelectedRow(-1);
               rotateCol(x - 1, selectedCol - 1, true);
               setSelectedCol(x);
+              decrementRotCount("col");
             }}
             value=""
           >
@@ -143,6 +180,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
               setSelectedRow(-1);
               rotateCol(x - 1, selectedCol - 1);
               setSelectedCol(x);
+              incrementRotCount("col");
             }}
           >
             <UpIcon />
@@ -155,6 +193,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
               setSelectedCol(-1);
               rotateRow(y - 1, selectedRow - 1, true);
               setSelectedRow(y);
+              incrementRotCount("row");
             }}
             dark
           >
@@ -168,6 +207,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
               setSelectedCol(-1);
               rotateRow(y - 1, selectedRow - 1);
               setSelectedRow(y);
+              decrementRotCount("row");
             }}
             dark
           >
