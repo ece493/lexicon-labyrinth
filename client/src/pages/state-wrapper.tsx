@@ -9,36 +9,45 @@ import LobbyPage from "./lobby";
 import Game from "./game";
 import JoinLobbyPage, { JoinLobbyErrorPage } from "./join-lobby";
 import JoinLobbyComponent from "../components/lobby/join/join-lobby-component";
+import { ReceiveCallbacksDefault } from "../ws-client/receive-callbacks";
 
 interface StateWrapperProps {
-    initScreen?: ScreenState
+  initScreen?: ScreenState;
 }
 
-export const StateWrapper: React.FC<StateWrapperProps> = ({ initScreen = ScreenState.START }) => {
-    const [screen, setScreen] = useState<ScreenState>(initScreen);
-    const stateToScreen = (s: ScreenState) => {
-        switch (screen) {
-            case ScreenState.START:
-                return <Home />;
-            case ScreenState.LOBBY:
-                return <LobbyPage />;
-            case ScreenState.GAME:
-                return <Game />;
-            case ScreenState.LOBBY_CODE_ENTRY:
-                return <JoinLobbyPage />;
-            case ScreenState.LOBBY_CODE_ENTRY_FAILED:
-                return <JoinLobbyErrorPage />;
-            default:
-                return <Home />;
-        }
+export const StateWrapper: React.FC<StateWrapperProps> = ({
+  initScreen = ScreenState.START,
+}) => {
+  const [screen, setScreen] = useState<ScreenState>(initScreen);
+  const stateToScreen = (s: ScreenState) => {
+    switch (screen) {
+      case ScreenState.START:
+        return <Home />;
+      case ScreenState.LOBBY:
+        return <LobbyPage />;
+      case ScreenState.GAME:
+        return <Game />;
+      case ScreenState.LOBBY_CODE_ENTRY:
+        return <JoinLobbyPage />;
+      case ScreenState.LOBBY_CODE_ENTRY_FAILED:
+        return <JoinLobbyErrorPage />;
+      default:
+        return <Home />;
     }
-    return <GameContext.Provider value={{
-        sock: connect(setScreen),
+  };
+  const dReceiveCallbacks = ReceiveCallbacksDefault;
+  return (
+    <GameContext.Provider
+      value={{
+        sock: connect(setScreen, dReceiveCallbacks),
         screen,
         setScreen,
         lobby: null,
-        transitions: TransitionManager
-    }}>
-        { stateToScreen(screen) }
+        transitions: TransitionManager,
+        receiveCallBacks: dReceiveCallbacks,
+      }}
+    >
+      {stateToScreen(screen)}
     </GameContext.Provider>
-}
+  );
+};
