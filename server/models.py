@@ -1,5 +1,6 @@
 import random
 import string
+import time
 
 from enum import Enum
 from typing import Optional, Callable
@@ -23,6 +24,10 @@ class Lobby(object):
     def __str__(self) -> str:
         return f"{self.game}"
 
+    def __repr__(self) -> str:
+        #dict = {"state": }
+        return 
+
     def change_lobby_settings(self, settings: dict) -> None:
         # Example settings could include 'board_size', 'timer_setting', and 'lives'
         print(f"Updating lobby {self.lobby_id}'s settings with: {settings}")
@@ -36,11 +41,12 @@ class Lobby(object):
     def broadcast_lobby_settings(self) -> None:
         if self.broadcast_func:
             lobby_settings_message = {
+                "timestamp": time.perf_counter_ns(),
                 "action": ActionEnum.UPDATE_LOBBY_SETTINGS.value,
                 "data": {
                     "board_size": self.board_size,
                     "timer_setting": self.timer_setting,
-                    "lives": self.lives
+                    "max_lives": self.lives
                 }
             }
             print(f"Broadcasting new lobby settings to all players within lobby {self.lobby_id}: {lobby_settings_message}")
@@ -205,6 +211,9 @@ class ActionEnum(Enum):
     PICK_WORD = "pick_word"
     PICK_POWERUP = "pick_powerup"
     LEAVE_GAME = "leave_game"
+    ADD_BOT = "add_bot" # Also sent from server to client
+    UPDATE_BOT = "update_bot"
+    DELETE_BOT = "delete_bot"
     # server side
     RETURN_PLAYER_ID = "return_player_id"
     RETURN_LOBBY_CODE = "return_lobby_code"
