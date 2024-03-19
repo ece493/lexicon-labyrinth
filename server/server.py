@@ -8,9 +8,11 @@ import jsonpickle
 from models import Lobby, Action, ActionEnum, Player
 
 # Define a WebSocketHandler
+
+
 class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     connections = set()
-    lobbies: dict[str, Lobby] = {} # each lobby is assigned to a player UUID
+    lobbies: dict[str, Lobby] = {}  # each lobby is assigned to a player UUID
 
     def open(self) -> None:
         # Assign a unique ID to the connection
@@ -35,14 +37,16 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             if lobby_id in self.lobbies:
                 p = Player(self.id, None)
                 self.lobbies[lobby_id].players.append(p)
-                resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, -1, [self.id])
+                resp = Action(
+                    ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, -1, [self.id])
             else:
                 resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, -1, [])
         elif actionEnum == ActionEnum.PICK_WORD:
-            
+
             resp = Action(ActionEnum.WORD_DENIED.value)
             # resp = Action(ActionEnum.WORD_ACCEPTED)
-            
+
+        print("resp", jsonpickle.encode(resp, unpicklable=False))
         self.write_message(jsonpickle.encode(resp, unpicklable=False))
 
     def on_close(self) -> None:
@@ -54,17 +58,22 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         return True
 
 # Define the MainHandler for HTTP requests
+
+
 class MainHandler(tornado.web.RequestHandler):
     def get(self) -> None:
         # Simple HTTP GET handler
         self.write("Welcome to Lexicon Labyrinth!")
 
 # Create the Tornado application and define routes
+
+
 def make_app() -> Application:
     return tornado.web.Application([
         (r"/", MainHandler),
         (r"/websocket", GameWebSocketHandler),  # WebSocket route
     ])
+
 
 if __name__ == "__main__":
     app = make_app()

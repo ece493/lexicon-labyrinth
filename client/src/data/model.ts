@@ -48,9 +48,10 @@ export type Action = {
 export enum ScreenState {
     START = 0,
     LOBBY_CODE_ENTRY = 1,
-    LOBBY = 2,
-    GAME = 3,
-    END = 4,
+    LOBBY_CODE_ENTRY_FAILED = 2,
+    LOBBY = 3,
+    GAME = 4,
+    END = 5,
 };
 
 export const isAction = (d: any): d is Action => d?.action && d?.player_id;;

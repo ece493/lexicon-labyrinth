@@ -3,11 +3,12 @@ import Home from "./pages/home";
 import Game from "./pages/game";
 import Lobby from "./pages/lobby";
 import JoinLobby from "./pages/join-lobby";
+import { StateWrapper } from "./pages/state-wrapper";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />,
+    element: <StateWrapper />,
   },
   {
     path: "/game/:gameId",
