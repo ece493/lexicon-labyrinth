@@ -10,10 +10,13 @@ import { RotateGridComponent } from "../components/grid/powerup-grids/rotateGrid
 import { TransformGridComponent } from "../components/grid/powerup-grids/transformGrid";
 import { ScrambleGridComponent } from "../components/grid/powerup-grids/scrambleGrid";
 import { GameContext } from "../context/ctx";
+import { isJSDocNullableType } from "typescript";
 
 const Game: React.FC = () => {
   const gameContext = useContext(GameContext);
   const [word, setWord] = useState("");
+  const [error, setError] = useState(null);
+
   // May have to change where this is stored to prevent too much re-rendering
   const [wordPath, setWordPath] = useState([]);
 
@@ -122,6 +125,7 @@ const Game: React.FC = () => {
           <TurnComponent
             handleSubmit={handleSubmit}
             word={word}
+            error={error}
             player={"player name"}
             powerup={powerup}
           />
