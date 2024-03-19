@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { SelectionGridComponent } from "../components/grid/selectionGrid";
 import TurnComponent from "../components/grid/turn";
 import PowerupsComponent from "../components/grid/powerups";
@@ -13,19 +13,35 @@ import { GameContext } from "../context/ctx";
 import { isJSDocNullableType } from "typescript";
 
 const Game: React.FC = () => {
-  const host: Player = { id: "0", name: "John Player", is_spectator: false, lives: 3, money: 100 };
-  const bot: Bot = { id: "1", name: "John Bot", is_spectator: false, lives: 3, money: 100, difficulty: 1, memory: [] };
+  const host: Player = {
+    id: "0",
+    name: "John Player",
+    is_spectator: false,
+    lives: 3,
+    money: 100,
+  };
+  const bot: Bot = {
+    id: "1",
+    name: "John Bot",
+    is_spectator: false,
+    lives: 3,
+    money: 100,
+    difficulty: 1,
+    memory: [],
+  };
   const lobby: Lobby = {
     state: {
       curr_turn: "0",
       board: {
-        tiles: [["a", "b", "c", "d", "e", "f", "g"],
-        ["h", "i", "j", "k", "l", "m", "n"],
-        ["o", "p", "q", "r", "s", "t", "u"],
-        ["v", "w", "x", "y", "z", "A", "B"],
-        ["C", "D", "E", "F", "G", "H", "I"],
-        ["J", "K", "L", "M", "N", "O", "P"],
-        ["Q", "R", "S", "T", "U", "V", "W"],]
+        tiles: [
+          ["a", "b", "c", "d", "e", "f", "g"],
+          ["h", "i", "j", "k", "l", "m", "n"],
+          ["o", "p", "q", "r", "s", "t", "u"],
+          ["v", "w", "x", "y", "z", "A", "B"],
+          ["C", "D", "E", "F", "G", "H", "I"],
+          ["J", "K", "L", "M", "N", "O", "P"],
+          ["Q", "R", "S", "T", "U", "V", "W"],
+        ],
       },
       timer: 0,
       memory: [],
@@ -35,9 +51,8 @@ const Game: React.FC = () => {
     board_size: [7, 7],
     timer_setting: 30,
     lobby_code: "X3Y0EG",
-    players: [host, host, host, bot],
+    players: [host, bot],
   };
-
 
   const gameContext = useContext(GameContext);
   const [word, setWord] = useState("");
@@ -68,6 +83,14 @@ const Game: React.FC = () => {
       gameContext.transitions.pickWord(gameContext.sock as WebSocket, wordPath);
     }
   }
+
+  function loadReceiveCallBacks() {
+    gameContext.receiveCallBacks.handleWordDeny = () => console.log("denied");
+  }
+
+  useEffect(() => {
+    loadReceiveCallBacks();
+  }, []);
 
   function getGrid() {
     switch (powerup) {
