@@ -180,6 +180,7 @@ class Player(object):
         self.player_id = player_id
         self.name = name
         self.is_bot = False
+        self.is_spectator = False
         self.lives = 3
         self.score = 0
         self.currency = 0
@@ -198,12 +199,13 @@ class Player(object):
 
     def to_json(self) -> dict[str, Any]:
         return {
-            "player_id": self.player_id,
+            "id": self.player_id,
             "name": self.name,
+            "is_spectator": self.is_spectator,
             "is_bot": self.is_bot,
             "lives": self.lives,
+            "money": self.currency,
             "score": self.score,
-            "currency": self.currency,
         }
 
 
@@ -212,6 +214,7 @@ class Bot(Player, object):
         super().__init__(player_id, name)
         self.is_bot = True
         self.difficulty = difficulty
+        self.memory: list[str] = []
         # Additional properties and methods specific to bot behavior
 
     def send_message(self, message) -> None:
@@ -223,6 +226,19 @@ class Bot(Player, object):
         # Process the message and simulate a bot response/action
         print(f"Bot is processing message {message}")
         pass
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "id": self.player_id,
+            "name": self.name,
+            "is_spectator": self.is_spectator,
+            "is_bot": self.is_bot,
+            "lives": self.lives,
+            "money": self.currency,
+            "score": self.score,
+            "difficulty": self.difficulty,
+            "memory": self.memory,
+        }
 
 
 class WordGrid:
