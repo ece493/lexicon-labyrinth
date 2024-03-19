@@ -6,13 +6,15 @@ export const connect = (setScreen: (s: ScreenState) => void) => {
     // TO-DO: Remove undefined
     // const url = process.env.NODE_ENV === 'production' ? "undefined" : 'ws://localhost:8888/websocket';
     const ws = new WebSocket("ws://localhost:8888/websocket");
+    ws.onopen = (_) => console.log("connected websocket!");
     ws.onmessage = (ev) => wsReceiveHandler(setScreen, ev);
     return ws;
 }
 
 export const wsReceiveHandler = (setScreen: (s: ScreenState) => void, ev: MessageEvent<any>) => {
-    if (!isAction(ev.data)) return null;
-    const action = ev.data as Action;
+    const data = JSON.parse(ev.data);
+    if (!isAction(data)) return null;
+    const action = data as Action;
     switch (action.action) {
         case ActionsList.return_lobby_code:
             // Code for return_lobby_code
@@ -20,7 +22,7 @@ export const wsReceiveHandler = (setScreen: (s: ScreenState) => void, ev: Messag
             break;
         case ActionsList.lobby_does_not_exist:
             // Code for lobby_does_not_exist
-            setScreen(ScreenState.GAME);
+            setScreen(ScreenState.LOBBY_CODE_ENTRY_FAILED);
             break;
         case ActionsList.successfully_joined_lobby:
             // Code for successfully_joined_lobby

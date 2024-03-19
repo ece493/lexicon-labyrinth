@@ -3,6 +3,8 @@ export enum ActionsList {
     initialize = "initialize",
     join_lobby = "join_lobby",
     change_param = "change_param",
+    add_bot = "add_bot",
+    delete_bot = "delete_bot",
     ready_lobby = "ready_lobby",
     pick_word = "pick_word",
     pick_powerup = "pick_powerup",
