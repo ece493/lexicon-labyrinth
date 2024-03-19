@@ -42,45 +42,7 @@ const Game: React.FC = () => {
                 order: [1,0,3],
                 curr_turn: 0,
               }}
-              players={[
-                {
-                  name: "p1",
-                  id: 0,
-                  is_spectator: false,
-                  lives: 2,
-                  money: 0,
-                },
-                {
-                  name: "player2",
-                  id: 1,
-                  is_spectator: false,
-                  lives: 1,
-                  money: 0,
-                },
-                {
-                  name: "player3",
-                  id: 2,
-                  is_spectator: false,
-                  lives: 0,
-                  money: 0,
-                },
-                {
-                  name: "bot4",
-                  id: 3,
-                  is_spectator: false,
-                  lives: 3,
-                  money: 0,
-                  difficulty: 1,
-                } as Player,
-                {
-                  name: "botter5",
-                  id: 4,
-                  is_spectator: false,
-                  lives: 0,
-                  money: 0,
-                  difficulty: 1,
-                } as Player,
-              ]}
+              players={[]}
             />
           </div>
         </div>

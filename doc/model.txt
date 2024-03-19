@@ -12,16 +12,12 @@ GameState: {
   turns: Turns,
   board: Board,
   timer: int,
-  memory: set(str)
+  memory: str[], // assumed to be a set
+  curr_turn: str // player_id
 }
 
 Board: {
   tiles: str[][]
-}
-
-Turns: {
-  order: int[],
-  curr_turn: int
 }
 
 Player: {
@@ -34,10 +30,17 @@ Player: {
 
 Bot(Player): {
   difficulty: int,
-  memory: set(str)
+  memory: str[], // assumed to be a set
 }
 
 Action: {
+  action: str,
+  player_id: str,
+  data: any
+}
+
+Action: {
+  timestamp: number,
   action: str,
   player_id: str,
   data: any
@@ -47,21 +50,17 @@ enum CLIENT_ACTIONS {
 	"initialize",
   "join_lobby",
   "change_param",
+  "update_lobby_settings",
   "ready_lobby",
   "pick_word",
   "pick_powerup",
+  "add_bot",
+  "update_bot",
+  "delete_bot",
+  "pick_rotate_powerup",
+  "pick_transform_powerup",
+  "pick_scramble_powerup",
   "leave_game"
-}
-
-server_to_client_payload = {
-	"global_state": 
-  "personal": you lost
-}
-
-Action: {
-  action: str,
-  player_id: str,
-  data: any
 }
 
 enum SERVER_ACTIONS {
@@ -71,26 +70,18 @@ enum SERVER_ACTIONS {
   "success",
   "error",
   "start_game",
-  "player_joined",
   "player_left",
-  "update_lobby_settings",
   "word_accepted",
   "word_denied",
-  "end_turn",
   "start_turn",
   "powerup_denied",
-  "powerup_activated",
+  "transform_powerup_accept",
+  "transform_powerup_denied",
+  "scramble_powerup_accept",
+  "scramble_powerup_denied",
+  "rotate_powerup_accept",
+  "rotate_powerup_denied",
+  "lose_life",
   "you_died",
-  "you_win",
+  "game_end",
 }
-
-enum SCREEN {
-	"lobby",
-  "game"
-}
-
-{
-	"screen": SCREEN,
-  
-}
-
