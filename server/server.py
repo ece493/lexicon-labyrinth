@@ -117,7 +117,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 #        msg = Action(ActionEnum.PLAYER_LEFT.value, player.player_id, {"lobby_code": self.lobby_id})
                 #        player.send_message(msg)
                 # Remove the player from the lobby's list of players
-                lobby.players = [p for p in lobby.players if p.player_id != self.id]
+                #lobby.players = [p for p in lobby.players if p.player_id != self.id]
                 is_host_leaving = lobby.remove_player(self.id)
 
                 if is_host_leaving:

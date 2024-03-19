@@ -32,15 +32,24 @@ class Lobby(object):
         return
     
     def to_json(self) -> dict[str, Any]:
-        return {
+        game_dict = self.game.to_json()
+        state = {
+            "curr_turn": 0, # TODO, index of player of whose turn it is
+            "board": game_dict['board'],
+            "timer": 123.4,
+            "memory": [],
+        }
+        lobby_dict = {
+            "state": state,
+            "max_lives": self.max_lives,
             "host": self.host,
-            "lobby_id": self.lobby_id,
-            "players": [player.to_json() for player in self.players],
             "board_size": self.board_size,
             "timer_setting": self.timer_setting,
-            "max_lives": self.max_lives,
+            "lobby_code": self.lobby_id,
+            "players": [player.to_json() for player in self.players],
             "is_in_game": self.is_in_game,
         }
+        return lobby_dict
 
     def change_lobby_settings(self, settings: dict) -> None:
         # Example settings could include 'board_size', 'timer_setting', and 'lives'
