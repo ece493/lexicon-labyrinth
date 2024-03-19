@@ -1,7 +1,8 @@
 import React from "react";
 import LobbyComponent from "../components/lobby/lobby-component";
 import { Bot, Lobby, Player } from "../data/model";
-import JoinLobbyComponent from "../components/lobby/join/join-lobby-component";
+import JoinLobbyComponent, { JoinLobbyErrorComponent } from "../components/lobby/join/join-lobby-component";
 
-const JoinLobbyPage: React.FC = () => <JoinLobbyComponent />;
+const JoinLobbyPage = () => <JoinLobbyComponent />;
+export const JoinLobbyErrorPage = () => <JoinLobbyErrorComponent />;
 export default JoinLobbyPage;

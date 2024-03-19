@@ -3,14 +3,11 @@ import LobbyComponent from "../components/lobby/lobby-component";
 import { Bot, Lobby, Player } from "../data/model";
 
 const LobbyPage: React.FC = () => {
-  const host: Player = { id: 0, name: "John Player", is_spectator: false, lives: 3, money: 100 };
-  const bot: Bot = { id: 0, name: "John Bot", is_spectator: false, lives: 3, money: 100, difficulty: 1, memory: [] };
+  const host: Player = { id: "0", name: "John Player", is_spectator: false, lives: 3, money: 100 };
+  const bot: Bot = { id: "0", name: "John Bot", is_spectator: false, lives: 3, money: 100, difficulty: 1, memory: [] };
   const lobby: Lobby = {
     state: {
-      turns: {
-        order: [0],
-        curr_turn: 0
-      },
+      curr_turn: "0",
       board: {
         tiles: [["a", "b", "c", "d", "e", "f", "g"],
         ["h", "i", "j", "k", "l", "m", "n"],
