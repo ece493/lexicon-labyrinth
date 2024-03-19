@@ -18,7 +18,7 @@ class Lobby(object):
         #self.bots = []  # List of Bot objects
         self.board_size: int = 4
         self.timer_setting: float = 15.0
-        self.lives: int = 5
+        self.max_lives: int = 5
         self.is_in_game = False
         self.broadcast_func: Optional[Callable] = None  # Set this when starting the game
         self.send_to_player_func: Optional[Callable] = None # Set this when starting the game
@@ -44,15 +44,15 @@ class Lobby(object):
     def broadcast_lobby_settings(self) -> None:
         if self.broadcast_func:
             lobby_settings_message = Action(action=ActionEnum.UPDATE_LOBBY_SETTINGS.value,
-                                            player_id=-1,
+                                            player_id=self.host,
                                             data={
                                                     "board_size": self.board_size,
                                                     "timer_setting": self.timer_setting,
-                                                    "max_lives": self.lives
+                                                    "max_lives": self.max_lives
                                                 }
             )
             print(f"Broadcasting new lobby settings to all players within lobby {self.lobby_id}: {lobby_settings_message}")
-            self.broadcast_func(self.lobby_code, lobby_settings_message)
+            self.broadcast_func(self.lobby_id, lobby_settings_message)
 
     def add_player(self, player: 'Player') -> bool:
         if not self.is_full:

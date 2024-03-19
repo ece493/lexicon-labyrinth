@@ -80,7 +80,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             self.lobbies[lobby_code].set_send_to_player_func(GameWebSocketHandler.send_to_player_func)
             print(f"Created a new player class and added them to the lobby they just created")
             # Create a new player, and add them to the lobby they just created
-            p = Player(self.id, None)
+            p = Player(self.id, action['data']['player_name'])
             p.set_send_message_func(GameWebSocketHandler.send_to_player_func)
             self.lobbies[lobby_code].add_player(p)
             self.lobby_id = lobby_code
@@ -88,13 +88,14 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             resp = Action(ActionEnum.RETURN_LOBBY_CODE.value, self.id, lobby_code)
             self.send_message(resp)
             # Tell the player they joined their own lobby. Technically we should be telling everyone within the lobby, but it's only the player in there right now.
-            resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, lobby_code)
+            resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_code, "player_name": action['data']['player_name']})
             self.send_message(resp)
         elif actionEnum == ActionEnum.JOIN_LOBBY:
             # The player is trying to join an existing lobby
-            lobby_id = action['data']
+            lobby_id = action['data']['lobby_code']
+            player_name = action['data']['player_name']
             if lobby_id in self.lobbies:
-                p = Player(self.id, None)
+                p = Player(self.id, player_name)
                 p.set_send_message_func(GameWebSocketHandler.send_to_player_func)
                 self.lobbies[lobby_id].add_player(p)
                 self.lobby_id = lobby_id
@@ -103,6 +104,9 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             else:
                 resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, self.id, None)
                 self.send_message(resp)
+        elif actionEnum == ActionEnum.CHANGE_PARAM:
+            # The owner of the lobby is trying to change the lobby's settings
+            self.lobbies[self.lobby_id].change_lobby_settings(action['data'])
         elif actionEnum == ActionEnum.READY_LOBBY:
             # The owner of the lobby is trying to start the game.
             # Assert that the person starting the game is also the lobby owner
