@@ -5,11 +5,14 @@ import time
 from enum import Enum
 from typing import Optional, Callable
 
+#from server import GameWebSocketHandler
+
 PLAYER_LIMIT = 5
+
 
 class Lobby(object):
     def __init__(self, host, lobby_id) -> None:
-        self.host = host,
+        self.host = host
         self.lobby_id = lobby_id
         self.players = []  # List of Player objects, and bots go in here too
         #self.bots = []  # List of Bot objects
@@ -102,6 +105,7 @@ class Lobby(object):
     def is_full(self) -> bool:
         return len(self.players) >= PLAYER_LIMIT
 
+
 class Game:
     def __init__(self, lobby_id: str, players: list['Player'], broadcast_func: Callable, send_to_player_func: Callable, board_size: int) -> None:
         self.lobby_id: str = lobby_id
@@ -139,6 +143,19 @@ class Player(object):
         self.lives = 3
         self.score = 0
         self.currency = 0
+        self.send_func: Optional[Callable] = None  # Callback function to send a message
+
+    def set_send_message_func(self, func) -> None:
+        self.send_func = func
+
+    def send_message(self, message) -> None:
+        # This is a real player, so we need to send a websocket message
+        if self.send_func:
+            print(f"Player with id {self.player_id} is sending a message to the associated websocket for this connection: {message}")
+            self.send_func(self.player_id, message)
+        else:
+            print("No send function set for this player.")
+
 
 class Bot(Player, object):
     def __init__(self, player_id, name, difficulty) -> None:
@@ -146,6 +163,17 @@ class Bot(Player, object):
         self.is_bot = True
         self.difficulty = difficulty
         # Additional properties and methods specific to bot behavior
+
+    def send_message(self, message) -> None:
+        # For local bots, directly process the message
+        print(f"Bot with name {self.name} and id {self.player_id} received message: {message}")
+        self.process_bot_action(message)
+
+    def process_bot_action(self, message) -> None:
+        # Process the message and simulate a bot response/action
+        print(f"Bot is processing message {message}")
+        pass
+
 
 class WordGrid:
     def __init__(self, size) -> None:
@@ -159,13 +187,14 @@ class WordGrid:
             for _ in range(size)
         ]
     
-    def check_word(self, word):
+    def check_word(self, word) -> None:
         # Implementation to check if a word is valid
         pass
     
-    def apply_powerup(self, powerup):
+    def apply_powerup(self, powerup) -> None:
         # Implementation for applying power-up effects
         pass
+
 
 class GameDictionary(object):
     def __init__(self) -> None:
@@ -177,6 +206,7 @@ class GameDictionary(object):
     def is_valid_word(self, word) -> bool:
         return word.lower() in self.words
 
+
 class Powerup(object):
     def __init__(self, name, cost) -> None:
         self.name = name
@@ -185,15 +215,18 @@ class Powerup(object):
     def apply_effect(self, target) -> None:
         pass  # Implementation of the power-up's effect
 
+
 class Refresh(Powerup, object):
     def apply_effect(self, target) -> None:
         # Refresh the word grid
         pass
 
+
 class Swap(Powerup, object):
     def apply_effect(self, target) -> None:
         # Swap two tiles
         pass
+
 
 class Action(object):
     def __init__(self, action, player_id, data) -> None:

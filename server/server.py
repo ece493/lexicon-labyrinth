@@ -72,6 +72,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             
             # Add the player to the lobby they just created
             p = Player(self.id, None)
+            p.set_send_message_func(GameWebSocketHandler.send_to_player_func)
             self.lobbies[lobby_code].add_player(p)
             
             # Send them back the lobby code we created for them
@@ -81,6 +82,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             lobby_id = action['data']
             if lobby_id in self.lobbies:
                 p = Player(self.id, None)
+                p.set_send_message_func(GameWebSocketHandler.send_to_player_func)
                 self.lobbies[lobby_id].add_player(p)
                 self.lobby_id = lobby_id
                 resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, self.id)
