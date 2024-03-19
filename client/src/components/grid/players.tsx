@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 
-import { Player, Bot, Turns } from "../../data/model";
+import { Player, Bot } from "../../data/model";
 import RobotIcon from "../icons/robotIcon";
 import PlayerIcon from "../icons/playerIcon";
 import { Typography } from "@mui/material";
@@ -10,7 +10,7 @@ import DeadIcon from "../icons/deadIcon";
 interface PlayersComponentProp {
   players: Player[];
   powerup: string | null;
-  turns: Turns;
+  currentTurn: string
 }
 
 function getLivesIcons(lives: number) {
@@ -27,18 +27,19 @@ function getLivesIcons(lives: number) {
 
 const PlayersComponent: React.FC<PlayersComponentProp> = ({
   players,
-  turns,
-  powerup
+  powerup,
+  currentTurn
 }) => {
   function getOrderedPlayers() {
     const orderedLivePlayers: Player[] = [];
-    let j = players.findIndex((p) => p.id === turns.curr_turn);
-    for (let i = 0; i < turns.order.length; i++) {
-      if (j === turns.order.length) {
+    const livePlayers = players.filter((p) => p.lives !== 0)
+    let j = players.findIndex((p) => p.id === currentTurn);
+    for (let i = 0; i < livePlayers.length; i++) {
+      if (j === livePlayers.length) {
         j = 0;
       }
       orderedLivePlayers.push(
-        players.find((p) => p.id === turns.order[j]) as Player
+        players.find((p) => p.id === livePlayers[j].id) as Player
       );
       j++;
     }
