@@ -3,7 +3,7 @@ import string
 import time
 
 from enum import Enum
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 
 #from server import GameWebSocketHandler
 
@@ -29,7 +29,18 @@ class Lobby(object):
 
     def __repr__(self) -> str:
         #dict = {"state": }
-        return 
+        return
+    
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "host": self.host,
+            "lobby_id": self.lobby_id,
+            "players": [player.to_json() for player in self.players],
+            "board_size": self.board_size,
+            "timer_setting": self.timer_setting,
+            "max_lives": self.max_lives,
+            "is_in_game": self.is_in_game,
+        }
 
     def change_lobby_settings(self, settings: dict) -> None:
         # Example settings could include 'board_size', 'timer_setting', and 'lives'
@@ -146,6 +157,14 @@ class Game:
         }
         self.broadcast_game_state(update_message)
 
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "lobby_id": self.lobby_id,
+            "players": [player.to_json() for player in self.players],
+            "board_size": self.board_size,
+            "board": self.board.to_json() if self.board else None,
+        }
+
 
 class Player(object):
     def __init__(self, player_id, name) -> None:
@@ -167,6 +186,16 @@ class Player(object):
             self.send_func(self.player_id, message)
         else:
             print("No send function set for this player.")
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "player_id": self.player_id,
+            "name": self.name,
+            "is_bot": self.is_bot,
+            "lives": self.lives,
+            "score": self.score,
+            "currency": self.currency,
+        }
 
 
 class Bot(Player, object):
@@ -206,6 +235,12 @@ class WordGrid:
     def apply_powerup(self, powerup) -> None:
         # Implementation for applying power-up effects
         pass
+
+    def to_json(self):
+        return {
+            "size": self.size,
+            "grid": self.grid,
+        }
 
 
 class GameDictionary(object):
@@ -252,6 +287,14 @@ class Action(object):
 
     def __repr__(self) -> str:
         return f"Action(action={repr(self.action)}, player_id={repr(self.player_id)}, data={repr(self.data)}, sequence={self.sequence})"
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "action": self.action,
+            "player_id": self.player_id,
+            "data": self.data,
+            "sequence": self.sequence,
+        }
 
 
 class ActionEnum(Enum):
