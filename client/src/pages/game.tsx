@@ -107,7 +107,7 @@ const Game: React.FC = () => {
 
   function handleSubmit() {
     if (gameContext.sock !== null) {
-      gameContext.transitions.pickWord(gameContext.sock as WebSocket, wordPath);
+      gameContext.transitions.pickWord(wordPath, gameContext);
       if (turnRef.current) turnRef.current.shakeWord();
     }
   }
