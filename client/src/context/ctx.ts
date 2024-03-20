@@ -5,6 +5,10 @@ import {
   ServerTransitions,
   TransitionManager,
 } from "../ws-client/server/transitions";
+import {
+  ReceiveCallbacks,
+  ReceiveCallbacksDefault,
+} from "../ws-client/receive-callbacks";
 
 export type GameContextData = {
   sock: WebSocket | null;
@@ -12,6 +16,8 @@ export type GameContextData = {
   setScreen: (s: ScreenState) => void;
   lobby: Lobby | null;
   transitions: ServerTransitions;
+  receiveCallBacks: ReceiveCallbacks;
+  playerId: string | null;
   sequenceNumber: number;
 };
 
@@ -21,5 +27,7 @@ export const GameContext = createContext<GameContextData>({
   setScreen: (s: ScreenState) => {},
   lobby: null,
   transitions: TransitionManager,
+  receiveCallBacks: ReceiveCallbacksDefault,
+  playerId: null,
   sequenceNumber: 0,
 });

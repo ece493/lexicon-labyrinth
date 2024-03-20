@@ -9,6 +9,7 @@ import LeftIcon from "../../icons/leftIcon";
 import { GridComponent } from "../grid";
 import { GameContext } from "../../../context/ctx";
 
+
 interface RotateGridComponentProps {
   ogGrid: Board;
   board_size: [number, number];

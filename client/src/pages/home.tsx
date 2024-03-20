@@ -18,7 +18,7 @@ const Home: React.FC = () => {
       <h2
         onClick={() => {
           ctx.setScreen(ScreenState.GAME);
-          ctx.sock = connect(ctx.setScreen);
+          ctx.sock = connect(ctx.setScreen, ctx.receiveCallBacks);
         }}
       >
         Click to go to Game test page
@@ -28,7 +28,7 @@ const Home: React.FC = () => {
       </h2>
       <h2
         onClick={() => {
-          const sock = connect(ctx.setScreen);
+          const sock = connect(ctx.setScreen, ctx.receiveCallBacks);
           sock.onopen = () => {
             sock.send("test");
           };
@@ -43,7 +43,7 @@ const Home: React.FC = () => {
       </h2>
       <h2
         onClick={() => {
-          const sock = connect(ctx.setScreen);
+          const sock = connect(ctx.setScreen, ctx.receiveCallBacks);
           const act: Action = {
             action: ActionsList.initialize,
             player_id: 0,

@@ -2,6 +2,7 @@ import { Board } from "../../data/model";
 import { useState } from "react";
 import { GridComponent } from "./grid";
 import { TileComponent, nullTile, isTileEqual } from "./tile";
+import { Fade } from "@mui/material";
 
 interface GridComponentProps {
   grid: Board;
@@ -10,6 +11,7 @@ interface GridComponentProps {
   setWord: any;
   wordPath: number[][];
   setWordPath: any;
+  setError: any;
 }
 
 export const SelectionGridComponent: React.FC<GridComponentProps> = ({
@@ -19,6 +21,7 @@ export const SelectionGridComponent: React.FC<GridComponentProps> = ({
   setWord,
   wordPath,
   setWordPath,
+  setError,
 }) => {
   const [firstTile, setFirstTile] = useState(nullTile);
   const [selecting, setSelecting] = useState(false);
@@ -54,6 +57,7 @@ export const SelectionGridComponent: React.FC<GridComponentProps> = ({
   function handleSelectStart(x: number, y: number) {
     setFirstTile([x, y]);
     setWord(grid.tiles[y][x]);
+    setError(null);
     setWordPath([[x, y]]);
     setSelecting(true);
   }
@@ -93,17 +97,11 @@ export const SelectionGridComponent: React.FC<GridComponentProps> = ({
               ? "cursor-pointer"
               : "cursor-default"
           }`}
-          style={{
-            opacity:
-              selecting && !isSelectableNonFirstTile(x, y) && !selected
-                ? 0.3
-                : "",
-          }}
         >
-          <TileComponent value={v} selected={selected} />
+          <TileComponent value={v} selected={selected} disabled={selecting && !isSelectableNonFirstTile(x, y) && !selected}/>
         </div>
         {selected && !isTileEqual([x, y], firstTile)
-          ? renderPathLine(indexInPath, x, y)
+          ? <Fade in={selected && !isTileEqual([x, y], firstTile)} timeout={300}>{renderPathLine(indexInPath, x, y)}</Fade>
           : null}
       </div>
     );
