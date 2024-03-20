@@ -2,13 +2,29 @@ import random
 import string
 import time
 
-from enum import Enum
+from enum import Enum, auto
 from typing import Optional, Callable, Any
 
 #from server import GameWebSocketHandler
 
 PLAYER_LIMIT = 5
 
+POWERUP_COSTS = {
+    "Rotate": 1,
+    "Scramble": 1,
+    "Swap": 1,
+    "Transform": 1
+}
+
+class GameState(Enum):
+    WAITING_FOR_PLAYERS = auto()
+    TURN_START = auto()
+    WAITING_FOR_MOVE = auto()
+    MOVE_REJECTED = auto()
+    TURN_END = auto()
+    PLAYER_ELIMINATED = auto()
+    CHECK_FOR_WIN = auto()
+    GAME_OVER = auto()
 
 class Lobby(object):
     def __init__(self, host, lobby_id) -> None:
@@ -31,7 +47,21 @@ class Lobby(object):
         #dict = {"state": }
         return
     
+    def handle_action(self, player_id: str, actionEnum: 'ActionEnum', action: 'Action') -> None:
+        if actionEnum in [ActionEnum.CHANGE_PARAM, ActionEnum.READY_LOBBY]:
+            if actionEnum == ActionEnum.CHANGE_PARAM:
+                # The owner of the lobby is trying to change the lobby's settings
+                self.change_lobby_settings(action['data'])
+            elif actionEnum == ActionEnum.READY_LOBBY:
+                assert self.host == player_id, f"Error! Player who tried to start game ({player_id}) is not the host of the lobby ({self.host})!"
+                self.start_game()
+        elif actionEnum in [ActionEnum.CHANGE_PARAM, ActionEnum.READY_LOBBY]:
+            self.game.handle_action(player_id, actionEnum, action)
+        else:
+            print(f"Action {action} cannot be handled by the lobby nor the game!")
+
     def to_json(self) -> dict[str, Any]:
+        # SHOULD BE UNUSED!
         game_dict = self.game.to_json()
         state = {
             "curr_turn": 0, # TODO, index of player of whose turn it is
@@ -114,9 +144,14 @@ class Lobby(object):
             return False
     
     def add_bot(self, bot) -> None:
+        # Initialize bot with specified difficulty
+        # Add them to the list of players
+        # Send a message to all players saying a new bot player joined
         pass  # TODO
     
     def remove_bot(self, bot_id) -> None:
+        # Remove bot
+        # Send message to all players saying the bot left
         pass  # TODO
 
     def set_broadcast_function(self, func: Callable) -> None:
@@ -130,7 +165,7 @@ class Lobby(object):
         print(f"Starting the game in lobby {self.lobby_id}")
         assert self.broadcast_func is not None, "Broadcast function wasn't set before starting the game!"
         self.game = Game(self.lobby_id, self.players, self.broadcast_func, self.send_to_player_func)
-        self.game.start()
+        self.game.run_game()
         self.is_in_game = True
 
     @property
@@ -139,13 +174,18 @@ class Lobby(object):
 
 
 class Game:
-    def __init__(self, lobby_id: str, players: list['Player'], broadcast_func: Callable, send_to_player_func: Callable, board_size: int) -> None:
+    def __init__(self, lobby_id: str, players: list['Player'], broadcast_func: Callable, send_to_player_func: Callable, board_size: int, max_lives: int, host: str, timer_setting: float) -> None:
         self.lobby_id: str = lobby_id
         self.players: list['Player'] = players
         self.broadcast_func: Callable = broadcast_func  # Callback function for broadcasting messages
         self.send_to_player_func: Callable = send_to_player_func  # Callback to send message to specific player
         self.board_size: int = board_size
         self.board: Optional[WordGrid] = WordGrid(board_size)
+        self.max_lives: int = max_lives
+        self.host: str = host
+        self.timer_setting: float = timer_setting
+        self.current_player_index: int = 0
+        self.turn_modulus: int = len(players)
     
     #def initialize_random_board(self) -> None:
 
@@ -166,13 +206,146 @@ class Game:
         }
         self.broadcast_game_state(update_message)
 
+    def start_game(self) -> None:
+        # Broadcast the start game message to all players
+        start_game_message = Action(ActionEnum.START_GAME.value, self.host, self.to_json())
+        # Send the initial game state, including the board, to all players
+        self.broadcast_func(self.lobby_id, start_game_message)
+        # Transition from WAITING_FOR_PLAYERS to TURN_START
+        self.state = GameState.TURN_START
+        self.next_turn()
+
+    def next_turn(self) -> None:
+        if self.state == GameState.TURN_START:
+            self.state = GameState.WAITING_FOR_MOVE
+            # Loop to ensure we skip over spectators
+            while True:
+                current_player = self.players[self.current_player_index]
+                if not current_player.is_spectator:
+                    # This player is not a spectator, so announce their turn
+                    self.broadcast_func(self.lobby_id, Action(ActionEnum.START_TURN.value, current_player.player_id, {"message": "Your turn"}))
+                    # Wait for move submission handled elsewhere
+                    break  # Exit the loop since we've found our next active player
+                else:
+                    # If the player is a spectator, increment the index and check the next player
+                    self.current_player_index = (self.current_player_index + 1) % len(self.players)
+            
+            # Always increment the player index after handling the current player's turn
+            self.current_player_index = (self.current_player_index + 1) % len(self.players)
+
+    def handle_action(self, player_id: str, actionEnum: 'ActionEnum', action: 'Action') -> None:
+        if actionEnum == ActionEnum.PICK_WORD:
+            self.process_move(player_id, action.data)
+        elif actionEnum == ActionEnum.PICK_ROTATE_POWERUP:
+            self.use_rotate_powerup(player_id, action.data)
+        elif actionEnum == ActionEnum.PICK_SCRAMBLE_POWERUP:
+            self.use_scramble_powerup(player_id, action.data)
+        elif actionEnum == ActionEnum.PICK_SWAP_POWERUP:
+            self.use_swap_powerup(player_id, action.data)
+        elif actionEnum == ActionEnum.PICK_TRANSFORM_POWERUP:
+            self.use_transform_powerup(player_id, action.data)
+        elif actionEnum == ActionEnum.END_TURN:
+            # The player ran out of time and needs to be eliminated
+            self.eliminate_player(player_id)
+        else:
+            print(f"Game cannot handle this unknown action: {action}")
+
+    def process_move(self, player_id, move_data) -> None:
+        # Logic to check if the move is valid
+        move_valid = True
+        if move_valid:
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.MOVE_ACCEPTED.value, player_id, move_data))
+            self.state = GameState.TURN_END
+            self.winner_determined()
+        else:
+            self.send_to_player_func(player_id, Action(ActionEnum.MOVE_REJECTED.value, player_id, {"message": "Move rejected, try again"}))
+            self.state = GameState.MOVE_REJECTED
+
+    def winner_determined(self, winner: 'Player') -> None:
+        self.state = GameState.GAME_OVER
+        winner_player_id = winner.player_id
+        self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_WIN.value, winner_player_id, self.to_json()))
+        #else:
+        #    self.state = GameState.TURN_START
+        #    self.current_player_index = (self.current_player_index + 1) % len(self.players)
+        #    self.next_turn()
+
+    def eliminate_player(self, player_id) -> None:
+        self.players = [player for player in self.players if player.player_id != player_id]
+        remaining_players = [player for player in self.players if not player.is_spectator]
+        if len(remaining_players) == 1:
+            # Last player standing
+            self.winner_determined(remaining_players[0])
+        else:
+            # Adjust the current player index if necessary
+            self.adjust_current_player_index_after_elimination(player_id)
+
+    def run_game(self) -> None:
+        # determining who goes first, initializing game timers, etc.
+        current_turn = 0
+        turn_modulus = len(self.players)
+        while True:
+            # Main game loop
+            current_turn_player = self.players[current_turn % turn_modulus]
+            current_turn = (current_turn + 1) % turn_modulus
+            if current_turn_player.is_spectator:
+                continue
+            # This is either a real player or bot that is in-game
+
+    def use_powerup(self, player_id: str, powerup_name: str, action_data: dict):
+        # General method to handle power-up usage including currency checks
+        player = next((p for p in self.players if p.player_id == player_id), None)
+        if player and player.currency >= POWERUP_COSTS[powerup_name]:
+            # Deduct the cost and apply the power-up effect
+            player.currency -= POWERUP_COSTS[powerup_name]
+            # Broadcast the power-up effect
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_ACTIVATED.value, player_id, {"powerup": powerup_name, "effect": f"{powerup_name} used"}))
+            # It's still the player's turn
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.START_TURN.value, player_id, self.to_json()))
+        elif player:
+            # Not enough currency to use the power-up
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED.value, player_id, {"message": f"Not enough currency to use {powerup_name}"}))
+        else:
+            print(f"Player with ID {player_id} not found.")
+
+    def use_rotate_powerup(self, player_id: str, action_data: dict) -> None:
+        self.use_powerup(player_id, "Rotate", action_data)
+
+    def use_scramble_powerup(self, player_id: str, action_data: dict) -> None:
+        self.use_powerup(player_id, "Scramble", action_data)
+
+    def use_swap_powerup(self, player_id: str, action_data: dict) -> None:
+        self.use_powerup(player_id, "Swap", action_data)
+
+    def use_transform_powerup(self, player_id: str, action_data: dict) -> None:
+        self.use_powerup(player_id, "Transform", action_data)
+
+
+
+    # def to_json(self) -> dict[str, Any]:
+    #     return {
+    #         "lobby_id": self.lobby_id,
+    #         "players": [player.to_json() for player in self.players],
+    #         "board_size": self.board_size,
+    #         "board": self.board.to_json() if self.board else None,
+    #     }
     def to_json(self) -> dict[str, Any]:
-        return {
-            "lobby_id": self.lobby_id,
-            "players": [player.to_json() for player in self.players],
-            "board_size": self.board_size,
+        state = {
+            "curr_turn": 0, # TODO, index of player of whose turn it is
             "board": self.board.to_json() if self.board else None,
+            "timer": 123.4,
+            "memory": [],
         }
+        game_stat_dict = {
+            "state": state,
+            "max_lives": self.max_lives,
+            "host": self.host,
+            "board_size": self.board_size,
+            "timer_setting": self.timer_setting,
+            "lobby_code": self.lobby_id,
+            "players": [player.to_json() for player in self.players]
+        }
+        return game_stat_dict
 
 
 class Player(object):
@@ -242,18 +415,18 @@ class Bot(Player, object):
 
 
 class WordGrid:
-    def __init__(self, size) -> None:
+    def __init__(self, size: int) -> None:
         self.size = size
         self.grid = self.generate_grid(size)
         self.valid_words = set()  # Words found in the dictionary
     
-    def generate_grid(self, size) -> list[list[str]]:
+    def generate_grid(self, size: int) -> list[list[str]]:
         return [
             [random.choice(string.ascii_uppercase) for _ in range(size)]
             for _ in range(size)
         ]
     
-    def check_word(self, word) -> None:
+    def check_word(self, word: str) -> None:
         # Implementation to check if a word is valid
         pass
     
@@ -261,11 +434,12 @@ class WordGrid:
         # Implementation for applying power-up effects
         pass
 
-    def to_json(self):
-        return {
-            "size": self.size,
-            "grid": self.grid,
-        }
+    def to_json(self) -> Any:
+        # return {
+        #     "size": self.size,
+        #     "grid": self.grid,
+        # }
+        return self.grid
 
 
 class GameDictionary(object):
