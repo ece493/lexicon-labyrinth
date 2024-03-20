@@ -49,6 +49,7 @@ const PowerupsComponent: React.FC<PowerupsComponentProp> = ({
             onClick={() => {
               setPowerup("ROTATE");
             }}
+            flourish
           >
             <RotateIcon />
           </ButtonComponent>
@@ -63,6 +64,7 @@ const PowerupsComponent: React.FC<PowerupsComponentProp> = ({
             onClick={() => {
               setPowerup("SCRAMBLE");
             }}
+            flourish
           >
             <ScrambleIcon />
           </ButtonComponent>
@@ -78,6 +80,7 @@ const PowerupsComponent: React.FC<PowerupsComponentProp> = ({
             onClick={() => {
               setPowerup("TRANSFORM");
             }}
+            flourish
           >
             <TransformIcon />
           </ButtonComponent>
@@ -94,6 +97,7 @@ const PowerupsComponent: React.FC<PowerupsComponentProp> = ({
             onClick={() => {
               setPowerup("SWAP");
             }}
+            flourish
           >
             <SwapIcon />
           </ButtonComponent>
