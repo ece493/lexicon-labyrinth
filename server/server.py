@@ -15,6 +15,8 @@ from models import Lobby, Action, ActionEnum, Player
 class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     connections: set['GameWebSocketHandler'] = set()
     lobbies: dict[str, Lobby] = {} # each lobby is assigned to a player UUID
+    last_processed_sequence_number: dict[str, int] = {}  # Maps player ID to last processed sequence number
+    pending_messages: dict[str, list[Action]] = {}  # Maps player ID to a list of pending Action objects
 
     #def __init__(self) -> None:
 
@@ -38,7 +40,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         self.id = str(uuid.uuid4())
         self.lobby_id: Optional[str] = None
         self.connections.add(self)
-        self.sequence: int = 0
+        self.sequence_number: int = 0
         print(f"New WebSocket connection with id (new player id): {self.id}")
         # Tell the client what their player ID is
         resp = Action(ActionEnum.RETURN_PLAYER_ID.value, self.id, self.id)
@@ -47,24 +49,54 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     def send_message(self, message: Action) -> None:
         # Sends a message to this specific player attached to this connection
         print(message)
-        message.sequence = self.sequence # Set the monotonic sequence number
-        print(f"Sending message #{self.sequence} {message} to player {self.id} in lobby {self.lobby_id}")
+        message.sequence_number = self.sequence_number # Set the monotonic sequence number
+        print(f"Sending message #{self.sequence_number} {message} to player {self.id} in lobby {self.lobby_id}")
         self.write_message(json.dumps(message.to_json()))
-        self.sequence += 1
+        self.sequence_number += 1
 
     def on_message(self, message) -> None:
-        # Echo the message back to all connected clients
-        print(f"Received message '{message}' from {self.id}")
-        
         # for conn in self.connections:
         #print(message)
         try:
+            print(f"Received message '{str(message)}' from {self.id}")
             action = json.loads(str(message))
+            action_sequence_number = action['sequence_number']
+            player_id = self.id
         except ValueError as e:
             print(f"Error decoding received message: {e}")
             return
         #print(action)
-        # match message
+    
+        # Initialize sequence tracking if not already done
+        if player_id not in GameWebSocketHandler.last_processed_sequence_number:
+            GameWebSocketHandler.last_processed_sequence_number[player_id] = -1  # Indicates no messages processed yet
+            GameWebSocketHandler.pending_messages[player_id] = []
+        
+        expected_sequence_number = GameWebSocketHandler.last_processed_sequence_number[player_id] + 1
+        if action_sequence_number == expected_sequence_number:
+            # We gucci, process message normally
+            GameWebSocketHandler.last_processed_sequence_number[player_id] = action_sequence_number
+            self.process_message(action)  # You'll implement this based on your existing logic
+            self.process_pending_messages(player_id)
+        elif action_sequence_number > expected_sequence_number:
+            # Message is out of order, store it until the missing messages arrive
+            GameWebSocketHandler.pending_messages[player_id].append((action_sequence_number, action))
+        else:
+            # Sequence number is lower than expected, indicating a duplicate or old message
+            print(f"Received an old or duplicate message with sequence {action_sequence_number} from player {player_id}")
+            raise Exception()
+    
+    def process_pending_messages(self, player_id: str) -> None:
+        # Sort pending messages by their sequence numbers
+        self.pending_messages[player_id].sort(key=lambda x: x[0])
+        # Check if the next message in the list is the expected one
+        while self.pending_messages[player_id] and self.pending_messages[player_id][0][0] == self.last_processed_sequence_number[player_id] + 1:
+            _, next_action = self.pending_messages[player_id].pop(0)
+            self.process_message(next_action)
+            self.last_processed_sequence_number[player_id] += 1
+
+    def process_message(self, action) -> None:
+        # Match message to the set of valid actions
         actionEnum = ActionEnum(action['action'])
         if actionEnum == ActionEnum.INITIALIZE:
             # Generate a unique 4-letter lobby code

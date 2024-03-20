@@ -305,20 +305,20 @@ class Action(object):
         self.action = action
         self.player_id = player_id
         self.data = data
-        self.sequence: int = -1 # This gets set before sending!
+        self.sequence_number: int = -1 # This gets set before sending!
 
     def __str__(self) -> str:
-        return f"Action({self.action}, Player ID: {self.player_id}, Data: {self.data}, Sequence: {self.sequence})"
+        return f"Action({self.action}, Player ID: {self.player_id}, Data: {self.data}, Sequence: {self.sequence_number})"
 
     def __repr__(self) -> str:
-        return f"Action(action={repr(self.action)}, player_id={repr(self.player_id)}, data={repr(self.data)}, sequence={self.sequence})"
+        return f"Action(action={repr(self.action)}, player_id={repr(self.player_id)}, data={repr(self.data)}, sequence={self.sequence_number})"
 
     def to_json(self) -> dict[str, Any]:
         return {
             "action": self.action,
             "player_id": self.player_id,
             "data": self.data,
-            "sequence": self.sequence,
+            "sequence_number": self.sequence_number,
         }
 
 
