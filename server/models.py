@@ -51,11 +51,11 @@ class Lobby(object):
         if actionEnum in [ActionEnum.CHANGE_PARAM, ActionEnum.READY_LOBBY]:
             if actionEnum == ActionEnum.CHANGE_PARAM:
                 # The owner of the lobby is trying to change the lobby's settings
-                self.change_lobby_settings(action['data'])
+                self.change_lobby_settings(action.data)
             elif actionEnum == ActionEnum.READY_LOBBY:
                 assert self.host == player_id, f"Error! Player who tried to start game ({player_id}) is not the host of the lobby ({self.host})!"
                 self.start_game()
-        elif actionEnum in [ActionEnum.CHANGE_PARAM, ActionEnum.READY_LOBBY]:
+        elif actionEnum in [ActionEnum.PICK_WORD, ActionEnum.PICK_TRANSFORM_POWERUP, ActionEnum.PICK_ROTATE_POWERUP, ActionEnum.PICK_SCRAMBLE_POWERUP, ActionEnum.PICK_SWAP_POWERUP, ActionEnum.END_TURN]:
             self.game.handle_action(player_id, actionEnum, action)
         else:
             print(f"Action {action} cannot be handled by the lobby nor the game!")
@@ -164,8 +164,8 @@ class Lobby(object):
         # Ensure broadcast_func is set before starting the game
         print(f"Starting the game in lobby {self.lobby_id}")
         assert self.broadcast_func is not None, "Broadcast function wasn't set before starting the game!"
-        self.game = Game(self.lobby_id, self.players, self.broadcast_func, self.send_to_player_func)
-        self.game.run_game()
+        self.game = Game(self.lobby_id, self.players, self.broadcast_func, self.send_to_player_func, self.board_size, self.max_lives, self.host, self.timer_setting)
+        self.game.start_game()
         self.is_in_game = True
 
     @property
@@ -194,6 +194,7 @@ class Game:
         self.broadcast_func(state_message)
 
     def player_made_move(self, player_id, move) -> None:
+        # UNUSED
         # Logic to update the game state based on the move
         # Then broadcast the new state
         update_message = {
@@ -215,51 +216,106 @@ class Game:
         self.state = GameState.TURN_START
         self.next_turn()
 
+    def find_next_non_spectator_player_index(self, start_index: int = 0) -> int:
+        """Finds the next non-spectator player starting from a given index."""
+        next_index = start_index
+        for _ in range(len(self.players)):  # Prevent infinite loops
+            if not self.players[next_index].is_spectator:
+                return next_index  # Found a non-spectator player
+            next_index = (next_index + 1) % len(self.players)
+        return -1  # In case all players are spectators or list is empty
+
+    def get_next_non_spectator_player(self) -> tuple[int, Optional['Player']]:
+        """Returns the next non-spectator player's index and object."""
+        next_index = self.find_next_non_spectator_player_index(self.current_player_index)
+        if next_index != -1:
+            return next_index, self.players[next_index]
+        else:
+            return -1, None  # No non-spectator player found
+
     def next_turn(self) -> None:
-        if self.state == GameState.TURN_START:
+        """Transitions to the next player's turn, skipping spectators."""
+        next_index, next_player = self.get_next_non_spectator_player()
+        if next_player is not None:
+            self.current_player_index = next_index  # Update to the next player's index
             self.state = GameState.WAITING_FOR_MOVE
-            # Loop to ensure we skip over spectators
-            while True:
-                current_player = self.players[self.current_player_index]
-                if not current_player.is_spectator:
-                    # This player is not a spectator, so announce their turn
-                    self.broadcast_func(self.lobby_id, Action(ActionEnum.START_TURN.value, current_player.player_id, {"message": "Your turn"}))
-                    # Wait for move submission handled elsewhere
-                    break  # Exit the loop since we've found our next active player
-                else:
-                    # If the player is a spectator, increment the index and check the next player
-                    self.current_player_index = (self.current_player_index + 1) % len(self.players)
-            
-            # Always increment the player index after handling the current player's turn
-            self.current_player_index = (self.current_player_index + 1) % len(self.players)
+            # Inform all players whose turn it is now
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.START_TURN.value, next_player.player_id, self.to_json()))
+        else:
+            # Handle the scenario where no non-spectator players are found
+            pass  # This could involve checking game end conditions or handling errors
+            raise Exception("No players remaining!")
+            #self.winner_determined()
 
     def handle_action(self, player_id: str, actionEnum: 'ActionEnum', action: 'Action') -> None:
         if actionEnum == ActionEnum.PICK_WORD:
-            self.process_move(player_id, action.data)
+            self.process_word_choice(player_id, action.data)
         elif actionEnum == ActionEnum.PICK_ROTATE_POWERUP:
-            self.use_rotate_powerup(player_id, action.data)
+            self.apply_rotate_powerup(player_id, action.data)
         elif actionEnum == ActionEnum.PICK_SCRAMBLE_POWERUP:
-            self.use_scramble_powerup(player_id, action.data)
+            self.apply_scramble_powerup(player_id, action.data)
         elif actionEnum == ActionEnum.PICK_SWAP_POWERUP:
-            self.use_swap_powerup(player_id, action.data)
+            self.apply_swap_powerup(player_id, action.data)
         elif actionEnum == ActionEnum.PICK_TRANSFORM_POWERUP:
-            self.use_transform_powerup(player_id, action.data)
+            self.apply_transform_powerup(player_id, action.data)
         elif actionEnum == ActionEnum.END_TURN:
             # The player ran out of time and needs to be eliminated
             self.eliminate_player(player_id)
+            # TODO: Move onto the next player's turn!
         else:
             print(f"Game cannot handle this unknown action: {action}")
 
-    def process_move(self, player_id, move_data) -> None:
+    def transition_to_next_player(self) -> None:
+        """Transitions to the next player's turn."""
+        print(f"Transitioning to next player from {self.current_player_index}")
+        self.current_player_index = (self.current_player_index + 1) % len(self.players)
+
+        self.inform_player_turn()
+
+    def inform_player_turn(self) -> None:
+        """Informs the current player that it's their turn."""
+        print(f"Informing player at index {self.current_player_index} that it's their turn")
+        # Ensure we skip spectators
+        while self.players[self.current_player_index].is_spectator:
+            self.current_player_index = (self.current_player_index + 1) % len(self.players)
+
+        current_player = self.players[self.current_player_index]
+        self.broadcast_func(self.lobby_id, Action(ActionEnum.START_TURN.value, current_player.player_id, {"message": "Your turn"}))
+        self.state = GameState.WAITING_FOR_MOVE
+
+    def retry_current_player_turn(self) -> None:
+        """Allows the current player to retry their turn after a rejected move or using a power-up."""
+        self.inform_player_turn()  # It's still the current player's turn
+
+    def handle_player_elimination_or_time_out(self, player_id) -> None:
+        """Handles the scenario where a player is eliminated or runs out of time."""
+        # Implement player elimination logic
+        # This is a placeholder for any additional logic you may need for player elimination
+        # TODO: Implement additional player elimination logic here if necessary
+
+        # Remove the player or deduct life
+        self.remove_player_or_deduct_life(player_id)
+
+        # Check if the game is over or if we should move to the next player's turn
+        if self.check_for_game_end():
+            self.end_game()
+        else:
+            self.transition_to_next_player()
+
+    def process_word_choice(self, player_id, move_data) -> None:
+        assert self.state == GameState.WAITING_FOR_MOVE, f"In process move, the current state of {self.state} isn't the expected of WAITING_FOR_MOVE!"
         # Logic to check if the move is valid
+        print(f"Processing move: {move_data}")
         move_valid = True
         if move_valid:
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.MOVE_ACCEPTED.value, player_id, move_data))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_ACCEPTED.value, player_id, move_data))
             self.state = GameState.TURN_END
-            self.winner_determined()
+            #self.winner_determined()
+            self.transition_to_next_player()
         else:
-            self.send_to_player_func(player_id, Action(ActionEnum.MOVE_REJECTED.value, player_id, {"message": "Move rejected, try again"}))
+            self.send_to_player_func(player_id, Action(ActionEnum.WORD_DENIED.value, player_id, {"message": "Move rejected, try again"}))
             self.state = GameState.MOVE_REJECTED
+            self.retry_current_player_turn()
 
     def winner_determined(self, winner: 'Player') -> None:
         self.state = GameState.GAME_OVER
@@ -278,9 +334,12 @@ class Game:
             self.winner_determined(remaining_players[0])
         else:
             # Adjust the current player index if necessary
-            self.adjust_current_player_index_after_elimination(player_id)
+            #self.adjust_current_player_index_after_elimination(player_id)
+            # TODO: Move onto the next player's turn!
+            pass
 
     def run_game(self) -> None:
+        # UNUSED
         # determining who goes first, initializing game timers, etc.
         current_turn = 0
         turn_modulus = len(self.players)
@@ -292,34 +351,78 @@ class Game:
                 continue
             # This is either a real player or bot that is in-game
 
-    def use_powerup(self, player_id: str, powerup_name: str, action_data: dict):
-        # General method to handle power-up usage including currency checks
+    # Helper function to check player's funds and deduct cost
+    def check_and_deduct_funds(self, player_id: str, cost: int) -> bool:
         player = next((p for p in self.players if p.player_id == player_id), None)
-        if player and player.currency >= POWERUP_COSTS[powerup_name]:
-            # Deduct the cost and apply the power-up effect
-            player.currency -= POWERUP_COSTS[powerup_name]
-            # Broadcast the power-up effect
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_ACTIVATED.value, player_id, {"powerup": powerup_name, "effect": f"{powerup_name} used"}))
-            # It's still the player's turn
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.START_TURN.value, player_id, self.to_json()))
-        elif player:
-            # Not enough currency to use the power-up
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED.value, player_id, {"message": f"Not enough currency to use {powerup_name}"}))
+        if player and player.currency >= cost:
+            player.currency -= cost
+            return True
+        return False
+
+    def apply_rotate_powerup(self, player_id: str, data: dict) -> None:
+        cost = POWERUP_COSTS["Rotate"]
+        if self.check_and_deduct_funds(player_id, cost):
+            # Apply rotation logic here based on 'data'
+            # TODO: Implement rotation logic
+
+            # Broadcast success message to ALL players
+            success_message = {
+                "action": "rotate_powerup_accept",
+                "player_id": player_id,
+                # TODO: Replace with actual timestamp
+                "timestamp": 1234,
+                "data": {
+                    "lobby": self.lobby_id,  # Assuming you need to convert lobby to string if necessary
+                    "powerup_data": data
+                }
+            }
+            self.broadcast_func(self.lobby_id, success_message)
         else:
-            print(f"Player with ID {player_id} not found.")
+            # Broadcast denial due to insufficient funds
+            # TODO: Implement denial message broadcasting
+            pass
 
-    def use_rotate_powerup(self, player_id: str, action_data: dict) -> None:
-        self.use_powerup(player_id, "Rotate", action_data)
+    def apply_transform_powerup(self, player_id: str, tile: list, new_char: str) -> None:
+        cost = POWERUP_COSTS["Transform"]
+        if self.check_and_deduct_funds(player_id, cost):
+            # Apply transform logic here
+            # TODO: Implement transform logic
 
-    def use_scramble_powerup(self, player_id: str, action_data: dict) -> None:
-        self.use_powerup(player_id, "Scramble", action_data)
+            # Broadcast success message
+            # TODO: Implement success message broadcasting
+            pass
+        else:
+            # Broadcast denial due to insufficient funds
+            # TODO: Implement denial message broadcasting
+            pass
 
-    def use_swap_powerup(self, player_id: str, action_data: dict) -> None:
-        self.use_powerup(player_id, "Swap", action_data)
+    def apply_swap_powerup(self, player_id: str, tiles: list) -> None:
+        cost = POWERUP_COSTS["Swap"]
+        if self.check_and_deduct_funds(player_id, cost):
+            # Apply swap logic here
+            # TODO: Implement swap logic
 
-    def use_transform_powerup(self, player_id: str, action_data: dict) -> None:
-        self.use_powerup(player_id, "Transform", action_data)
+            # Broadcast success message
+            # TODO: Implement success message broadcasting
+            pass
+        else:
+            # Broadcast denial due to insufficient funds
+            # TODO: Implement denial message broadcasting
+            pass
 
+    def apply_scramble_powerup(self, player_id: str) -> None:
+        cost = POWERUP_COSTS["Scramble"]
+        if self.check_and_deduct_funds(player_id, cost):
+            # Apply scramble logic here
+            # TODO: Implement scramble logic
+
+            # Broadcast success message
+            # TODO: Implement success message broadcasting
+            pass
+        else:
+            # Broadcast denial due to insufficient funds
+            # TODO: Implement denial message broadcasting
+            pass
 
 
     # def to_json(self) -> dict[str, Any]:
@@ -391,6 +494,7 @@ class Bot(Player, object):
         # Additional properties and methods specific to bot behavior
 
     def send_message(self, message) -> None:
+        # Send a message from the game to the bot
         # For local bots, directly process the message
         print(f"Bot with name {self.name} and id {self.player_id} received message: {message}")
         self.process_bot_action(message)
@@ -475,7 +579,7 @@ class Swap(Powerup, object):
 
 
 class Action(object):
-    def __init__(self, action, player_id, data) -> None:
+    def __init__(self, action: 'ActionEnum', player_id: str, data: Optional[dict[str, Any]] = None) -> None:
         self.action = action
         self.player_id = player_id
         self.data = data

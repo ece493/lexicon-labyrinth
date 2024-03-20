@@ -7,7 +7,7 @@ import json
 import random
 import string
 
-from typing import Optional
+from typing import Optional, Any
 
 from models import Lobby, Action, ActionEnum, Player
 
@@ -98,9 +98,12 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             self.process_message(next_action)
             self.last_processed_sequence_number[player_id] += 1
 
-    def process_message(self, action) -> None:
+    def process_message(self, action_dict: dict[str, Any]) -> None:
         # Match message to the set of valid actions
-        actionEnum = ActionEnum(action['action'])
+        if 'data' not in action_dict:
+            action_dict['data'] = None
+        action = Action(ActionEnum(action_dict['action']), action_dict['player_id'], action_dict['data'])
+        actionEnum = ActionEnum(action_dict['action'])
         if actionEnum in [ActionEnum.INITIALIZE, ActionEnum.JOIN_LOBBY, ActionEnum.LEAVE_LOBBY]:
             # These actions are handled outside of a lobby or game, so we just handle them right here
             if actionEnum == ActionEnum.INITIALIZE:
@@ -118,9 +121,9 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.lobbies[lobby_code].set_send_to_player_func(GameWebSocketHandler.send_to_player_func)
                 print(f"Created a new player class and added them to the lobby they just created")
                 # Create a new player, and add them to the lobby they just created
-                if 'data' not in action or 'player_name' not in action['data']:
+                if action.data is None or 'player_name' not in action.data:
                     raise Exception("Please specify the player_name field in the data!")
-                p = Player(self.id, action['data']['player_name'])
+                p = Player(self.id, action.data['player_name'])
                 p.set_send_message_func(GameWebSocketHandler.send_to_player_func)
                 self.lobbies[lobby_code].add_player(p)
                 self.lobby_id = lobby_code
@@ -128,25 +131,25 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 resp = Action(ActionEnum.RETURN_LOBBY_CODE.value, self.id, lobby_code)
                 self.send_message(resp)
                 # Tell the player they joined their own lobby. Technically we should be telling everyone within the lobby, but it's only the player in there right now.
-                resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_code, "player_name": action['data']['player_name']})
+                resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_code, "player_name": action.data['player_name']})
                 self.send_message(resp)
             elif actionEnum == ActionEnum.JOIN_LOBBY:
                 # The player is trying to join an existing lobby
-                lobby_id = action['data']['lobby_code']
-                player_name = action['data']['player_name']
+                lobby_id = action.data['lobby_code']
+                player_name = action.data['player_name']
                 if lobby_id in self.lobbies:
                     p = Player(self.id, player_name)
                     p.set_send_message_func(GameWebSocketHandler.send_to_player_func)
                     self.lobbies[lobby_id].add_player(p)
                     self.lobby_id = lobby_id
-                    resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_id, "player_name": action['data']['player_name']})
+                    resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_id, "player_name": action.data['player_name']})
                     GameWebSocketHandler.broadcast_to_lobby(self.lobby_id, resp)
                 else:
                     resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, self.id, None)
                     self.send_message(resp)
             elif actionEnum == ActionEnum.LEAVE_LOBBY:
                 # The player is trying to leave the lobby
-                assert action['data']['lobby_code'] == self.lobby_id, f"The lobby code the client passed to leave of {action['data']['lobby_code']} doesn't match the client's actual current lobby {self.lobby_id}!"
+                assert action.data['lobby_code'] == self.lobby_id, f"The lobby code the client passed to leave of {action.data['lobby_code']} doesn't match the client's actual current lobby {self.lobby_id}!"
                 if self.lobby_id in self.lobbies:
                     lobby = self.lobbies[self.lobby_id]
                     # Send a message to this player letting them know they successfully left the lobby
