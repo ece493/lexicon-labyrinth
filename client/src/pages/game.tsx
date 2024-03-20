@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { SelectionGridComponent } from "../components/grid/selectionGrid";
-import TurnComponent from "../components/grid/turn";
+import TurnComponent, { TurnRef } from "../components/grid/turn";
 import PowerupsComponent from "../components/grid/powerups";
 import PlayersComponent from "../components/grid/players";
 import { Bot, Lobby, Player } from "../data/model";
@@ -11,6 +11,8 @@ import { TransformGridComponent } from "../components/grid/powerup-grids/transfo
 import { ScrambleGridComponent } from "../components/grid/powerup-grids/scrambleGrid";
 import { GameContext } from "../context/ctx";
 import { isJSDocNullableType } from "typescript";
+import { Zoom } from "@mui/material";
+import { motion } from "framer-motion";
 
 const Game: React.FC = () => {
   const host: Player = {
@@ -61,6 +63,8 @@ const Game: React.FC = () => {
   // May have to change where this is stored to prevent too much re-rendering
   const [wordPath, setWordPath] = useState([]);
 
+  const turnRef = useRef<TurnRef>(null);
+
   const [powerup, setPowerup] = useState<string | null>(null);
   const [tiles, setTiles] = useState([
     ["a", "b", "c", "d", "a", "b", "c", "d"],
@@ -81,6 +85,7 @@ const Game: React.FC = () => {
   function handleSubmit() {
     if (gameContext.sock !== null) {
       gameContext.transitions.pickWord(gameContext.sock as WebSocket, wordPath);
+      if (turnRef.current) turnRef.current.shakeWord();
     }
   }
 
@@ -103,46 +108,58 @@ const Game: React.FC = () => {
     loadReceiveCallBacks();
   }, []);
 
-  function getGrid() {
+  function getPowerupGrid() {
     switch (powerup) {
       case "SWAP":
         return (
-          <SwapGridComponent
-            help={word}
-            setPowerup={setPowerup}
-            setHelp={setWord}
-            board_size={[8, 8]}
-            grid={{
-              tiles,
-            }}
-            resetWordSelection={resetWordSelection}
-          />
+          <Zoom in={true}>
+            <div>
+              <SwapGridComponent
+                help={word}
+                setPowerup={setPowerup}
+                setHelp={setWord}
+                board_size={[8, 8]}
+                grid={{
+                  tiles,
+                }}
+                resetWordSelection={resetWordSelection}
+              />
+            </div>
+          </Zoom>
         );
       case "ROTATE":
         return (
-          <RotateGridComponent
-            help={word}
-            setPowerup={setPowerup}
-            setHelp={setWord}
-            board_size={[8, 8]}
-            ogGrid={{
-              tiles,
-            }}
-            resetWordSelection={resetWordSelection}
-          />
+          <Zoom in={true}>
+            <div>
+              <RotateGridComponent
+                help={word}
+                setPowerup={setPowerup}
+                setHelp={setWord}
+                board_size={[8, 8]}
+                ogGrid={{
+                  tiles,
+                }}
+                resetWordSelection={resetWordSelection}
+              />
+            </div>
+          </Zoom>
         );
       case "TRANSFORM":
         return (
-          <TransformGridComponent
-            help={word}
-            setPowerup={setPowerup}
-            setHelp={setWord}
-            board_size={[8, 8]}
-            grid={{
-              tiles,
-            }}
-            resetWordSelection={resetWordSelection}
-          />
+          <Zoom in={true}>
+            <div>
+              <TransformGridComponent
+                help={word}
+                setPowerup={setPowerup}
+                setHelp={setWord}
+                board_size={[8, 8]}
+                grid={{
+                  tiles,
+                }}
+                resetWordSelection={resetWordSelection}
+              />
+            </div>
+          </Zoom>
         );
       case "SCRAMBLE":
         return (
@@ -159,24 +176,14 @@ const Game: React.FC = () => {
         );
 
       default:
-        return (
-          <SelectionGridComponent
-            wordPath={wordPath}
-            setWordPath={setWordPath}
-            word={word}
-            setWord={setWord}
-            setError={setError}
-            board_size={[8, 8]}
-            grid={{
-              tiles,
-            }}
-          />
-        );
+        return <div></div>;
     }
   }
 
   return (
-    <div
+    <motion.div
+      onClick={() => setError(null)}
+      animate={{ backgroundColor: powerup ? "#1E3A8A" : "#60A5FA" }}
       className={`flex ${
         powerup ? "bg-blue-900" : "bg-blue-400"
       } pb-20 box-border min-h-screen`}
@@ -184,6 +191,7 @@ const Game: React.FC = () => {
       <div className="flex align-top justify-center width w-full">
         <div className="flex flex-col items-center pt-5">
           <TurnComponent
+            ref={turnRef}
             handleSubmit={handleSubmit}
             word={word}
             error={error}
@@ -196,7 +204,21 @@ const Game: React.FC = () => {
               powerup={powerup}
               setPowerup={setPowerup}
             ></PowerupsComponent>
-            {getGrid()}
+            <div style={{ opacity: powerup ? "0.2" : "" }}>
+              <SelectionGridComponent
+                wordPath={wordPath}
+                setWordPath={setWordPath}
+                word={word}
+                setWord={setWord}
+                setError={setError}
+                board_size={[8, 8]}
+                grid={{
+                  tiles,
+                }}
+              />
+            </div>
+
+            <div className="absolute z-20">{getPowerupGrid()}</div>
             <PlayersComponent
               currentTurn={lobby.state.curr_turn}
               players={lobby.players}
@@ -205,7 +227,7 @@ const Game: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

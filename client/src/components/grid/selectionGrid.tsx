@@ -2,6 +2,7 @@ import { Board } from "../../data/model";
 import { useState } from "react";
 import { GridComponent } from "./grid";
 import { TileComponent, nullTile, isTileEqual } from "./tile";
+import { Fade } from "@mui/material";
 
 interface GridComponentProps {
   grid: Board;
@@ -96,17 +97,11 @@ export const SelectionGridComponent: React.FC<GridComponentProps> = ({
               ? "cursor-pointer"
               : "cursor-default"
           }`}
-          style={{
-            opacity:
-              selecting && !isSelectableNonFirstTile(x, y) && !selected
-                ? 0.3
-                : "",
-          }}
         >
-          <TileComponent value={v} selected={selected} />
+          <TileComponent value={v} selected={selected} disabled={selecting && !isSelectableNonFirstTile(x, y) && !selected}/>
         </div>
         {selected && !isTileEqual([x, y], firstTile)
-          ? renderPathLine(indexInPath, x, y)
+          ? <Fade in={selected && !isTileEqual([x, y], firstTile)} timeout={300}>{renderPathLine(indexInPath, x, y)}</Fade>
           : null}
       </div>
     );

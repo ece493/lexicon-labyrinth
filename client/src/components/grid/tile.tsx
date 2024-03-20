@@ -1,3 +1,6 @@
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+
 interface TileComponentProps {
   value?: string;
   selected?: boolean;
@@ -6,6 +9,8 @@ interface TileComponentProps {
   readonly?: boolean;
   onClick?: any;
   children?: any;
+  disabled?: boolean;
+  drift?: boolean;
 }
 
 const nullTile = [-1, -1];
@@ -22,38 +27,84 @@ const TileComponent: React.FC<TileComponentProps> = ({
   readonly,
   onClick,
   children,
+  disabled,
+  drift,
 }) => {
+  const [x, setX] = useState(0);
+  const [y, setY] = useState(0);
+  let driftFactor = 500;
+  let driftTime = 200;
+
+  function startDrift() {
+    if (drift) {
+      let driftX = Math.floor(Math.random() * driftFactor);
+      let driftY = Math.floor(Math.random() * driftFactor);
+
+      let negativeFactorX = Math.random() < 0.5 ? -1 : 1;
+      let negativeFactorY = Math.random() < 0.5 ? -1 : 1;
+
+      setX(driftX * negativeFactorX);
+      setY(driftY * negativeFactorY);
+
+      setTimeout(() => {
+        setX(Math.floor(0));
+        setY(Math.floor(0));
+      }, driftTime);
+    }
+  }
+
+  useEffect(() => {
+    if (drift) {
+      setTimeout(() => startDrift(), 100);
+    }
+  }, [drift]);
+
   return (
-    <div
+    <motion.div
       draggable="false"
       className="relative"
+      animate={{ x, y }}
+      transition={{ type: "spring" }}
       style={{ opacity: transparent ? 0 : "" }}
-      onClick={onClick}
+      onClick={(e) => {
+        if (!disabled && onClick) onClick(e);
+      }}
     >
-      <div
+      <motion.div
         draggable="false"
-        className={`relative ${readonly ? "" : "cursor-pointer"}
+        className={`relative ${readonly || disabled ? "" : "cursor-pointer"}
       ${
-        selected ? "bg-blue-200" : dark ? "bg-blue-900" : "bg-blue-400"
+        dark ? "bg-blue-900" : "bg-blue-400"
       } rounded-sm w-12 h-12 flex flex-col justify-center items-center z-10`}
+        animate={
+          dark
+            ? {
+                opacity: disabled ? 0.3 : 1,
+              }
+            : {
+                opacity: disabled ? 0.3 : 1,
+                backgroundColor: selected ? "#BFDBFE" : "#60A5FA",
+              }
+        }
+        transition={{ duration: 0.3 }}
       >
         {children ? (
           children
         ) : (
-          <p
+          <motion.p
             draggable="false"
             className={`relative text-bold text-lg select-none z-1 ${
               selected ? "text-blue-600" : "text-slate-100"
-            } text-center ${
-              selected ? "bg-blue-200" : dark ? "bg-blue-900" : "bg-blue-400"
-            }`}
+            } text-center ${dark ? "bg-blue-900" : "bg-blue-400"}`}
+            animate={{ backgroundColor: selected ? "#BFDBFE" : "#60A5FA" }}
+            transition={{ duration: 0.3 }}
           >
             {value}
-          </p>
+          </motion.p>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
-export  {TileComponent, nullTile, isTileEqual};
+export { TileComponent, nullTile, isTileEqual };

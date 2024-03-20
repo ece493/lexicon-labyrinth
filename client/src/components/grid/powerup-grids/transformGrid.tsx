@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Typography, Zoom } from "@mui/material";
 import { Board } from "../../../data/model";
 import { useState, useEffect, useRef, useContext } from "react";
 import { TileComponent, nullTile, isTileEqual } from "../tile";
@@ -88,11 +88,15 @@ export const TransformGridComponent: React.FC<TransformGridComponentProps> = ({
           buildChild={buildCurrentTile}
         />
       ) : (
-        <GridComponent
-          grid={{ tiles: alphabetTiles }}
-          board_size={[6, 5]}
-          buildChild={buildAlphabetTile}
-        />
+        <Zoom in={true}>
+          <div>
+            <GridComponent
+              grid={{ tiles: alphabetTiles }}
+              board_size={[6, 5]}
+              buildChild={buildAlphabetTile}
+            />
+          </div>
+        </Zoom>
       )}
     </div>
   );
