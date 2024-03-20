@@ -34,14 +34,12 @@ const PlayersComponent: React.FC<PlayersComponentProp> = ({
   function getOrderedPlayers() {
     const orderedLivePlayers: Player[] = [];
     const livePlayers = players.filter((p) => p.lives !== 0);
-    let j = players.findIndex((p) => p.id === currentTurn);
+    let j = livePlayers.findIndex((p) => p.id === currentTurn);
     for (let i = 0; i < livePlayers.length; i++) {
       if (j === livePlayers.length) {
         j = 0;
       }
-      orderedLivePlayers.push(
-        players.find((p) => p.id === livePlayers[j].id) as Player
-      );
+      orderedLivePlayers.push(livePlayers[j]);
       j++;
     }
     return [...orderedLivePlayers, ...players.filter((p) => p.lives === 0)];
@@ -56,7 +54,7 @@ const PlayersComponent: React.FC<PlayersComponentProp> = ({
       <Reorder.Group
         axis="y"
         values={getOrderedPlayers().map((p) => p.id)}
-        style={{ padding: 0, margin:0 }}
+        style={{ padding: 0, margin: 0 }}
         onReorder={() => {}}
       >
         {getOrderedPlayers().map((player) => {

@@ -48,6 +48,7 @@ const Home: React.FC = () => {
             action: ActionsList.initialize,
             player_id: 0,
             data: [],
+            sequence_number:0
           };
           sock.onopen = () => {
             sock.send(JSON.stringify(act));

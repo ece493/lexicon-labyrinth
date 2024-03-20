@@ -10,7 +10,7 @@ import string
 from typing import Optional, Any
 
 from models import Lobby, Action, ActionEnum, Player
-
+from tempTestObjects import StaticTestObjects
 # Define a WebSocketHandler
 
 
