@@ -38,6 +38,7 @@ export type Action = {
   action: ActionsList,
   player_id: number,
   data: any
+  sequence_number: number
 }
 
 export enum ScreenState {

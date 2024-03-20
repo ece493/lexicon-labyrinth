@@ -32,7 +32,7 @@ export const ScrambleGridComponent: React.FC<ScrambleGridComponentProps> = ({
     }, 1100);
     setTimeout(() => {
       if (gameContext.sock !== null) {
-        gameContext.transitions.pickScramblePowerup(gameContext.sock);
+        gameContext.transitions.pickScramblePowerup(gameContext);
         resetWordSelection();
         setPowerup(null);
       }
