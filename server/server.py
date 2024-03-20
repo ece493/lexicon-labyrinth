@@ -111,7 +111,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         elif actionEnum == ActionEnum.PICK_SWAP_POWERUP:
             resp = Action(ActionEnum.POWERUP_DENIED.value, self.id, None)
         elif actionEnum == ActionEnum.PICK_WORD:
-            resp = Action(ActionEnum.WORD_DENIED.value, self.id, None)
+            resp = Action(ActionEnum.WORD_DENIED.value, self.id, {"path":[[0,0]]})
         self.write_message(jsonpickle.encode(resp, unpicklable=False))
 
     def on_close(self) -> None:

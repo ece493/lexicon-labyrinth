@@ -11,6 +11,7 @@ export type GameContextData = {
     lobby: Lobby | null,
     transitions: ServerTransitions,
     receiveCallBacks: ReceiveCallbacks
+    playerId: string | null
 }
 
 export const GameContext = createContext <GameContextData>({
@@ -20,4 +21,5 @@ export const GameContext = createContext <GameContextData>({
     lobby: null,
     transitions: TransitionManager,
     receiveCallBacks: ReceiveCallbacksDefault,
+    playerId: null
 });
