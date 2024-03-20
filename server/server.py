@@ -12,13 +12,15 @@ from typing import Optional
 from models import Lobby, Action, ActionEnum, Player
 
 # Define a WebSocketHandler
+
+
 class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     connections: set['GameWebSocketHandler'] = set()
     lobbies: dict[str, Lobby] = {} # each lobby is assigned to a player UUID
     last_processed_sequence_number: dict[str, int] = {}  # Maps player ID to last processed sequence number
     pending_messages: dict[str, list[Action]] = {}  # Maps player ID to a list of pending Action objects
 
-    #def __init__(self) -> None:
+    # def __init__(self) -> None:
 
     @classmethod
     def broadcast_to_lobby(cls, lobby_id: str, message: Action) -> None:
@@ -102,7 +104,8 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         if actionEnum == ActionEnum.INITIALIZE:
             # Generate a unique 4-letter lobby code
             while True:
-                lobby_code = ''.join(random.choices(string.ascii_uppercase, k=4))
+                lobby_code = ''.join(random.choices(
+                    string.ascii_uppercase, k=4))
                 if lobby_code not in self.lobbies:
                     break  # Exit the loop if the generated code is unique
             lobby_code = "ABCD" # TODO: REMOVE
@@ -196,17 +199,22 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         return True
 
 # Define the MainHandler for HTTP requests
+
+
 class MainHandler(tornado.web.RequestHandler):
     def get(self) -> None:
         # Simple HTTP GET handler
         self.write("Welcome to Lexicon Labyrinth!")
 
 # Create the Tornado application and define routes
+
+
 def make_app() -> Application:
     return tornado.web.Application([
         (r"/", MainHandler),
         (r"/websocket", GameWebSocketHandler),  # WebSocket route
     ])
+
 
 if __name__ == "__main__":
     app = make_app()

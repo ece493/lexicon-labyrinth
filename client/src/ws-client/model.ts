@@ -7,7 +7,10 @@ export enum ActionsList {
     delete_bot = "delete_bot",
     ready_lobby = "ready_lobby",
     pick_word = "pick_word",
-    pick_powerup = "pick_powerup",
+    pick_rotate_powerup = "pick_rotate_powerup",
+    pick_scramble_powerup = "pick_scramble_powerup",
+    pick_swap_powerup = "pick_swap_powerup",
+    pick_transform_powerup = "pick_transform_powerup",
     leave_game = "leave_game",
     // Server Actions
     return_lobby_code = "return_lobby_code",
