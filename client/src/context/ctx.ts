@@ -21,5 +21,5 @@ export const GameContext = createContext <GameContextData>({
     lobby: null,
     transitions: TransitionManager,
     receiveCallBacks: ReceiveCallbacksDefault,
-    playerId: null
+    playerId: null,
 });

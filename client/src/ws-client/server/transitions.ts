@@ -6,7 +6,7 @@ export type ServerTransitions = {
   joinLobby: (ws: WebSocket, code: string) => void;
   changeParam: (ws: WebSocket, param: string, value: string) => void;
   readyLobby: (ws: WebSocket) => void;
-  pickWord: (ws: WebSocket, path: [number, number][]) => void;
+  pickWord: (ws: WebSocket, path: number[][]) => void;
   pickRotatePowerup: (
     ws: WebSocket,
     type: string,
@@ -59,7 +59,7 @@ const readyLobby = (ws: WebSocket) => {
   ws.send(JSON.stringify(msg));
 };
 
-const pickWord = (ws: WebSocket, path: [number, number][]) => {
+const pickWord = (ws: WebSocket, path: number[][]) => {
   console.log("sending word pick request with: ", path);
   const msg: Action = {
     action: ActionsList.pick_word,

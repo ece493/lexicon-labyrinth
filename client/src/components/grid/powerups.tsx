@@ -8,11 +8,14 @@ import RotateIcon from "../icons/rotateIcon";
 import TransformIcon from "../icons/transformIcon";
 import SwapIcon from "../icons/swapIcon";
 import ScrambleIcon from "../icons/scrambleIcon";
+import { motion } from "framer-motion";
+
 
 interface PowerupsComponentProp {
   funds: number;
   setPowerup: any;
   powerup: string | null;
+  disabled?: boolean;
 }
 
 const prices = {
@@ -26,12 +29,17 @@ const PowerupsComponent: React.FC<PowerupsComponentProp> = ({
   funds,
   powerup,
   setPowerup,
+  disabled,
 }) => {
   return (
-    <div
-      className="flex flex-col mt-2 p-2 box-border justify-start bg-blue-500 rounded-sm w-40"
-      style={{ opacity: powerup ? "0.1" : "" }}
+    <motion.div
+      className="flex flex-col mt-2 p-2 box-border justify-start bg-blue-500 rounded-sm w-40 relative"
+      animate={{ opacity: powerup || disabled ? 0.3 : 1 }}
     >
+      {disabled ? (
+        <div className="bg-transparent w-full h-full absolute z-40" />
+      ) : null}
+
       <div className="space-x-1 items-center justify-center flex flex-row">
         <FundsIcon />
         <Typography className="font-bold text-lg text-slate-100 py-2">
@@ -103,7 +111,7 @@ const PowerupsComponent: React.FC<PowerupsComponentProp> = ({
           </ButtonComponent>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
