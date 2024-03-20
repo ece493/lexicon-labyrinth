@@ -7,7 +7,7 @@ export type ServerTransitions = {
   joinLobby: (code: string, ctx: GameContextData) => void;
   changeParam: (param: string, value: string, ctx: GameContextData) => void;
   readyLobby: (ctx: GameContextData) => void;
-  pickWord: (path: [number, number][], ctx: GameContextData) => void;
+  pickWord: (path: number[][], ctx: GameContextData) => void;
   pickRotatePowerup: (
     type: string,
     index: number,
@@ -68,7 +68,7 @@ const readyLobby = (ctx: GameContextData) => {
   ctx.sequenceNumber += 1;
 };
 
-const pickWord = (path: [number, number][], ctx: GameContextData) => {
+const pickWord = (path: number[][], ctx: GameContextData) => {
   console.log(
     "sending word pick request with: ",
     path,

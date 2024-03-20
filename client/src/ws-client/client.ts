@@ -57,18 +57,19 @@ export const wsReceiveHandler = (
       break;
     case ActionsList.word_accepted:
       // Code for word_accepted
+      receiveCallBacks.handleWordAccept(action.data.path, action.data.lobby);
       break;
     case ActionsList.word_denied:
       // Code for word_denied
-      console.log(ev);
-      const data = JSON.parse(ev.data).data;
-      receiveCallBacks.handleWordDeny(data.path);
+      receiveCallBacks.handleWordDeny(action.data.path);
       break;
     case ActionsList.end_turn:
       // Code for end_turn
       break;
     case ActionsList.start_turn:
       // Code for start_turn
+      //TEMPFIX
+      setTimeout(() => receiveCallBacks.handleNewTurn(action.data), 1200);
       break;
     case ActionsList.powerup_denied:
       // Code for powerup_denied

@@ -1,5 +1,8 @@
 import React, { useEffect, useRef } from "react";
-import { SelectionGridComponent } from "../components/grid/selectionGrid";
+import {
+  SelectGridRef,
+  SelectionGridComponent,
+} from "../components/grid/selectionGrid";
 import TurnComponent, { TurnRef } from "../components/grid/turn";
 import PowerupsComponent from "../components/grid/powerups";
 import PlayersComponent from "../components/grid/players";
@@ -27,7 +30,7 @@ const Game: React.FC = () => {
     name: "P2",
     is_spectator: false,
     lives: 3,
-    money: 100,
+    money: 10,
   };
   const dead: Player = {
     id: "2",
@@ -45,7 +48,7 @@ const Game: React.FC = () => {
     difficulty: 1,
     memory: [],
   };
-  const [lobby, setLobby] = useState({
+  const [lobby, setLobby] = useState<Lobby>({
     state: {
       curr_turn: "1",
       board: {
@@ -71,22 +74,29 @@ const Game: React.FC = () => {
   });
 
   useEffect(() => {
-    setTimeout(() => {
-      let lobbyCopy = { ...lobby };
-      lobbyCopy.state.curr_turn = "3";
-      setLobby(lobbyCopy);
-    }, 1000);
+    // setTimeout(() => {
+    //   let lobbyCopy = { ...lobby };
+    //   lobbyCopy.state.curr_turn = "3";
+    //   setLobby(lobbyCopy);
+    // }, 1000);
+    gameContext.playerId = "1";
   }, []);
 
   const gameContext = useContext(GameContext);
   const [word, setWord] = useState("");
   const [error, setError] = useState<null | string>(null);
   const [showGame, setShowGame] = useState(false);
+  const [disableInput, setDisableInput] = useState(false);
+
+  function isSpectator() {
+    return lobby?.state.curr_turn !== gameContext.playerId;
+  }
 
   // May have to change where this is stored to prevent too much re-rendering
-  const [wordPath, setWordPath] = useState([]);
+  const [wordPath, setWordPath] = useState<number[][]>([]);
 
   const turnRef = useRef<TurnRef>(null);
+  const selectGridRef = useRef<SelectGridRef>(null);
 
   const [powerup, setPowerup] = useState<string | null>(null);
   const [tiles, setTiles] = useState([
@@ -108,14 +118,26 @@ const Game: React.FC = () => {
   function handleSubmit() {
     if (gameContext.sock !== null) {
       gameContext.transitions.pickWord(wordPath, gameContext);
-      if (turnRef.current) turnRef.current.shakeWord();
     }
   }
 
   function loadReceiveCallBacks() {
     gameContext.receiveCallBacks.handleWordDeny = (path: number[][]) => {
       setError("Word has already been played!");
+      if (turnRef.current) turnRef.current.shakeWord();
       setWord(reconstructWord(path));
+    };
+    gameContext.receiveCallBacks.handleWordAccept = (
+      path: number[][],
+      newLobby: Lobby
+    ) => {
+      setWord(reconstructWord(path));
+      setWordPath(path);
+      selectGridRef.current?.fadePath(1200, () => setLobby(newLobby));
+    };
+    gameContext.receiveCallBacks.handleNewTurn = (newLobby: Lobby) => {
+      setLobby(newLobby);
+      turnRef.current?.resetTimer()
     };
   }
 
@@ -213,35 +235,45 @@ const Game: React.FC = () => {
           powerup ? "bg-blue-900" : "bg-blue-400"
         } pb-20 box-border min-h-screen`}
       >
+        {disableInput ? (
+          <div className="bg-transparent w-full h-full absolute z-40" />
+        ) : null}
         <div className="flex align-top justify-center width w-full">
           <div className="flex flex-col items-center pt-5">
             <TurnComponent
               ref={turnRef}
               handleSubmit={handleSubmit}
               word={word}
+              disabled={isSpectator()}
               error={error}
               player={
-                lobby.players.find((p) => p.id === lobby.state.curr_turn)?.name ?? "player"
+                lobby?.players.find((p) => p.id === lobby.state.curr_turn)
+                  ?.name ?? "player"
               }
               powerup={powerup}
             />
             <div className="flex flex-row items-start justify-center">
               <PowerupsComponent
-                funds={50}
+                funds={
+                  lobby?.players?.find((p) => p.id === gameContext.playerId)
+                    ?.money ?? 0
+                }
                 powerup={powerup}
                 setPowerup={setPowerup}
+                disabled={isSpectator()}
               ></PowerupsComponent>
               <div style={{ opacity: powerup ? "0.2" : "" }}>
                 <SelectionGridComponent
                   wordPath={wordPath}
+                  resetSelection={resetWordSelection}
                   setWordPath={setWordPath}
                   word={word}
                   setWord={setWord}
                   setError={setError}
-                  board_size={[8, 8]}
-                  grid={{
-                    tiles,
-                  }}
+                  board_size={[7, 7]}
+                  grid={lobby?.state?.board ?? {}}
+                  ref={selectGridRef}
+                  disabled={isSpectator()}
                 />
               </div>
               <div className="absolute z-20">{getPowerupGrid()}</div>

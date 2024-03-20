@@ -10,7 +10,7 @@ import string
 from typing import Optional
 
 from models import Lobby, Action, ActionEnum, Player
-
+from tempTestObjects import StaticTestObjects
 # Define a WebSocketHandler
 
 
@@ -111,7 +111,10 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         elif actionEnum == ActionEnum.PICK_SWAP_POWERUP:
             resp = Action(ActionEnum.POWERUP_DENIED.value, self.id, None)
         elif actionEnum == ActionEnum.PICK_WORD:
-            resp = Action(ActionEnum.WORD_DENIED.value, self.id, {"path":[[0,0]]})
+            resp = Action(ActionEnum.WORD_ACCEPTED.value, self.id, {"path": [[0, 0],[1,1],[2,2]], "lobby":StaticTestObjects.getAcceptedWordLobby()})
+            self.write_message(jsonpickle.encode(resp, unpicklable=False))
+            resp = Action(ActionEnum.START_TURN.value, self.id, StaticTestObjects.getNewTurnLobby())
+            # resp = Action(ActionEnum.WORD_DENIED.value, self.id, {"path":[[0,0]]})
         self.write_message(jsonpickle.encode(resp, unpicklable=False))
 
     def on_close(self) -> None:
