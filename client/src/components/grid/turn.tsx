@@ -31,6 +31,7 @@ export interface TurnRef {
 
 const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
   ({ word, player, powerup, handleSubmit, error, disabled }, ref) => {
+    
     const [wordX, setWordX] = React.useState(0);
     const [timerComp, setTimerComp] = React.useState(<TimerComponent />);
 
