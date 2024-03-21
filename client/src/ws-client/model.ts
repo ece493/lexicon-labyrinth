@@ -12,6 +12,7 @@ export enum ActionsList {
     pick_swap_powerup = "pick_swap_powerup",
     pick_transform_powerup = "pick_transform_powerup",
     leave_game = "leave_game",
+    lose_life = "lose_life",
     // Server Actions
     return_lobby_code = "return_lobby_code",
     lobby_does_not_exist = "lobby_does_not_exist",

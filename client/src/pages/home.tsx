@@ -19,6 +19,10 @@ const Home: React.FC = () => {
         onClick={() => {
           ctx.setScreen(ScreenState.GAME);
           ctx.sock = connect(ctx.setScreen, ctx.receiveCallBacks);
+          ctx.sock.onopen = () => {
+            ctx.transitions.initialize(ctx);
+            ctx.transitions.readyLobby(ctx);
+          };
         }}
       >
         Click to go to Game test page
@@ -48,7 +52,7 @@ const Home: React.FC = () => {
             action: ActionsList.initialize,
             player_id: 0,
             data: [],
-            sequence_number:0
+            sequence_number: 0,
           };
           sock.onopen = () => {
             sock.send(JSON.stringify(act));

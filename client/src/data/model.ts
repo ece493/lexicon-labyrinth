@@ -4,7 +4,7 @@ export type Lobby = {
     state: GameState;
     max_lives: number;
     host: number;
-    board_size: [number, number];
+    board_size: number[];
     timer_setting: number;
     lobby_code: string;
     players: (Player|Bot)[];

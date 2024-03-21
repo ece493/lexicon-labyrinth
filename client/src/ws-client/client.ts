@@ -56,18 +56,15 @@ export const wsReceiveHandler = (
       // Code for update_lobby_settings
       break;
     case ActionsList.word_accepted:
-      // Code for word_accepted
       receiveCallBacks.handleWordAccept(action.data.path, action.data.lobby);
       break;
     case ActionsList.word_denied:
-      // Code for word_denied
       receiveCallBacks.handleWordDeny(action.data.path);
       break;
-    case ActionsList.end_turn:
-      // Code for end_turn
+    case ActionsList.lose_life:
+      receiveCallBacks.handleLoseLife(action.data.lobby, action.data.player_id)
       break;
     case ActionsList.start_turn:
-      // Code for start_turn
       //TEMPFIX
       setTimeout(() => receiveCallBacks.handleNewTurn(action.data), 1200);
       break;
@@ -78,10 +75,10 @@ export const wsReceiveHandler = (
       // Code for powerup_activated
       break;
     case ActionsList.you_died:
-      // Code for you_died
+      receiveCallBacks.handleDeath(action.data.lobby, action.data.player_id)
       break;
     case ActionsList.you_win:
-      // Code for you_win
+      receiveCallBacks.handleGameEnd(action.data.lobby)
       setScreen(ScreenState.END);
       break;
     default:
