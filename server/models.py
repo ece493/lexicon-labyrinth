@@ -313,6 +313,9 @@ class Game:
         move_valid = self.dictionary.is_valid_word(word_to_check)
         if move_valid:
             money_to_give_player = self.dictionary.get_word_score(word_to_check)
+            # Now that the word is selected, we need to replace the letters used with new random letters
+            for (col, row) in move_data:
+                self.board.replace_letter(row, col)
             # TODO: Give the money to the player
             self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_ACCEPTED.value, player_id, {'lobby': self.to_json(), 'path': move_data}))
             self.state = GameState.TURN_END
@@ -521,12 +524,25 @@ class WordGrid:
         '''Returns the uppercase letter in the cell'''
         return self.grid[row][col]
 
+    def random_letter_with_weights() -> str:
+        # https://www3.nd.edu/~busiforc/handouts/cryptography/letterfrequencies.html
+        letter_weights = {
+            'E': 11.1607, 'A': 8.4966, 'R': 7.5809, 'I': 7.5448, 'O': 7.1635,
+            'T': 6.9509, 'N': 6.6544, 'S': 5.7351, 'L': 5.4893, 'C': 4.5388,
+            'U': 3.6308, 'D': 3.3844, 'P': 3.1671, 'M': 3.0129, 'H': 3.0034,
+            'G': 2.4705, 'B': 2.0720, 'F': 1.8121, 'Y': 1.7779, 'W': 1.2899,
+            'K': 1.1016, 'V': 1.0074, 'X': 0.2902, 'Z': 0.2722, 'J': 0.1965,
+            'Q': 0.1962
+        }
+        letters, weights = zip(*letter_weights.items())
+        return random.choices(letters, weights=weights, k=1)[0]
+
     def generate_grid(self, size: int) -> list[list[str]]:
         return [
-            [random.choice(string.ascii_uppercase) for _ in range(size)]
+            [self.random_letter_with_weights() for _ in range(size)]
             for _ in range(size)
         ]
-    
+
     def scramble(self) -> None:
         # Collect all letters into a single list
         all_letters = [letter for row in self.grid for letter in row]
@@ -543,6 +559,9 @@ class WordGrid:
             self.rotate_row(index, rotations)
         elif type == "col":
             self.rotate_column(index, rotations)
+
+    def replace_letter(self, row: int, col: int) -> None:
+        self.grid[row][col] = self.random_letter_with_weights()
 
     def rotate_row(self, row_index: int, rotations: int) -> None:
         # Ensure rotations are within the bounds of the grid size
