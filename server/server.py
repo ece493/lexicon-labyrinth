@@ -13,6 +13,13 @@ from models import Lobby, Action, ActionEnum, Player
 from tempTestObjects import StaticTestObjects
 # Define a WebSocketHandler
 
+def get_random_player_id(length: int = 10) -> str:
+    """Generate a random string of letters for a player ID."""
+    # Combines uppercase and lowercase letters
+    letters = string.ascii_letters
+    # Randomly selects letters to create the ID
+    player_id = ''.join(random.choice(letters) for i in range(length))
+    return player_id
 
 class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     connections: set['GameWebSocketHandler'] = set()
@@ -39,7 +46,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def open(self) -> None:
         # Assign a unique ID to the connection
-        self.id = str(uuid.uuid4())
+        self.id = get_random_player_id() #str(uuid.uuid4())
         self.lobby_id: Optional[str] = None
         self.connections.add(self)
         self.sequence_number: int = 0
@@ -113,7 +120,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                         string.ascii_uppercase, k=4))
                     if lobby_code not in self.lobbies:
                         break  # Exit the loop if the generated code is unique
-                lobby_code = "ABCD" # TODO: REMOVE
+                #lobby_code = "ABCD" # TODO: REMOVE
                 # Initialize the lobby with the generated code
                 print(f"Initializing a lobby with code {lobby_code}")
                 self.lobbies[lobby_code] = Lobby(self.id, lobby_code)
@@ -225,6 +232,7 @@ def make_app() -> Application:
 
 
 if __name__ == "__main__":
+    random.seed(0)
     app = make_app()
     app.listen(8888)  # Specify the port to listen on
     print("Lexicon Labyrinth server is running on http://localhost:8888")
