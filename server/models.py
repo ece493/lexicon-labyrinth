@@ -180,7 +180,7 @@ class Game:
         self.broadcast_func: Callable = broadcast_func  # Callback function for broadcasting messages
         self.send_to_player_func: Callable = send_to_player_func  # Callback to send message to specific player
         self.board_size: int = board_size
-        self.board: Optional[WordGrid] = WordGrid(board_size)
+        self.board: WordGrid = WordGrid(board_size)
         self.max_lives: int = max_lives
         self.host: str = host
         self.timer_setting: float = timer_setting
@@ -309,15 +309,17 @@ class Game:
         print(f"Processing move: {move_data}")
         word_to_check = ""
         for (col, row) in move_data:
-            word_to_check += self.board
-        move_valid = True
+            word_to_check += self.board.get_letter(row, col)
+        move_valid = self.dictionary.is_valid_word(word_to_check)
         if move_valid:
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_ACCEPTED.value, player_id, move_data))
+            money_to_give_player = self.dictionary.get_word_score(word_to_check)
+            # TODO: Give the money to the player
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_ACCEPTED.value, player_id, {'lobby': self.to_json(), 'path': move_data}))
             self.state = GameState.TURN_END
             #self.winner_determined()
             self.transition_to_next_player()
         else:
-            self.send_to_player_func(player_id, Action(ActionEnum.WORD_DENIED.value, player_id, {"message": "Move rejected, try again"}))
+            self.send_to_player_func(player_id, Action(ActionEnum.WORD_DENIED.value, player_id, self.to_json()))
             self.state = GameState.MOVE_REJECTED
             self.retry_current_player_turn()
 
@@ -358,7 +360,7 @@ class Game:
     # Helper function to check player's funds and deduct cost
     def check_and_deduct_funds(self, player_id: str, cost: int) -> bool:
         player = next((p for p in self.players if p.player_id == player_id), None)
-        if player and player.currency >= cost:
+        if player is not None and player.currency >= cost:
             player.currency -= cost
             return True
         return False
@@ -367,24 +369,14 @@ class Game:
         cost = POWERUP_COSTS["Rotate"]
         if self.check_and_deduct_funds(player_id, cost):
             # Apply rotation logic here based on 'data'
-            # TODO: Implement rotation logic
+            assert data['type'] in ['row', 'col'], f"Rotate powerup type not either 'row' or 'col'!"
+            self.board.rotate(data['type'], data['index'], data['rotations'])
 
             # Broadcast success message to ALL players
-            success_message = {
-                "action": "rotate_powerup_accept",
-                "player_id": player_id,
-                # TODO: Replace with actual timestamp
-                "timestamp": 1234,
-                "data": {
-                    "lobby": self.lobby_id,  # Assuming you need to convert lobby to string if necessary
-                    "powerup_data": data
-                }
-            }
-            self.broadcast_func(self.lobby_id, success_message)
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.ROTATE_POWERUP_ACCEPTED.value, player_id, {'lobby': self.to_json(), 'powerup_data': data}))
         else:
             # Broadcast denial due to insufficient funds
-            # TODO: Implement denial message broadcasting
-            pass
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED.value, player_id, self.to_json()))
 
     def apply_transform_powerup(self, player_id: str, tile: list, new_char: str) -> None:
         cost = POWERUP_COSTS["Transform"]
@@ -397,8 +389,7 @@ class Game:
             pass
         else:
             # Broadcast denial due to insufficient funds
-            # TODO: Implement denial message broadcasting
-            pass
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED.value, player_id, self.to_json()))
 
     def apply_swap_powerup(self, player_id: str, tiles: list) -> None:
         cost = POWERUP_COSTS["Swap"]
@@ -411,22 +402,20 @@ class Game:
             pass
         else:
             # Broadcast denial due to insufficient funds
-            # TODO: Implement denial message broadcasting
-            pass
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED.value, player_id, self.to_json()))
 
     def apply_scramble_powerup(self, player_id: str) -> None:
         cost = POWERUP_COSTS["Scramble"]
         if self.check_and_deduct_funds(player_id, cost):
             # Apply scramble logic here
             # TODO: Implement scramble logic
-
+            self.board.scramble()
             # Broadcast success message
             # TODO: Implement success message broadcasting
-            pass
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.SCRAMBLE_POWERUP_ACCEPTED.value, player_id, self.to_json()))
         else:
             # Broadcast denial due to insufficient funds
-            # TODO: Implement denial message broadcasting
-            pass
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED.value, player_id, self.to_json()))
 
 
     # def to_json(self) -> dict[str, Any]:
@@ -528,19 +517,51 @@ class WordGrid:
         self.grid = self.generate_grid(size)
         self.valid_words = set()  # Words found in the dictionary
     
+    def get_letter(self, row, col) -> str:
+        '''Returns the uppercase letter in the cell'''
+        return self.grid[row][col]
+
     def generate_grid(self, size: int) -> list[list[str]]:
         return [
             [random.choice(string.ascii_uppercase) for _ in range(size)]
             for _ in range(size)
         ]
     
-    def check_word(self, word: str) -> None:
-        # Implementation to check if a word is valid
-        pass
-    
-    def apply_powerup(self, powerup) -> None:
-        # Implementation for applying power-up effects
-        pass
+    def scramble(self) -> None:
+        # Collect all letters into a single list
+        all_letters = [letter for row in self.grid for letter in row]
+        # Shuffle the letters randomly
+        random.shuffle(all_letters)
+        
+        # Redistribute the letters back into the grid
+        for i in range(self.size):
+            for j in range(self.size):
+                self.grid[i][j] = all_letters[i*self.size + j]
+
+    def rotate(self, type: str, index: int, rotations: int) -> None:
+        if type == "row":
+            self.rotate_row(index, rotations)
+        elif type == "col":
+            self.rotate_column(index, rotations)
+
+    def rotate_row(self, row_index: int, rotations: int) -> None:
+        # Ensure rotations are within the bounds of the grid size
+        rotations %= self.size
+        self.grid[row_index] = self.grid[row_index][-rotations:] + self.grid[row_index][:-rotations]
+
+    def rotate_column(self, col_index: int, rotations: int) -> None:
+        # Extract the column
+        column = [self.grid[i][col_index] for i in range(self.size)]
+        # Ensure rotations are within the bounds of the grid size
+        rotations %= self.size
+        # Rotate the column
+        column = column[-rotations:] + column[:-rotations]
+        # Put the column back
+        for i in range(self.size):
+            self.grid[i][col_index] = column[i]
+
+    #def apply_powerup(self, powerup) -> None:
+    #    pass
 
     def to_json(self) -> Any:
         # return {
@@ -569,7 +590,7 @@ class GameDictionary(object):
                     start_processing = True
         return words
     
-    def is_valid_word(self, word) -> bool:
+    def is_valid_word(self, word: str) -> bool:
         return word.lower() in self.words
     
     def get_word_score(self, word) -> int:
@@ -654,5 +675,7 @@ class ActionEnum(Enum):
     START_TURN = "start_turn"
     POWERUP_DENIED = "powerup_denied"
     POWERUP_ACTIVATED = "powerup_activated"
+    ROTATE_POWERUP_ACCEPTED = "rotate_powerup_accept"
+    SCRAMBLE_POWERUP_ACCEPTED = "scramble_powerup_accept"
     YOU_DIED = "you_died"
     YOU_WIN = "you_win"
