@@ -303,6 +303,20 @@ class Game:
         else:
             self.transition_to_next_player()
 
+    def check_move_validity(self, path) -> bool:
+        last_col = None
+        last_row = None
+        for (col, row) in path:
+            if last_col is None and last_row is None:
+                last_col = col
+                last_row = row
+            else:
+                # Check to make sure that the move is either a diagonal, or it goes up/down/left/right by one
+                if (abs(col - last_col), abs(row - last_row)) not in [(1, 0), (1, 1), (0, 1)]:
+                    print(f"Move has an invalid path!")
+                    return False
+        return True
+
     def process_word_choice(self, player_id, move_data) -> None:
         assert self.state == GameState.WAITING_FOR_MOVE, f"In process move, the current state of {self.state} isn't the expected of WAITING_FOR_MOVE!"
         # Logic to check if the move is valid
@@ -310,8 +324,12 @@ class Game:
         word_to_check = ""
         for (col, row) in move_data:
             word_to_check += self.board.get_letter(row, col)
-        move_valid = self.dictionary.is_valid_word(word_to_check)
-        if move_valid:
+        word_is_valid = self.dictionary.is_valid_word(word_to_check)
+        move_is_valid = self.check_move_validity(move_data)
+        choice_is_valid = word_is_valid and move_is_valid
+        if not word_is_valid:
+            print(f"Word is not in the dictionary! Invalid word.")
+        if choice_is_valid:
             money_to_give_player = self.dictionary.get_word_score(word_to_check)
             # Now that the word is selected, we need to replace the letters used with new random letters
             for (col, row) in move_data:
@@ -369,6 +387,7 @@ class Game:
         return False
 
     def apply_rotate_powerup(self, player_id: str, data: dict) -> None:
+        print(f"Applying rotate powerup! Data is {data}")
         cost = POWERUP_COSTS["Rotate"]
         if self.check_and_deduct_funds(player_id, cost):
             # Apply rotation logic here based on 'data'
@@ -382,6 +401,7 @@ class Game:
             self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED.value, player_id, self.to_json()))
 
     def apply_transform_powerup(self, player_id: str, data: dict) -> None:
+        print(f"Applying transform powerup! Data is {data}")
         tile = data['tile']
         new_char = data['new_char']
         cost = POWERUP_COSTS["Transform"]
@@ -396,6 +416,7 @@ class Game:
             self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED.value, player_id, self.to_json()))
 
     def apply_swap_powerup(self, player_id: str, data: list) -> None:
+        print(f"Applying swap powerup! Data is {data}")
         cost = POWERUP_COSTS["Swap"]
         if self.check_and_deduct_funds(player_id, cost):
             # Apply swap logic here
@@ -407,6 +428,7 @@ class Game:
             self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED.value, player_id, self.to_json()))
 
     def apply_scramble_powerup(self, player_id: str) -> None:
+        print(f"Applying scramble powerup!")
         cost = POWERUP_COSTS["Scramble"]
         if self.check_and_deduct_funds(player_id, cost):
             # Apply scramble logic here
@@ -521,7 +543,7 @@ class WordGrid:
         '''Returns the uppercase letter in the cell'''
         return self.grid[row][col]
 
-    def random_letter_with_weights() -> str:
+    def random_letter_with_weights(self) -> str:
         # https://www3.nd.edu/~busiforc/handouts/cryptography/letterfrequencies.html
         letter_weights = {
             'E': 11.1607, 'A': 8.4966, 'R': 7.5809, 'I': 7.5448, 'O': 7.1635,
