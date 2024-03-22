@@ -8,6 +8,7 @@ from typing import Optional, Callable, Any
 #from server import GameWebSocketHandler
 
 PLAYER_LIMIT = 5
+DICTIONARY_PATH = "dictionary.txt"
 
 POWERUP_COSTS = {
     "Rotate": 1,
@@ -128,7 +129,6 @@ class Lobby(object):
             print(f"Lobby {self.lobby_id} is full. Cannot add player {player.name}.")
             return False
 
-    
     def remove_player(self, player_id: str) -> bool:
         # Attempt to remove the player
         player_found = any(player.player_id == player_id for player in self.players)
@@ -186,6 +186,7 @@ class Game:
         self.timer_setting: float = timer_setting
         self.current_player_index: int = 0
         self.turn_modulus: int = len(players)
+        self.dictionary = GameDictionary()
     
     #def initialize_random_board(self) -> None:
 
@@ -306,6 +307,9 @@ class Game:
         assert self.state == GameState.WAITING_FOR_MOVE, f"In process move, the current state of {self.state} isn't the expected of WAITING_FOR_MOVE!"
         # Logic to check if the move is valid
         print(f"Processing move: {move_data}")
+        word_to_check = ""
+        for (col, row) in move_data:
+            word_to_check += self.board
         move_valid = True
         if move_valid:
             self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_ACCEPTED.value, player_id, move_data))
@@ -551,10 +555,26 @@ class GameDictionary(object):
         self.words = self.load_words()
     
     def load_words(self) -> None:
-        pass  # Implementation to load words from the SCOWL dataset
+        # Load words from the SCOWL dataset
+        words = []
+        start_processing = False
+        with open(DICTIONARY_PATH, 'r', encoding='utf8') as file:
+            for line in file:
+                # Strip newline and other trailing whitespace characters
+                line = line.strip()
+                if start_processing:
+                    if line:  # Check if the line is not empty
+                        words.append(line)
+                elif line == '---':
+                    start_processing = True
+        return words
     
     def is_valid_word(self, word) -> bool:
         return word.lower() in self.words
+    
+    def get_word_score(self, word) -> int:
+        # Based on the letters used in the word and how long it is, give the player a score
+        return len(word)
 
 
 class Powerup(object):
