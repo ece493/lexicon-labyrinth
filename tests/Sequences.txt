@@ -40,3 +40,8 @@ B receives:
 
 {"action": "word_accepted", "player_id": "yWAcqGFzYt", "data": {"lobby": {"state": {"curr_turn": 0, "board": [["P", "N", "E", "U"], ["G", "C", "U", "O"], ["T", "S", "B", "W"], ["T", "H", "R", "P"]], "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 15.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}, {"id": "isiWgNZqIT", "name": "bob", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}]}, "path": [[1, 0], [2, 0], [2, 1], [3, 1]]}, "sequence_number": 4}
 {"action": "start_turn", "player_id": "isiWgNZqIT", "data": {"message": "Your turn"}, "sequence_number": 5}
+
+["P", "N", "E", "U"]
+["G", "C", "U", "O"]
+["T", "S", "B", "W"]
+["T", "H", "R", "P"]

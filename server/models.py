@@ -10,11 +10,12 @@ from typing import Optional, Callable, Any
 PLAYER_LIMIT = 5
 DICTIONARY_PATH = "dictionary.txt"
 
+# The player starts with 10 money
 POWERUP_COSTS = {
-    "Rotate": 1,
-    "Scramble": 1,
-    "Swap": 1,
-    "Transform": 1
+    "Rotate": 5,
+    "Scramble": 4,
+    "Swap": 8,
+    "Transform": 10
 }
 
 class GameState(Enum):
@@ -303,10 +304,15 @@ class Game:
         else:
             self.transition_to_next_player()
 
-    def check_move_validity(self, path) -> bool:
+    def check_path_validity(self, path) -> bool:
         last_col = None
         last_row = None
+        visited = set()
         for (col, row) in path:
+            if (col, row) in visited:
+                # Make sure we don't visit the same node twice
+                return False
+            visited.add((col, row))
             if last_col is None and last_row is None:
                 last_col = col
                 last_row = row
@@ -315,6 +321,8 @@ class Game:
                 if (abs(col - last_col), abs(row - last_row)) not in [(1, 0), (1, 1), (0, 1)]:
                     print(f"Move has an invalid path!")
                     return False
+                last_col = col
+                last_row = row
         return True
 
     def process_word_choice(self, player_id, move_data) -> None:
@@ -324,12 +332,13 @@ class Game:
         word_to_check = ""
         for (col, row) in move_data:
             word_to_check += self.board.get_letter(row, col)
+        print(f"Checking word {word_to_check}")
         word_is_valid = self.dictionary.is_valid_word(word_to_check)
-        move_is_valid = self.check_move_validity(move_data)
-        choice_is_valid = word_is_valid and move_is_valid
+        path_is_valid = self.check_path_validity(move_data)
+        move_is_valid = word_is_valid and path_is_valid
         if not word_is_valid:
             print(f"Word is not in the dictionary! Invalid word.")
-        if choice_is_valid:
+        if move_is_valid:
             money_to_give_player = self.dictionary.get_word_score(word_to_check)
             # Now that the word is selected, we need to replace the letters used with new random letters
             for (col, row) in move_data:
@@ -354,16 +363,30 @@ class Game:
         #    self.next_turn()
 
     def eliminate_player(self, player_id) -> None:
-        self.players = [player for player in self.players if player.player_id != player_id]
+        player_to_eliminate = None
+        for player in self.players:
+            if player.player_id == player_id:
+                player_to_eliminate = player
+                break
+        if player_to_eliminate.is_bot:
+            # Remove the bot after telling it that it died
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, self.to_json()))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.LEAVE_GAME, player_to_eliminate.player_id, self.to_json()))
+            self.players = [player for player in self.players if player.player_id != player_id]
+        else:
+            # Let the player watch the rest of the game as a spectator
+            player_to_eliminate.is_spectator = True
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, self.to_json()))
+        
         remaining_players = [player for player in self.players if not player.is_spectator]
         if len(remaining_players) == 1:
             # Last player standing
+            print(f"Only one last player standing. The game has ended!")
             self.winner_determined(remaining_players[0])
         else:
-            # Adjust the current player index if necessary
-            #self.adjust_current_player_index_after_elimination(player_id)
-            # TODO: Move onto the next player's turn!
-            pass
+            print(f"A player got removed, but there's still players left to fight it out. The game goes on!")
+            # Move onto the next player's turn!
+            self.transition_to_next_player()
 
     def run_game(self) -> None:
         # UNUSED
@@ -474,7 +497,7 @@ class Player(object):
         self.is_spectator = False
         self.lives = 3
         self.score = 0
-        self.currency = 0
+        self.currency = 10 # Start with 10 monies
         self.send_func: Optional[Callable] = None  # Callback function to send a message
 
     def set_send_message_func(self, func) -> None:
