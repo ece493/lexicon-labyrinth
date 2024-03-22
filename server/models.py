@@ -315,7 +315,7 @@ class Game:
             money_to_give_player = self.dictionary.get_word_score(word_to_check)
             # Now that the word is selected, we need to replace the letters used with new random letters
             for (col, row) in move_data:
-                self.board.replace_letter(row, col)
+                self.board.randomly_replace_letter(row, col)
             # TODO: Give the money to the player
             self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_ACCEPTED.value, player_id, {'lobby': self.to_json(), 'path': move_data}))
             self.state = GameState.TURN_END
@@ -381,28 +381,27 @@ class Game:
             # Broadcast denial due to insufficient funds
             self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED.value, player_id, self.to_json()))
 
-    def apply_transform_powerup(self, player_id: str, tile: list, new_char: str) -> None:
+    def apply_transform_powerup(self, player_id: str, data: dict) -> None:
+        tile = data['tile']
+        new_char = data['new_char']
         cost = POWERUP_COSTS["Transform"]
         if self.check_and_deduct_funds(player_id, cost):
             # Apply transform logic here
-            # TODO: Implement transform logic
-
+            self.board.set_letter(tile[0], tile[1], new_char)
             # Broadcast success message
-            # TODO: Implement success message broadcasting
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.TRANSFORM_POWERUP_ACCEPTED.value, player_id, {'lobby': self.to_json(), 'powerup_data': data}))
             pass
         else:
             # Broadcast denial due to insufficient funds
             self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED.value, player_id, self.to_json()))
 
-    def apply_swap_powerup(self, player_id: str, tiles: list) -> None:
+    def apply_swap_powerup(self, player_id: str, data: list) -> None:
         cost = POWERUP_COSTS["Swap"]
         if self.check_and_deduct_funds(player_id, cost):
             # Apply swap logic here
-            # TODO: Implement swap logic
-
+            self.board.swap_tiles(data['tiles'][0], data['tiles'][1])
             # Broadcast success message
-            # TODO: Implement success message broadcasting
-            pass
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.SWAP_POWERUP_ACCEPTED.value, player_id, {'lobby': self.to_json(), 'powerup_data': data}))
         else:
             # Broadcast denial due to insufficient funds
             self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED.value, player_id, self.to_json()))
@@ -411,10 +410,8 @@ class Game:
         cost = POWERUP_COSTS["Scramble"]
         if self.check_and_deduct_funds(player_id, cost):
             # Apply scramble logic here
-            # TODO: Implement scramble logic
             self.board.scramble()
             # Broadcast success message
-            # TODO: Implement success message broadcasting
             self.broadcast_func(self.lobby_id, Action(ActionEnum.SCRAMBLE_POWERUP_ACCEPTED.value, player_id, self.to_json()))
         else:
             # Broadcast denial due to insufficient funds
@@ -543,6 +540,11 @@ class WordGrid:
             for _ in range(size)
         ]
 
+    def swap_tiles(self, tile1, tile2) -> None:
+        temp = self.get_letter(tile1[0], tile1[1])
+        self.set_letter(tile1[0], tile1[1], self.get_letter(tile2[0], tile2[1]))
+        self.set_letter(tile2[0], tile2[1], temp)
+
     def scramble(self) -> None:
         # Collect all letters into a single list
         all_letters = [letter for row in self.grid for letter in row]
@@ -560,7 +562,11 @@ class WordGrid:
         elif type == "col":
             self.rotate_column(index, rotations)
 
-    def replace_letter(self, row: int, col: int) -> None:
+    def set_letter(self, row: int, col: int, new_letter: str) -> None:
+        assert len(new_letter) == 1, f"New letter's length isn't 1! ({new_letter})"
+        self.grid[row][col] = new_letter
+
+    def randomly_replace_letter(self, row: int, col: int) -> None:
         self.grid[row][col] = self.random_letter_with_weights()
 
     def rotate_row(self, row_index: int, rotations: int) -> None:
@@ -694,6 +700,8 @@ class ActionEnum(Enum):
     START_TURN = "start_turn"
     POWERUP_DENIED = "powerup_denied"
     POWERUP_ACTIVATED = "powerup_activated"
+    SWAP_POWERUP_ACCEPTED = "swap_powerup_accept"
+    TRANSFORM_POWERUP_ACCEPTED = "transform_powerup_accept"
     ROTATE_POWERUP_ACCEPTED = "rotate_powerup_accept"
     SCRAMBLE_POWERUP_ACCEPTED = "scramble_powerup_accept"
     YOU_DIED = "you_died"
