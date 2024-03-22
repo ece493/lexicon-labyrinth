@@ -1,6 +1,7 @@
-These sequences use random.seed(0)
+These sequences use random.seed(0), which is what the game is set to by default
+Run mock_client_manual.py in two separate windows, and call one A and the other B, and then you can test these out
 
-2024-03-22
+Sequence 1: Starting a basic 2 player game and selecting a word
 
 A sends:
 {"action": "initialize", "data": {"player_name": "Alice"}, "sequence_number": 0}
@@ -10,36 +11,38 @@ A receives:
 {"action": "successfully_joined_lobby", "player_id": "yWAcqGFzYt", "data": {"lobby_code": "ZJXF", "player_name": "Alice"}, "sequence_number": 2}
 
 B sends:
-{"action": "join_lobby", "data": {"lobby_code": "ZJXF", "player_name": "bob"}, "sequence_number": 0}
+{"action": "join_lobby", "data": {"lobby_code": "ZJXF", "player_name": "Bob"}, "sequence_number": 0}
 
 B receives:
-{"action": "successfully_joined_lobby", "player_id": "isiWgNZqIT", "data": {"lobby_code": "ZJXF", "player_name": "bob"}, "sequence_number": 1}
+{"action": "successfully_joined_lobby", "player_id": "isiWgNZqIT", "data": {"lobby_code": "ZJXF", "player_name": "Bob"}, "sequence_number": 1}
 
 A receives:
-{"action": "successfully_joined_lobby", "player_id": "isiWgNZqIT", "data": {"lobby_code": "ZJXF", "player_name": "bob"}, "sequence_number": 3}
+{"action": "successfully_joined_lobby", "player_id": "isiWgNZqIT", "data": {"lobby_code": "ZJXF", "player_name": "Bob"}, "sequence_number": 3}
 
 A sends:
 {"action": "ready_lobby", "sequence_number": 1}
 
 A receives:
-{"action": "start_game", "player_id": "yWAcqGFzYt", "data": {"state": {"curr_turn": 0, "board": [["P", "B", "I", "U"], ["G", "C", "T", "E"], ["T", "S", "B", "W"], ["T", "H", "R", "P"]], "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 15.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}, {"id": "isiWgNZqIT", "name": "bob", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}]}, "sequence_number": 4}
-{"action": "start_turn", "player_id": "yWAcqGFzYt", "data": {"state": {"curr_turn": 0, "board": [["P", "B", "I", "U"], ["G", "C", "T", "E"], ["T", "S", "B", "W"], ["T", "H", "R", "P"]], "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 15.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}, {"id": "isiWgNZqIT", "name": "bob", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}]}, "sequence_number": 5}
+{"action": "start_game", "player_id": "yWAcqGFzYt", "data": {"state": {"curr_turn": 0, "board": [["P", "B", "I", "U"], ["G", "C", "T", "E"], ["T", "S", "B", "W"], ["T", "H", "R", "P"]], "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 15.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}, {"id": "isiWgNZqIT", "name": "Bob", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}]}, "sequence_number": 4}
+{"action": "start_turn", "player_id": "yWAcqGFzYt", "data": {"state": {"curr_turn": 0, "board": [["P", "B", "I", "U"], ["G", "C", "T", "E"], ["T", "S", "B", "W"], ["T", "H", "R", "P"]], "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 15.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}, {"id": "isiWgNZqIT", "name": "Bob", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}]}, "sequence_number": 5}
 
 B receives:
-{"action": "start_game", "player_id": "yWAcqGFzYt", "data": {"state": {"curr_turn": 0, "board": [["P", "B", "I", "U"], ["G", "C", "T", "E"], ["T", "S", "B", "W"], ["T", "H", "R", "P"]], "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 15.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}, {"id": "isiWgNZqIT", "name": "bob", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}]}, "sequence_number": 2}
-{"action": "start_turn", "player_id": "yWAcqGFzYt", "data": {"state": {"curr_turn": 0, "board": [["P", "B", "I", "U"], ["G", "C", "T", "E"], ["T", "S", "B", "W"], ["T", "H", "R", "P"]], "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 15.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}, {"id": "isiWgNZqIT", "name": "bob", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}]}, "sequence_number": 3}
+{"action": "start_game", "player_id": "yWAcqGFzYt", "data": {"state": {"curr_turn": 0, "board": [["P", "B", "I", "U"], ["G", "C", "T", "E"], ["T", "S", "B", "W"], ["T", "H", "R", "P"]], "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 15.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}, {"id": "isiWgNZqIT", "name": "Bob", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}]}, "sequence_number": 2}
+{"action": "start_turn", "player_id": "yWAcqGFzYt", "data": {"state": {"curr_turn": 0, "board": [["P", "B", "I", "U"], ["G", "C", "T", "E"], ["T", "S", "B", "W"], ["T", "H", "R", "P"]], "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 15.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}, {"id": "isiWgNZqIT", "name": "Bob", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}]}, "sequence_number": 3}
 
 A sends:
 {"action": "pick_word", "data": [[1, 0], [2, 0], [2, 1], [3, 1]], "sequence_number": 2}
 
 A receives:
-{"action": "word_accepted", "player_id": "yWAcqGFzYt", "data": {"lobby": {"state": {"curr_turn": 0, "board": [["P", "N", "E", "U"], ["G", "C", "U", "O"], ["T", "S", "B", "W"], ["T", "H", "R", "P"]], "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 15.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}, {"id": "isiWgNZqIT", "name": "bob", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}]}, "path": [[1, 0], [2, 0], [2, 1], [3, 1]]}, "sequence_number": 6}
+{"action": "word_accepted", "player_id": "yWAcqGFzYt", "data": {"lobby": {"state": {"curr_turn": 1, "board": [["P", "N", "E", "U"], ["G", "C", "U", "O"], ["T", "S", "B", "W"], ["T", "H", "R", "P"]], "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 15.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}, {"id": "isiWgNZqIT", "name": "Bob", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}]}, "path": [[1, 0], [2, 0], [2, 1], [3, 1]]}, "sequence_number": 6}
 {"action": "start_turn", "player_id": "isiWgNZqIT", "data": {"message": "Your turn"}, "sequence_number": 7}
 
 B receives:
 
-{"action": "word_accepted", "player_id": "yWAcqGFzYt", "data": {"lobby": {"state": {"curr_turn": 0, "board": [["P", "N", "E", "U"], ["G", "C", "U", "O"], ["T", "S", "B", "W"], ["T", "H", "R", "P"]], "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 15.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}, {"id": "isiWgNZqIT", "name": "bob", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}]}, "path": [[1, 0], [2, 0], [2, 1], [3, 1]]}, "sequence_number": 4}
+{"action": "word_accepted", "player_id": "yWAcqGFzYt", "data": {"lobby": {"state": {"curr_turn": 1, "board": [["P", "N", "E", "U"], ["G", "C", "U", "O"], ["T", "S", "B", "W"], ["T", "H", "R", "P"]], "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 15.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}, {"id": "isiWgNZqIT", "name": "Bob", "is_spectator": false, "is_bot": false, "lives": 3, "money": 0, "score": 0}]}, "path": [[1, 0], [2, 0], [2, 1], [3, 1]]}, "sequence_number": 4}
 {"action": "start_turn", "player_id": "isiWgNZqIT", "data": {"message": "Your turn"}, "sequence_number": 5}
+
+The board now looks like:
 
 ["P", "N", "E", "U"]
 ["G", "C", "U", "O"]

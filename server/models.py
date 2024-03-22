@@ -472,7 +472,7 @@ class Game:
     #     }
     def to_json(self) -> dict[str, Any]:
         state = {
-            "curr_turn": 0, # TODO, index of player of whose turn it is
+            "curr_turn": self.current_player_index,
             "board": self.board.to_json() if self.board else None,
             "timer": 123.4,
             "memory": [],
