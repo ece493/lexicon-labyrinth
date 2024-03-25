@@ -3,7 +3,7 @@ import { ActionsList } from "../ws-client/model";
 export type Lobby = {
     state: GameState;
     max_lives: number;
-    host: number;
+    host: string;
     board_size: number[];
     timer_setting: number;
     lobby_code: string;
