@@ -18,7 +18,7 @@ const Home: React.FC = () => {
       <h2
         onClick={() => {
           ctx.setScreen(ScreenState.GAME);
-          ctx.sock = connect(ctx.setScreen, ctx.receiveCallBacks);
+          ctx.sock = connect(ctx.setScreen, ctx.receiveCallBacks, ctx);
           ctx.sock.onopen = () => {
             ctx.transitions.initialize(ctx);
             ctx.transitions.readyLobby(ctx);
@@ -30,7 +30,7 @@ const Home: React.FC = () => {
       <h2
         onClick={() => {
           ctx.setScreen(ScreenState.END);
-          ctx.sock = connect(ctx.setScreen, ctx.receiveCallBacks);
+          ctx.sock = connect(ctx.setScreen, ctx.receiveCallBacks, ctx);
           ctx.sock.onopen = () => {
             ctx.transitions.initialize(ctx);
             ctx.transitions.readyLobby(ctx);
@@ -44,7 +44,7 @@ const Home: React.FC = () => {
       </h2>
       <h2
         onClick={() => {
-          const sock = connect(ctx.setScreen, ctx.receiveCallBacks);
+          const sock = connect(ctx.setScreen, ctx.receiveCallBacks, ctx);
           sock.onopen = () => {
             sock.send("test");
           };
@@ -59,10 +59,10 @@ const Home: React.FC = () => {
       </h2>
       <h2
         onClick={() => {
-          const sock = connect(ctx.setScreen, ctx.receiveCallBacks);
+          const sock = connect(ctx.setScreen, ctx.receiveCallBacks, ctx);
           const act: Action = {
             action: ActionsList.initialize,
-            player_id: 0,
+            player_id: "0",
             data: [],
             sequence_number: 0,
           };

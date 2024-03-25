@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GameContext } from "../context/ctx";
 import { ScreenState } from "../data/model";
@@ -19,6 +19,7 @@ interface StateWrapperProps {
 export const StateWrapper: React.FC<StateWrapperProps> = ({
   initScreen = ScreenState.START,
 }) => {
+  const ctx = useContext(GameContext)
   const [screen, setScreen] = useState<ScreenState>(initScreen);
   const stateToScreen = (s: ScreenState) => {
     switch (screen) {
@@ -42,7 +43,7 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   return (
     <GameContext.Provider
       value={{
-        sock: connect(setScreen, dReceiveCallbacks),
+        sock: connect(setScreen, dReceiveCallbacks,ctx),
         screen,
         setScreen,
         lobby: null,

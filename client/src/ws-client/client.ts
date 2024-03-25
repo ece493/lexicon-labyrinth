@@ -1,3 +1,4 @@
+import { GameContextData } from "../context/ctx";
 import { Action, ScreenState, isAction } from "../data/model";
 import { ActionsList } from "./model";
 import { ReceiveCallbacks } from "./receive-callbacks";
@@ -5,20 +6,22 @@ import { ReceiveCallbacks } from "./receive-callbacks";
 // https://socket.io/how-to/use-with-react
 export const connect = (
   setScreen: (s: ScreenState) => void,
-  receiveCallBacks: ReceiveCallbacks
+  receiveCallBacks: ReceiveCallbacks,
+  ctx: GameContextData,
 ) => {
   // TO-DO: Remove undefined
   // const url = process.env.NODE_ENV === 'production' ? "undefined" : 'ws://localhost:8888/websocket';
   const ws = new WebSocket("ws://localhost:8888/websocket");
   ws.onopen = (_) => console.log("connected websocket!");
-  ws.onmessage = (ev) => wsReceiveHandler(setScreen, ev, receiveCallBacks);
+  ws.onmessage = (ev) => wsReceiveHandler(setScreen, ev, receiveCallBacks, ctx);
   return ws;
 };
 
 export const wsReceiveHandler = (
   setScreen: (s: ScreenState) => void,
   ev: MessageEvent<any>,
-  receiveCallBacks: ReceiveCallbacks
+  receiveCallBacks: ReceiveCallbacks,
+  ctx: GameContextData
 ) => {
   const data = JSON.parse(ev.data);
   if (!isAction(data)) return null;
@@ -65,14 +68,10 @@ export const wsReceiveHandler = (
       receiveCallBacks.handleLoseLife(action.data.lobby, action.data.player_id)
       break;
     case ActionsList.start_turn:
-      //TEMPFIX
-      setTimeout(() => receiveCallBacks.handleNewTurn(action.data), 1200);
+      setTimeout(() => receiveCallBacks.handleNewTurn(action.data), 1200); //TEMP FIX
       break;
     case ActionsList.powerup_denied:
-      // Code for powerup_denied
-      break;
-    case ActionsList.powerup_activated:
-      // Code for powerup_activated
+      ctx.lobby = action.data.lobby
       break;
     case ActionsList.you_died:
       receiveCallBacks.handleDeath(action.data.lobby, action.data.player_id)
