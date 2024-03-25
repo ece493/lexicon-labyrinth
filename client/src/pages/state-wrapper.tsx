@@ -11,6 +11,7 @@ import JoinLobbyPage, { JoinLobbyErrorPage } from "./join-lobby";
 import JoinLobbyComponent from "../components/lobby/join/join-lobby-component";
 import { ReceiveCallbacksDefault } from "../ws-client/receive-callbacks";
 import EndPage from "./end";
+import NameEntryPage from "./name-entry";
 
 interface StateWrapperProps {
   initScreen?: ScreenState;
@@ -20,10 +21,18 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   initScreen = ScreenState.START,
 }) => {
   const [screen, setScreen] = useState<ScreenState>(initScreen);
+  const [playerId, setPlayerId] = useState<string>("");
+  const dReceiveCallbacks = ReceiveCallbacksDefault;
+  const [sock, setSock] = useState<WebSocket|null>(null);
+  const [playerName, setPlayerName] = useState("");
+  useEffect(() => setSock(connect(setPlayerId, setScreen, dReceiveCallbacks)), []);
+
   const stateToScreen = (s: ScreenState) => {
-    switch (screen) {
+    switch (s) {
       case ScreenState.START:
         return <Home />;
+      case ScreenState.NAME_ENTRY:
+        return <NameEntryPage />;
       case ScreenState.LOBBY:
         return <LobbyPage />;
       case ScreenState.GAME:
@@ -31,24 +40,28 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
       case ScreenState.LOBBY_CODE_ENTRY:
         return <JoinLobbyPage />;
       case ScreenState.LOBBY_CODE_ENTRY_FAILED:
-        return <JoinLobbyErrorPage />;
+        return JoinLobbyErrorPage("Lobby Does Not Exist!");
+      case ScreenState.LOBBY_FULL:
+        return JoinLobbyErrorPage("Lobby is Full!");
       case ScreenState.END:
           return <EndPage />;
       default:
         return <Home />;
     }
   };
-  const dReceiveCallbacks = ReceiveCallbacksDefault;
   return (
     <GameContext.Provider
       value={{
-        sock: connect(setScreen, dReceiveCallbacks),
+        playerName: playerName,
+        setPlayerName,
+        playerId,
+        setPlayerId,
+        sock: sock,
         screen,
         setScreen,
         lobby: null,
         transitions: TransitionManager,
         receiveCallBacks: dReceiveCallbacks,
-        playerId: null,
         sequenceNumber: 0,
       }}
     >

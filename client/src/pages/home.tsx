@@ -18,7 +18,7 @@ const Home: React.FC = () => {
       <h2
         onClick={() => {
           ctx.setScreen(ScreenState.GAME);
-          ctx.sock = connect(ctx.setScreen, ctx.receiveCallBacks);
+          ctx.sock = connect(ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
           ctx.sock.onopen = () => {
             ctx.transitions.initialize(ctx);
             ctx.transitions.readyLobby(ctx);
@@ -30,7 +30,7 @@ const Home: React.FC = () => {
       <h2
         onClick={() => {
           ctx.setScreen(ScreenState.END);
-          ctx.sock = connect(ctx.setScreen, ctx.receiveCallBacks);
+          ctx.sock = connect(ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
           ctx.sock.onopen = () => {
             ctx.transitions.initialize(ctx);
             ctx.transitions.readyLobby(ctx);
@@ -39,12 +39,15 @@ const Home: React.FC = () => {
       >
         Click to go to End Game Page
       </h2>
+      <h2 onClick={() => ctx.setScreen(ScreenState.NAME_ENTRY)}>
+        Click to go to Name Entry test page
+      </h2>
       <h2 onClick={() => ctx.setScreen(ScreenState.LOBBY_CODE_ENTRY)}>
         Click to go to Lobby Code Entry test page
       </h2>
       <h2
         onClick={() => {
-          const sock = connect(ctx.setScreen, ctx.receiveCallBacks);
+          const sock = connect(ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
           sock.onopen = () => {
             sock.send("test");
           };
@@ -59,20 +62,7 @@ const Home: React.FC = () => {
       </h2>
       <h2
         onClick={() => {
-          const sock = connect(ctx.setScreen, ctx.receiveCallBacks);
-          const act: Action = {
-            action: ActionsList.initialize,
-            player_id: 0,
-            data: [],
-            sequence_number: 0,
-          };
-          sock.onopen = () => {
-            sock.send(JSON.stringify(act));
-          };
-          sock.onmessage = (m) => {
-            console.log(m.data);
-            sock.close();
-          };
+          ctx.transitions.initialize(ctx);
         }}
       >
         Test Sock Outward

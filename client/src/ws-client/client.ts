@@ -4,6 +4,7 @@ import { ReceiveCallbacks } from "./receive-callbacks";
 
 // https://socket.io/how-to/use-with-react
 export const connect = (
+  setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
   receiveCallBacks: ReceiveCallbacks
 ) => {
@@ -11,11 +12,12 @@ export const connect = (
   // const url = process.env.NODE_ENV === 'production' ? "undefined" : 'ws://localhost:8888/websocket';
   const ws = new WebSocket("ws://localhost:8888/websocket");
   ws.onopen = (_) => console.log("connected websocket!");
-  ws.onmessage = (ev) => wsReceiveHandler(setScreen, ev, receiveCallBacks);
+  ws.onmessage = (ev) => wsReceiveHandler(setPlayerId, setScreen, ev, receiveCallBacks);
   return ws;
 };
 
 export const wsReceiveHandler = (
+  setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
   ev: MessageEvent<any>,
   receiveCallBacks: ReceiveCallbacks
@@ -23,14 +25,20 @@ export const wsReceiveHandler = (
   const data = JSON.parse(ev.data);
   if (!isAction(data)) return null;
   const action = data as Action;
+  console.log(action);
   switch (action.action) {
     case ActionsList.return_lobby_code:
       // Code for return_lobby_code
+      setPlayerId(action.player_id);
       setScreen(ScreenState.LOBBY);
       break;
     case ActionsList.lobby_does_not_exist:
       // Code for lobby_does_not_exist
       setScreen(ScreenState.LOBBY_CODE_ENTRY_FAILED);
+      break;
+    case ActionsList.lobby_full:
+      // Code for lobby_does_not_exist
+      setScreen(ScreenState.LOBBY_FULL);
       break;
     case ActionsList.successfully_joined_lobby:
       // Code for successfully_joined_lobby
