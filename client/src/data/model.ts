@@ -36,7 +36,7 @@ export type Bot = Player & {
 
 export type Action = {
   action: ActionsList,
-  player_id: number,
+  player_id: string,
   data: any
   sequence_number: number
 }

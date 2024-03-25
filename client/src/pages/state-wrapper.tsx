@@ -21,8 +21,13 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   initScreen = ScreenState.START,
 }) => {
   const [screen, setScreen] = useState<ScreenState>(initScreen);
+  const [playerId, setPlayerId] = useState<string>("");
+  const dReceiveCallbacks = ReceiveCallbacksDefault;
+  const [sock, setSock] = useState<WebSocket|null>(null);
+  useEffect(() => setSock(connect(setPlayerId, setScreen, dReceiveCallbacks)), []);
+
   const stateToScreen = (s: ScreenState) => {
-    switch (screen) {
+    switch (s) {
       case ScreenState.START:
         return <Home />;
       case ScreenState.NAME_ENTRY:
@@ -43,18 +48,18 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
         return <Home />;
     }
   };
-  const dReceiveCallbacks = ReceiveCallbacksDefault;
   return (
     <GameContext.Provider
       value={{
         player_name: "",
-        sock: connect(setScreen, dReceiveCallbacks),
+        playerId,
+        setPlayerId,
+        sock: sock,
         screen,
         setScreen,
         lobby: null,
         transitions: TransitionManager,
         receiveCallBacks: dReceiveCallbacks,
-        playerId: null,
         sequenceNumber: 0,
       }}
     >

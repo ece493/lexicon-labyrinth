@@ -14,6 +14,7 @@ export type GameContextData = {
   player_name: String;
   sock: WebSocket | null;
   screen: ScreenState;
+  setPlayerId: (s: string) => void;
   setScreen: (s: ScreenState) => void;
   lobby: Lobby | null;
   transitions: ServerTransitions;
@@ -26,6 +27,7 @@ export const GameContext = createContext<GameContextData>({
   player_name: "",
   sock: null,
   screen: ScreenState.START,
+  setPlayerId: (s: string) => {},
   setScreen: (s: ScreenState) => {},
   lobby: null,
   transitions: TransitionManager,
