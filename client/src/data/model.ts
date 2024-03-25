@@ -48,6 +48,7 @@ export enum ScreenState {
     LOBBY = 3,
     GAME = 4,
     END = 5,
+    LOBBY_FULL = 6,
 };
 
 export const isAction = (d: any): d is Action => d?.action && d?.player_id;;

@@ -31,7 +31,9 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
       case ScreenState.LOBBY_CODE_ENTRY:
         return <JoinLobbyPage />;
       case ScreenState.LOBBY_CODE_ENTRY_FAILED:
-        return <JoinLobbyErrorPage />;
+        return JoinLobbyErrorPage("Lobby Does Not Exist!");
+      case ScreenState.LOBBY_FULL:
+        return JoinLobbyErrorPage("Lobby is Full!");
       case ScreenState.END:
           return <EndPage />;
       default:

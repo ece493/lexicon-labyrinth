@@ -32,6 +32,10 @@ export const wsReceiveHandler = (
       // Code for lobby_does_not_exist
       setScreen(ScreenState.LOBBY_CODE_ENTRY_FAILED);
       break;
+    case ActionsList.lobby_full:
+      // Code for lobby_does_not_exist
+      setScreen(ScreenState.LOBBY_FULL);
+      break;
     case ActionsList.successfully_joined_lobby:
       // Code for successfully_joined_lobby
       setScreen(ScreenState.LOBBY);
