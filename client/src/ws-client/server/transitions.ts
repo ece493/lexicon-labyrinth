@@ -1,67 +1,168 @@
+import { GameContextData } from "../../context/ctx";
 import { Action } from "../../data/model";
 import { ActionsList } from "../model";
 
 export type ServerTransitions = {
-    initialize: (ws: WebSocket) => void,
-    joinLobby: (ws: WebSocket, code: string) => void,
-    changeParam: (ws: WebSocket, param: string, value: string) => void,
-    readyLobby: (ws: WebSocket) => void,
-    pickWord: (ws: WebSocket, path: [number, number][]) => void,
-    pickPowerup: (ws: WebSocket) => void,
-    leaveGame: (ws: WebSocket) => void,
+  initialize: (ctx: GameContextData) => void;
+  joinLobby: (code: string, ctx: GameContextData) => void;
+  changeParam: (param: string, value: string, ctx: GameContextData) => void;
+  readyLobby: (ctx: GameContextData) => void;
+  pickWord: (path: number[][], ctx: GameContextData) => void;
+  pickRotatePowerup: (
+    type: string,
+    index: number,
+    rotations: number,
+    ctx: GameContextData
+  ) => void;
+  pickTransformPowerup: (
+    tile: number[],
+    newChar: string,
+    ctx: GameContextData
+  ) => void;
+  pickSwapPowerup: (tiles: number[][], ctx: GameContextData) => void;
+  pickScramblePowerup: (ctx: GameContextData) => void;
+  leaveGame: (ctx: GameContextData) => void;
 };
 
-const initialize = (ws: WebSocket) => {
-    const msg: Action = {
-        action: ActionsList.initialize,
-        player_id: 0,
-        data: []
-    };
-    ws.send(JSON.stringify(msg));
-}
+const initialize = (ctx: GameContextData) => {
+  const msg: Action = {
+    action: ActionsList.initialize,
+    player_id: 0,
+    data: [],
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
 
-const joinLobby = (ws: WebSocket, code: string) => {
-    const msg: Action = {
-        action: ActionsList.join_lobby,
-        player_id: 0,
-        data: code
-    };
-    ws.send(JSON.stringify(msg));
-}
+const joinLobby = (code: string, ctx: GameContextData) => {
+  const msg: Action = {
+    action: ActionsList.join_lobby,
+    player_id: 0,
+    data: code,
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
 
-const changeParam = (ws: WebSocket, param: string, value: string) => {
-    const msg: Action = {
-        action: ActionsList.change_param,
-        player_id: 0,
-        data: [param, value]
-    };
-    ws.send(JSON.stringify(msg));
-}
+const changeParam = (param: string, value: string, ctx: GameContextData) => {
+  const msg: Action = {
+    action: ActionsList.change_param,
+    player_id: 0,
+    data: [param, value],
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
 
-const readyLobby = (ws: WebSocket) => {
-    const msg: Action = {
-        action: ActionsList.ready_lobby,
-        player_id: 0,
-        data: []
-    };
-    ws.send(JSON.stringify(msg));
-}
+const readyLobby = (ctx: GameContextData) => {
+  const msg: Action = {
+    action: ActionsList.ready_lobby,
+    player_id: 0,
+    data: [],
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
 
-const pickWord = (ws: WebSocket, path: [number, number][]) => {
-    const msg: Action = {
-        action: ActionsList.pick_word,
-        player_id: 0,
-        data: path
-    };
-    ws.send(JSON.stringify(msg));
-}
+const pickWord = (path: number[][], ctx: GameContextData) => {
+  console.log(
+    "sending word pick request with: ",
+    path,
+    "\n sequence number: ",
+    ctx.sequenceNumber
+  );
+  const msg: Action = {
+    action: ActionsList.pick_word,
+    player_id: 0,
+    data: path,
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
+
+const pickRotatePowerup = (
+  type: string,
+  index: number,
+  rotations: number,
+  ctx: GameContextData
+) => {
+  console.log("sending rotate request with: ", { type, index, rotations });
+  const msg: Action = {
+    action: ActionsList.pick_rotate_powerup,
+    player_id: 0,
+    data: { type, index, rotations },
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
+
+const pickScramblePowerup = (ctx: GameContextData) => {
+  console.log("sending scramble request");
+  const msg: Action = {
+    action: ActionsList.pick_scramble_powerup,
+    player_id: 0,
+    data: {},
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
+
+const pickSwapPowerup = (tiles: number[][], ctx: GameContextData) => {
+  console.log("sending swap request with: ", tiles);
+  const msg: Action = {
+    action: ActionsList.pick_swap_powerup,
+    player_id: 0,
+    data: tiles,
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
+
+const pickTransformPowerup = (
+  tile: number[],
+  newChar: string,
+  ctx: GameContextData
+) => {
+  console.log("sending transform request with: ", { tile, newChar });
+  const msg: Action = {
+    action: ActionsList.pick_transform_powerup,
+    player_id: 0,
+    data: { tile, newChar },
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
+
+const leaveGame = (ctx: GameContextData) => {
+  console.log("sending leave request");
+  const msg: Action = {
+    action: ActionsList.leave_game,
+    player_id: 0,
+    data: null,
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
 
 export const TransitionManager: ServerTransitions = {
-    initialize: initialize,
-    joinLobby: joinLobby,
-    changeParam: changeParam,
-    readyLobby: readyLobby,
-    pickWord: pickWord,
-    pickPowerup: (ws: WebSocket) => {},
-    leaveGame: (ws: WebSocket) => {},
-}
+  initialize: initialize,
+  joinLobby: joinLobby,
+  changeParam: changeParam,
+  readyLobby: readyLobby,
+  pickWord: pickWord,
+  pickRotatePowerup: pickRotatePowerup,
+  pickTransformPowerup: pickTransformPowerup,
+  pickSwapPowerup: pickSwapPowerup,
+  pickScramblePowerup: pickScramblePowerup,
+  leaveGame: leaveGame,
+};
