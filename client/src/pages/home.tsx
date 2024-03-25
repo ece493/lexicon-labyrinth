@@ -39,6 +39,9 @@ const Home: React.FC = () => {
       >
         Click to go to End Game Page
       </h2>
+      <h2 onClick={() => ctx.setScreen(ScreenState.NAME_ENTRY)}>
+        Click to go to Name Entry test page
+      </h2>
       <h2 onClick={() => ctx.setScreen(ScreenState.LOBBY_CODE_ENTRY)}>
         Click to go to Lobby Code Entry test page
       </h2>

@@ -11,6 +11,7 @@ import JoinLobbyPage, { JoinLobbyErrorPage } from "./join-lobby";
 import JoinLobbyComponent from "../components/lobby/join/join-lobby-component";
 import { ReceiveCallbacksDefault } from "../ws-client/receive-callbacks";
 import EndPage from "./end";
+import NameEntryPage from "./name-entry";
 
 interface StateWrapperProps {
   initScreen?: ScreenState;
@@ -24,6 +25,8 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
     switch (screen) {
       case ScreenState.START:
         return <Home />;
+      case ScreenState.NAME_ENTRY:
+        return <NameEntryPage />;
       case ScreenState.LOBBY:
         return <LobbyPage />;
       case ScreenState.GAME:
@@ -44,6 +47,7 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   return (
     <GameContext.Provider
       value={{
+        player_name: "",
         sock: connect(setScreen, dReceiveCallbacks),
         screen,
         setScreen,
