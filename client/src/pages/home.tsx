@@ -62,20 +62,7 @@ const Home: React.FC = () => {
       </h2>
       <h2
         onClick={() => {
-          const sock = connect(ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
-          const act: Action = {
-            action: ActionsList.initialize,
-            player_id: "",
-            data: [],
-            sequence_number: 0,
-          };
-          sock.onopen = () => {
-            sock.send(JSON.stringify(act));
-          };
-          sock.onmessage = (m) => {
-            console.log(m.data);
-            sock.close();
-          };
+          ctx.transitions.initialize(ctx);
         }}
       >
         Test Sock Outward

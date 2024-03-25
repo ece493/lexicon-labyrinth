@@ -11,7 +11,8 @@ import {
 } from "../ws-client/receive-callbacks";
 
 export type GameContextData = {
-  player_name: String;
+  playerName: String;
+  setPlayerName: (s: string) => void;
   sock: WebSocket | null;
   screen: ScreenState;
   setPlayerId: (s: string) => void;
@@ -24,7 +25,8 @@ export type GameContextData = {
 };
 
 export const GameContext = createContext<GameContextData>({
-  player_name: "",
+  playerName: "",
+  setPlayerName: (s: string) => { },
   sock: null,
   screen: ScreenState.START,
   setPlayerId: (s: string) => {},

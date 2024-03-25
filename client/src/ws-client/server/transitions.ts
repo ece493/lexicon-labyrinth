@@ -29,7 +29,7 @@ const initialize = (ctx: GameContextData) => {
     action: ActionsList.initialize,
     player_id: ctx.playerId || "",
     data: {
-      player_name: ctx.player_name
+      player_name: ctx.playerName
     },
     sequence_number: ctx.sequenceNumber,
   };
@@ -38,12 +38,13 @@ const initialize = (ctx: GameContextData) => {
 };
 
 const joinLobby = (code: string, ctx: GameContextData) => {
+  console.log("player_name", ctx.playerName);
   const msg: Action = {
     action: ActionsList.join_lobby,
     player_id: ctx.playerId || "",
     data: {
       lobby_code: code,
-      player_name: ctx.player_name
+      player_name: ctx.playerName
     },
     sequence_number: ctx.sequenceNumber,
   };
