@@ -10,6 +10,7 @@ import Game from "./game";
 import JoinLobbyPage, { JoinLobbyErrorPage } from "./join-lobby";
 import JoinLobbyComponent from "../components/lobby/join/join-lobby-component";
 import { ReceiveCallbacksDefault } from "../ws-client/receive-callbacks";
+import EndPage from "./end";
 
 interface StateWrapperProps {
   initScreen?: ScreenState;
@@ -31,6 +32,8 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
         return <JoinLobbyPage />;
       case ScreenState.LOBBY_CODE_ENTRY_FAILED:
         return <JoinLobbyErrorPage />;
+      case ScreenState.END:
+          return <EndPage />;
       default:
         return <Home />;
     }
