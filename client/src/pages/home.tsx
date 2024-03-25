@@ -27,6 +27,18 @@ const Home: React.FC = () => {
       >
         Click to go to Game test page
       </h2>
+      <h2
+        onClick={() => {
+          ctx.setScreen(ScreenState.END);
+          ctx.sock = connect(ctx.setScreen, ctx.receiveCallBacks);
+          ctx.sock.onopen = () => {
+            ctx.transitions.initialize(ctx);
+            ctx.transitions.readyLobby(ctx);
+          };
+        }}
+      >
+        Click to go to End Game Page
+      </h2>
       <h2 onClick={() => ctx.setScreen(ScreenState.LOBBY_CODE_ENTRY)}>
         Click to go to Lobby Code Entry test page
       </h2>
