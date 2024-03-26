@@ -1,6 +1,7 @@
 import React from "react";
 import { Bot, Lobby, Player, isPlayerABot } from "../../data/model";
 import { BotComponent, PlayerBotManagerComponent, PlayerComponent } from "./player-bot-component";
+import Slider from "@mui/material/Slider";
 
 interface LobbyProps {
     lobby: Lobby,
@@ -41,15 +42,39 @@ const LobbySettingsAdminComponent: React.FC<LobbyProps> = ({ ...p }) => {
             <div className="m-0 py-4"></div>
             <div className="m-0 flex flex-col w-full py-1">
                 <p className="m-0 text-slate-100">Number of Lives</p>
-                <input name="max_lives" defaultValue={p.lobby.max_lives} type="number" className="m-0 p-1 text-xl rounded-xl"></input>
+                <Slider
+                    size="medium"
+                    name="max_lives"
+                    min={1}
+                    max={15}
+                    defaultValue={p.lobby.max_lives}
+                    aria-label="Small"
+                    valueLabelDisplay="auto"
+                />
             </div>
             <div className="m-0 flex flex-col w-full py-1">
                 <p className="m-0 text-slate-100">Turn Timer</p>
-                <input name="timer_setting" defaultValue={p.lobby.timer_setting} type="number" className="m-0 p-1 text-xl rounded-xl"></input>
+                <Slider
+                    size="medium"
+                    name="timer_setting"
+                    defaultValue={p.lobby.timer_setting}
+                    min={10}
+                    max={60}
+                    aria-label="Small"
+                    valueLabelDisplay="auto"
+                />
             </div>
             <div className="m-0 flex flex-col w-full py-1">
                 <p className="m-0 text-slate-100">Board Width</p>
-                <input name="board_size" defaultValue={p.lobby.board_size[0]} type="number" className="m-0 p-1 text-xl rounded-xl"></input>
+                <Slider
+                    size="medium"
+                    name="board_size"
+                    defaultValue={p.lobby.board_size[0]}
+                    min={5}
+                    max={10}
+                    aria-label="Small"
+                    valueLabelDisplay="auto"
+                />
             </div>
         </div>
     );

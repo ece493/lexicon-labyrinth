@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Bot, Lobby, Player, isPlayerABot } from "../../data/model";
 import robotSvg from "./assets/robot.svg";
 import personSvg from "./assets/person.svg";
+import Button from "@mui/material/Button";
 
 type PlayerBotManagerComponentProps = {
     player: Player | Bot,
@@ -33,12 +34,12 @@ export const PlayerBotAdminComponent: React.FC<PlayerBotManagerComponentProps> =
         <div className="m-0 flex flex-auto flex-col items-center justify-center h-40 w-32 bg-blue-500 p-4"
             onClick={toggleManageMode}>
             { delete_player &&
-                <button className="m-0 bg-red-400 h-10 py-2 px-4 text-pink-100 z-10"
-                    onClick={delete_player}>Remove</button>
+                <Button className="m-0 bg-red-400 h-10 py-2 px-4 text-pink-100 z-10"
+                    onClick={delete_player}>Remove</Button>
             }
             { cycle_difficulty &&
-                <button className="m-0 bg-red-400 h-10 py-2 px-4 text-pink-100 z-10"
-                    onClick={() => setDifficulty(cycle_difficulty())}>{difficulty}</button>
+                <Button className="m-0 bg-red-400 h-10 py-2 px-4 text-pink-100 z-10"
+                    onClick={() => setDifficulty(cycle_difficulty())}>{difficulty}</Button>
             }
         </div>
     );
