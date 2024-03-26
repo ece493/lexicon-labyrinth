@@ -31,7 +31,7 @@ const LobbyPage: React.FC = () => {
   const ctx = useContext(GameContext);
   return (
     <>
-      { lobby && <LobbyComponent lobby={lobby} player_id={"0"} /> }
+      { lobby && <LobbyComponent lobby={lobby} player_id={"0"} ctx={ctx} /> }
       {/* { !(ctx.lobby && ctx.playerId) && <h1>Something went wrong! {!ctx.lobby} {!ctx.playerId}</h1> } */}
     </>
   );

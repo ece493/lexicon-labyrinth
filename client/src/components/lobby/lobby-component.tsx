@@ -2,10 +2,13 @@ import React from "react";
 import { Bot, Lobby, Player, isPlayerABot } from "../../data/model";
 import { BotComponent, PlayerBotManagerComponent, PlayerComponent } from "./player-bot-component";
 import Slider from "@mui/material/Slider";
+import { GameContextData } from "../../context/ctx";
+import Button from "@mui/material/Button";
 
 interface LobbyProps {
     lobby: Lobby,
-    player_id: string
+    player_id: string,
+    ctx: GameContextData
 }
 
 const LobbySettingsReadOnlyComponent: React.FC<LobbyProps> = ({...p}) => {
@@ -33,6 +36,10 @@ const LobbySettingsReadOnlyComponent: React.FC<LobbyProps> = ({...p}) => {
 }
 
 const LobbySettingsAdminComponent: React.FC<LobbyProps> = ({ ...p }) => {
+    const updateSetting = (setting: string, val: number) => {
+        p.ctx.transitions.changeParam(setting, val.toString(), p.ctx);
+    };
+
     return (
         <div className="m-0 h-auto w-full">
             <div className="m-0 flex flex-col w-full">
@@ -47,8 +54,8 @@ const LobbySettingsAdminComponent: React.FC<LobbyProps> = ({ ...p }) => {
                     name="max_lives"
                     min={1}
                     max={15}
+                    onChangeCommitted={(e, v) => updateSetting("max_lives", v as number)}
                     defaultValue={p.lobby.max_lives}
-                    aria-label="Small"
                     valueLabelDisplay="auto"
                 />
             </div>
@@ -57,10 +64,10 @@ const LobbySettingsAdminComponent: React.FC<LobbyProps> = ({ ...p }) => {
                 <Slider
                     size="medium"
                     name="timer_setting"
-                    defaultValue={p.lobby.timer_setting}
                     min={10}
                     max={60}
-                    aria-label="Small"
+                    onChangeCommitted={(e, v) => updateSetting("timer_setting", v as number)}
+                    defaultValue={p.lobby.timer_setting}
                     valueLabelDisplay="auto"
                 />
             </div>
@@ -69,10 +76,10 @@ const LobbySettingsAdminComponent: React.FC<LobbyProps> = ({ ...p }) => {
                 <Slider
                     size="medium"
                     name="board_size"
-                    defaultValue={p.lobby.board_size[0]}
                     min={5}
                     max={10}
-                    aria-label="Small"
+                    onChangeCommitted={(e, v) => updateSetting("board_size", v as number)}
+                    defaultValue={p.lobby.board_size[0]}
                     valueLabelDisplay="auto"
                 />
             </div>
@@ -80,7 +87,7 @@ const LobbySettingsAdminComponent: React.FC<LobbyProps> = ({ ...p }) => {
     );
 }
 
-const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id}) => {
+const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id, ctx}) => {
     const difficulties = ["Easy", "Medium", "Hard"];
     const toggleDifficulty = (currentDifficulty: number): number => (currentDifficulty + 1) % 3;
 
@@ -100,7 +107,7 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id}) => {
     const startButton = () => {
         return <div className="m-0 w-[75vw] h-16">
             <div className="m-0 flex flex-auto justify-end h-auto py-4">
-                <button className="m-0 bg-red-400 h-10 py-2 px-4 text-pink-100">Start</button>
+                <Button className="bg-red-400 h-10 py-2 px-4 text-pink-100" style={{ textTransform: 'none' }}>Start</Button>
             </div>
         </div>;
     }
@@ -120,8 +127,8 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id}) => {
                     <div className="m-0 h-auto w-1/3 bg-blue-400 p-12" >
                         {
                             (player_id === lobby.host)
-                            ? <LobbySettingsAdminComponent lobby={lobby} player_id={player_id} />
-                            : <LobbySettingsReadOnlyComponent lobby={lobby} player_id={player_id} />
+                            ? <LobbySettingsAdminComponent lobby={lobby} player_id={player_id} ctx={ctx}/>
+                            : <LobbySettingsReadOnlyComponent lobby={lobby} player_id={player_id} ctx={ctx}/>
                         }
                     </div>
                 </div>

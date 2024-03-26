@@ -43,16 +43,24 @@ export const PlayerBotAdminComponent: React.FC<PlayerBotManagerComponentProps> =
             <div className="p-4 w-auto">
                 { delete_player &&
                     <Button className="m-0 h-8 bg-slate-100 text-blue-600 py-2 px-4 z-10"
+                        style={{ textTransform: 'none' }}
                         onClick={delete_player}>
                             Remove
                     </Button>
                 }
-                {cycle_difficulty && <Divider flexItem className="p-2">
-                    <Typography className="text-sm text-slate-100">Difficulty</Typography>
-                </Divider>}
+                {cycle_difficulty &&
+                    <Divider flexItem className="py-2" sx={{
+                        "&::before, &::after": {
+                            borderColor: "white", // https://stackoverflow.com/questions/58295779/divider-color-change-react-material-ui
+                        },
+                    }}>
+                        <Typography className="text-sm text-slate-100">Difficulty</Typography>
+                    </Divider>
+                }
                 { cycle_difficulty &&
                     <div className="flex flex-col items-center w-auto">
                         <Button className="bg-slate-100 h-8 text-blue-600 py-2 px-4 z-[20]"
+                            style={{ textTransform: 'none' }}
                             onClick={() => setDifficulty(cycle_difficulty())}>{difficulty}</Button>
                     </div>
                 }
