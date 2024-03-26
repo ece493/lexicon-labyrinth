@@ -3,6 +3,9 @@ import { Bot, Lobby, Player, isPlayerABot } from "../../data/model";
 import robotSvg from "./assets/robot.svg";
 import personSvg from "./assets/person.svg";
 import Button from "@mui/material/Button";
+import { Divider, Fab, IconButton, Typography } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from "../icons/addIcon";
 
 type PlayerBotManagerComponentProps = {
     player: Player | Bot,
@@ -31,16 +34,30 @@ export const BotPlayerComponent: React.FC<PlayerBotDisplayComponentProps> = ({na
 export const PlayerBotAdminComponent: React.FC<PlayerBotManagerComponentProps> = ({ delete_player, cycle_difficulty, toggleManageMode }) => {
     const [difficulty, setDifficulty] = useState<string>("Medium");
     return (
-        <div className="m-0 flex flex-auto flex-col items-center justify-center h-40 w-32 bg-blue-500 p-4"
-            onClick={toggleManageMode}>
-            { delete_player &&
-                <Button className="m-0 bg-red-400 h-10 py-2 px-4 text-pink-100 z-10"
-                    onClick={delete_player}>Remove</Button>
-            }
-            { cycle_difficulty &&
-                <Button className="m-0 bg-red-400 h-10 py-2 px-4 text-pink-100 z-10"
-                    onClick={() => setDifficulty(cycle_difficulty())}>{difficulty}</Button>
-            }
+        <div className="m-0 flex flex-auto flex-col items-center justify-between h-48 w-40 bg-blue-500">
+            <div className="w-full h-10 m-0">
+                <IconButton onClick={toggleManageMode} size="medium" className="float-right">
+                    <CloseIcon sx={{ color: "white" }} fontSize="inherit" />
+                </IconButton>
+            </div>
+            <div className="p-4 w-auto">
+                { delete_player &&
+                    <Button className="m-0 h-8 bg-slate-100 text-blue-600 py-2 px-4 z-10"
+                        onClick={delete_player}>
+                            Remove
+                    </Button>
+                }
+                {cycle_difficulty && <Divider flexItem className="p-2">
+                    <Typography className="text-sm text-slate-100">Difficulty</Typography>
+                </Divider>}
+                { cycle_difficulty &&
+                    <div className="flex flex-col items-center w-auto">
+                        <Button className="bg-slate-100 h-8 text-blue-600 py-2 px-4 z-[20]"
+                            onClick={() => setDifficulty(cycle_difficulty())}>{difficulty}</Button>
+                    </div>
+                }
+            </div>
+            <div className="h-6"></div>
         </div>
     );
 }

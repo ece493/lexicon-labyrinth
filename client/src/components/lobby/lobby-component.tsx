@@ -85,7 +85,10 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id}) => {
     const toggleDifficulty = (currentDifficulty: number): number => (currentDifficulty + 1) % 3;
 
     const curriedDeletePlayer = (p: Player | Bot) => (player_id === lobby.host)
-            ? () => {"delete sequence"}
+            ? () => {
+                "delete sequence";
+                return;
+            }
             : undefined;
     const curriedCycleDifficulty = (p: Player | Bot) => (player_id === lobby.host && isPlayerABot(p))
         ? () => {
