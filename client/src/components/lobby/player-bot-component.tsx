@@ -24,7 +24,7 @@ export const BotComponent: React.FC<Bot> = ({...p}) => <BotPlayerComponent name=
 
 export const BotPlayerComponent: React.FC<PlayerBotDisplayComponentProps> = ({name, img}) => {
     return (
-        <div className="m-0 flex flex-auto flex-col items-center justify-center h-40 w-32 bg-blue-500 p-4" >
+        <div className="m-0 flex flex-auto flex-col items-center justify-center h-40 w-32 bg-blue-400 p-4" >
             <img className="m-0 h-16 w-16 opacity-80 invert" src={img}></img>
             <h4 className="m-0 text-slate-100 text-center">{name}</h4>
         </div>
@@ -34,7 +34,7 @@ export const BotPlayerComponent: React.FC<PlayerBotDisplayComponentProps> = ({na
 export const PlayerBotAdminComponent: React.FC<PlayerBotManagerComponentProps> = ({ delete_player, cycle_difficulty, toggleManageMode }) => {
     const [difficulty, setDifficulty] = useState<string>("Medium");
     return (
-        <div className="m-0 flex flex-auto flex-col items-center justify-between h-48 w-40 bg-blue-500">
+        <div className="m-0 flex flex-auto flex-col items-center justify-between h-48 w-40 bg-blue-400">
             <div className="w-full h-10 m-0">
                 <IconButton onClick={toggleManageMode} size="medium" className="float-right">
                     <CloseIcon sx={{ color: "white" }} fontSize="inherit" />
