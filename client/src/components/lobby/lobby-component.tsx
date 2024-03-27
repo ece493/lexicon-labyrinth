@@ -112,9 +112,14 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id, ctx}) => {
         : undefined;
 
     const startButton = () => {
+        const isDisabled = lobby.players.length <= 2;
         return <div className="m-0 w-[75vw] h-16">
             <div className="m-0 flex flex-auto justify-end h-auto py-4">
-                <Button className="bg-red-400 h-10 py-2 px-4 text-pink-100" style={{ textTransform: 'none' }}>Start</Button>
+                <Button
+                    disabled={isDisabled}
+                    className={`${isDisabled ? "bg-slate-400" : "bg-red-400"} h-10 py-2 px-4 text-pink-100`} style={{ textTransform: 'none' }}
+                    onClick={() => !isDisabled && ctx.transitions.readyLobby(ctx)}
+                    >Start</Button>
             </div>
         </div>;
     }
