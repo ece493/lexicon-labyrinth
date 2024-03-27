@@ -113,8 +113,8 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id, ctx}) => {
 
     const startButton = () => {
         const isDisabled = lobby.players.length <= 2;
-        return <div className="m-0 w-[75vw] h-16">
-            <div className="m-0 flex flex-auto justify-end h-auto py-4">
+        return <div className="m-0 w-full h-16">
+            <div className="m-0 flex flex-auto justify-end h-auto px-2">
                 <Button
                     disabled={isDisabled}
                     className={`${isDisabled ? "bg-slate-400" : "bg-red-400"} h-10 py-2 px-4 text-pink-100`} style={{ textTransform: 'none' }}
@@ -127,24 +127,26 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id, ctx}) => {
     return (
         <form>
             <div className="m-0 h-screen flex flex-col justify-center bg-blue-400 align-middle items-center">
-                <div className="m-0 h-[70vh] w-[75vw] flex flex-row gap-2" >
-                    <div className="m-0 h-auto w-2/3 flex flex-col p-8 bg-blue-500 justify-center items-center">
-                        <div className="m-0 flex flex-row h-1/2 w-fit gap-4">
-                            {lobby.players.slice(0, 3).map((p, i) => <PlayerBotManagerComponent key={i} player={p} delete_player={curriedDeletePlayer(p)} cycle_difficulty={curriedCycleDifficulty(p)} />)}
+                <div className="m-0 w-auto flex flex-col gap-2" >
+                    <div className="m-0 h-[70vh] w-auto flex flex-row gap-2">
+                        <div className="m-0 h-auto w-auto flex flex-col p-8 bg-blue-500 justify-center items-center">
+                            <div className="m-0 flex flex-row h-1/2 w-fit gap-4">
+                                {lobby.players.slice(0, 3).map((p, i) => <PlayerBotManagerComponent key={i} player={p} delete_player={curriedDeletePlayer(p)} cycle_difficulty={curriedCycleDifficulty(p)} />)}
+                            </div>
+                            <div className="m-0 flex flex-row h-1/2 w-fit gap-4">
+                                {lobby.players.slice(3, 6).map((p, i) => <PlayerBotManagerComponent key={i} player={p} delete_player={curriedDeletePlayer(p)} cycle_difficulty={curriedCycleDifficulty(p)} />)}
+                            </div>
                         </div>
-                        <div className="m-0 flex flex-row h-1/2 w-fit gap-4">
-                            {lobby.players.slice(3, 6).map((p, i) => <PlayerBotManagerComponent key={i} player={p} delete_player={curriedDeletePlayer(p)} cycle_difficulty={curriedCycleDifficulty(p)} />)}
+                        <div className="m-0 h-auto w-64 bg-blue-500 p-12" >
+                            {
+                                (player_id === lobby.host)
+                                ? <LobbySettingsAdminComponent lobby={lobby} player_id={player_id} ctx={ctx}/>
+                                : <LobbySettingsReadOnlyComponent lobby={lobby} player_id={player_id} ctx={ctx}/>
+                            }
                         </div>
                     </div>
-                    <div className="m-0 h-auto w-1/3 bg-blue-500 p-12" >
-                        {
-                            (player_id === lobby.host)
-                            ? <LobbySettingsAdminComponent lobby={lobby} player_id={player_id} ctx={ctx}/>
-                            : <LobbySettingsReadOnlyComponent lobby={lobby} player_id={player_id} ctx={ctx}/>
-                        }
-                    </div>
+                    {(player_id === lobby.host) && startButton()}
                 </div>
-                {(player_id === lobby.host) && startButton()}
             </div>
         </form>
     );
