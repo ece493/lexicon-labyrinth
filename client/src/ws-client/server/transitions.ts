@@ -6,6 +6,7 @@ export type ServerTransitions = {
   initialize: (ctx: GameContextData) => void;
   joinLobby: (code: string, ctx: GameContextData) => void;
   changeParam: (param: string, value: string, ctx: GameContextData) => void;
+  addBot: (ctx: GameContextData) => void;
   readyLobby: (ctx: GameContextData) => void;
   pickWord: (path: number[][], ctx: GameContextData) => void;
   pickRotatePowerup: (
@@ -57,6 +58,17 @@ const changeParam = (param: string, value: string, ctx: GameContextData) => {
     action: ActionsList.change_param,
     player_id: ctx.playerId || "",
     data: [param, value],
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
+
+const addBot = (ctx: GameContextData) => {
+  const msg: Action = {
+    action: ActionsList.add_bot,
+    player_id: ctx.playerId || "",
+    data: [],
     sequence_number: ctx.sequenceNumber,
   };
   ctx.sock!.send(JSON.stringify(msg));
@@ -164,6 +176,7 @@ export const TransitionManager: ServerTransitions = {
   initialize: initialize,
   joinLobby: joinLobby,
   changeParam: changeParam,
+  addBot: addBot,
   readyLobby: readyLobby,
   pickWord: pickWord,
   pickRotatePowerup: pickRotatePowerup,
