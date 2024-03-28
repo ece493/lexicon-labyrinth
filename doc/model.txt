@@ -56,7 +56,7 @@ enum CLIENT_ACTIONS {
   "pick_powerup",
   "add_bot",
   "update_bot",
-  "delete_bot",
+  "remove_player",
   "pick_rotate_powerup",
   "pick_transform_powerup",
   "pick_scramble_powerup",
