@@ -7,6 +7,8 @@ export type ServerTransitions = {
   joinLobby: (code: string, ctx: GameContextData) => void;
   changeParam: (param: string, value: string, ctx: GameContextData) => void;
   addBot: (ctx: GameContextData) => void;
+  updateBot: (player_id: string, difficulty: number, ctx: GameContextData) => void;
+  removePlayer: (player_id: string, ctx: GameContextData) => void;
   readyLobby: (ctx: GameContextData) => void;
   pickWord: (path: number[][], ctx: GameContextData) => void;
   pickRotatePowerup: (
@@ -69,6 +71,29 @@ const addBot = (ctx: GameContextData) => {
     action: ActionsList.add_bot,
     player_id: ctx.playerId || "",
     data: [],
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
+
+const updateBot = (player_id: string, difficulty: number, ctx: GameContextData) => {
+  const msg: Action = {
+    action: ActionsList.update_bot,
+    player_id: ctx.playerId || "",
+    data: { "player_id": player_id, difficulty: difficulty },
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
+
+
+const removePlayer = (player_id: string, ctx: GameContextData) => {
+  const msg: Action = {
+    action: ActionsList.remove_player,
+    player_id: ctx.playerId || "",
+    data: { "player_id": player_id },
     sequence_number: ctx.sequenceNumber,
   };
   ctx.sock!.send(JSON.stringify(msg));
@@ -173,15 +198,17 @@ const leaveGame = (ctx: GameContextData) => {
 };
 
 export const TransitionManager: ServerTransitions = {
-  initialize: initialize,
-  joinLobby: joinLobby,
-  changeParam: changeParam,
-  addBot: addBot,
-  readyLobby: readyLobby,
-  pickWord: pickWord,
-  pickRotatePowerup: pickRotatePowerup,
-  pickTransformPowerup: pickTransformPowerup,
-  pickSwapPowerup: pickSwapPowerup,
-  pickScramblePowerup: pickScramblePowerup,
-  leaveGame: leaveGame,
+  initialize,
+  joinLobby,
+  changeParam,
+  addBot,
+  updateBot,
+  removePlayer,
+  readyLobby,
+  pickWord,
+  pickRotatePowerup,
+  pickTransformPowerup,
+  pickSwapPowerup,
+  pickScramblePowerup,
+  leaveGame,
 };
