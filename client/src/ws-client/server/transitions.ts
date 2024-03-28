@@ -202,6 +202,8 @@ export const TransitionManager: ServerTransitions = {
   joinLobby,
   changeParam,
   addBot,
+  updateBot,
+  removePlayer,
   readyLobby,
   pickWord,
   pickRotatePowerup,
@@ -209,5 +211,4 @@ export const TransitionManager: ServerTransitions = {
   pickSwapPowerup,
   pickScramblePowerup,
   leaveGame,
-  removePlayer
 };
