@@ -8,7 +8,7 @@ import { ScreenState } from "../../data/model";
 const TileComponentWrapper: React.FC<{value: string}> = ({value}) => {
     const [empty, setEmpty] =  useState(true);
     useEffect(() => {
-        const t = setTimeout(() => setEmpty(false), Math.random()*2000 + 1000);
+        const t = setTimeout(() => setEmpty(false), Math.random()*2000);
         return () => clearTimeout(t);
     }, []);
     return <TileComponent value={empty?"":value} dark={empty}/>;

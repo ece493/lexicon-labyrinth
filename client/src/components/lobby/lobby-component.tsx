@@ -4,6 +4,7 @@ import { BotComponent, PlayerBotManagerComponent, PlayerComponent } from "./play
 import Slider from "@mui/material/Slider";
 import { GameContextData } from "../../context/ctx";
 import Button from "@mui/material/Button";
+import { FadeWrapper } from "../animations/fade-wrapper";
 
 interface LobbyProps {
     lobby: Lobby,
@@ -126,7 +127,7 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id, ctx}) => {
     }
 
     return (
-        <form>
+        <FadeWrapper>
             <div className="m-0 h-screen flex flex-col justify-center bg-blue-400 align-middle items-center">
                 <div className="m-0 w-auto flex flex-col gap-2" >
                     <div className="m-0 h-[70vh] w-auto flex flex-row gap-2">
@@ -149,7 +150,7 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id, ctx}) => {
                     {(player_id === lobby.host) && startButton()}
                 </div>
             </div>
-        </form>
+        </FadeWrapper>
     );
 };
 
