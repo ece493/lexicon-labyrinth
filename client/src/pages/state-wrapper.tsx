@@ -8,14 +8,15 @@ import Home from "./home";
 import LobbyPage from "./lobby";
 import Game from "./game";
 import JoinLobbyPage, { JoinLobbyErrorPage } from "./join-lobby";
-import JoinLobbyComponent from "../components/lobby/join/join-lobby-component";
 import { ReceiveCallbacksDefault } from "../ws-client/receive-callbacks";
 import EndPage from "./end";
 import NameEntryPage from "./name-entry";
+import { AnimatePresence, AnimationScope, motion, useAnimate, usePresence } from "framer-motion";
 
 interface StateWrapperProps {
   initScreen?: ScreenState;
 }
+
 
 export const StateWrapper: React.FC<StateWrapperProps> = ({
   initScreen = ScreenState.START,
@@ -26,7 +27,7 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   const [sock, setSock] = useState<WebSocket|null>(null);
   const [playerName, setPlayerName] = useState("");
   useEffect(() => setSock(connect(setPlayerId, setScreen, dReceiveCallbacks)), []);
-
+  
   const stateToScreen = (s: ScreenState) => {
     switch (s) {
       case ScreenState.START:
@@ -44,7 +45,7 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
       case ScreenState.LOBBY_FULL:
         return JoinLobbyErrorPage("Lobby is Full!");
       case ScreenState.END:
-          return <EndPage />;
+        return <EndPage />;
       default:
         return <Home />;
     }
@@ -65,7 +66,9 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
         sequenceNumber: 0,
       }}
     >
-      {stateToScreen(screen)}
+    {stateToScreen(screen)}
+      {/* <div className="m-0 bg-blue-400 h-screen w-screen">
+      </div> */}
     </GameContext.Provider>
   );
 };
