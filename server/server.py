@@ -82,19 +82,9 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             GameWebSocketHandler.pending_messages[player_id] = []
         
         expected_sequence_number = GameWebSocketHandler.last_processed_sequence_number[player_id] + 1
-        if action_sequence_number == expected_sequence_number:
-            # We gucci, process message normally
-            GameWebSocketHandler.last_processed_sequence_number[player_id] = action_sequence_number
-            self.process_message(action)  # You'll implement this based on your existing logic
-            self.process_pending_messages(player_id)
-        elif action_sequence_number > expected_sequence_number:
-            # Message is out of order! Store it until the missing messages arrive
-            print(f"Message received out of order! We were expecting number {expected_sequence_number}, but we got {action_sequence_number} so messages have been skipped.")
-            GameWebSocketHandler.pending_messages[player_id].append((action_sequence_number, action))
-        else:
-            # Sequence number is lower than expected, indicating a duplicate or old message
-            print(f"Received an old or duplicate message with sequence {action_sequence_number} from player {player_id}")
-            raise Exception()
+        GameWebSocketHandler.last_processed_sequence_number[player_id] = action_sequence_number
+        self.process_message(action)  # You'll implement this based on your existing logic
+        self.process_pending_messages(player_id)
     
     def process_pending_messages(self, player_id: str) -> None:
         # Sort pending messages by their sequence numbers

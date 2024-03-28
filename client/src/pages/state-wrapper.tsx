@@ -12,6 +12,7 @@ import { ReceiveCallbacksDefault } from "../ws-client/receive-callbacks";
 import EndPage from "./end";
 import NameEntryPage from "./name-entry";
 import { AnimatePresence, AnimationScope, motion, useAnimate, usePresence } from "framer-motion";
+import StartPage from "./start";
 
 interface StateWrapperProps {
   initScreen?: ScreenState;
@@ -19,7 +20,7 @@ interface StateWrapperProps {
 
 
 export const StateWrapper: React.FC<StateWrapperProps> = ({
-  initScreen = ScreenState.START,
+  initScreen = ScreenState.TEST_HOME,
 }) => {
   const [screen, setScreen] = useState<ScreenState>(initScreen);
   const [lobby, setLobby] = useState<Lobby|null>(null);
@@ -31,9 +32,11 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   
   const stateToScreen = (s: ScreenState) => {
     switch (s) {
-      case ScreenState.START:
-        return <Home />;
-      case ScreenState.NAME_ENTRY:
+      case ScreenState.TEST_HOME:
+        return <Home />
+        case ScreenState.START:
+          return <StartPage />;
+          case ScreenState.NAME_ENTRY:
         return <NameEntryPage />;
       case ScreenState.LOBBY:
         return <LobbyPage />;
