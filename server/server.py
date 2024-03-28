@@ -138,7 +138,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 resp = Action(ActionEnum.RETURN_LOBBY_CODE.value, self.id, lobby_code)
                 self.send_message(resp)
                 # Tell the player they joined their own lobby. Technically we should be telling everyone within the lobby, but it's only the player in there right now.
-                resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_code, "player_name": action.data['player_name']})
+                resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_code, "player_name": action.data['player_name'], "lobby": self.lobbies[lobby_code].to_json()})
                 self.send_message(resp)
             elif actionEnum == ActionEnum.JOIN_LOBBY:
                 # The player is trying to join an existing lobby
@@ -149,7 +149,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                     p.set_send_message_func(GameWebSocketHandler.send_to_player_func)
                     self.lobbies[lobby_id].add_player(p)
                     self.lobby_id = lobby_id
-                    resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_id, "player_name": action.data['player_name']})
+                    resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_id, "player_name": action.data['player_name'], "lobby": self.lobbies[lobby_id].to_json()})
                     GameWebSocketHandler.broadcast_to_lobby(self.lobby_id, resp)
                 else:
                     resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, self.id, None)
