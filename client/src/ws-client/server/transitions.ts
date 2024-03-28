@@ -7,6 +7,7 @@ export type ServerTransitions = {
   joinLobby: (code: string, ctx: GameContextData) => void;
   changeParam: (param: string, value: string, ctx: GameContextData) => void;
   addBot: (ctx: GameContextData) => void;
+  updateBot: (player_id: string, difficulty: number, ctx: GameContextData) => void;
   removePlayer: (player_id: string, ctx: GameContextData) => void;
   readyLobby: (ctx: GameContextData) => void;
   pickWord: (path: number[][], ctx: GameContextData) => void;
@@ -75,6 +76,18 @@ const addBot = (ctx: GameContextData) => {
   ctx.sock!.send(JSON.stringify(msg));
   ctx.sequenceNumber += 1;
 };
+
+const updateBot = (player_id: string, difficulty: number, ctx: GameContextData) => {
+  const msg: Action = {
+    action: ActionsList.update_bot,
+    player_id: ctx.playerId || "",
+    data: { "player_id": player_id, difficulty: difficulty },
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
+
 
 const removePlayer = (player_id: string, ctx: GameContextData) => {
   const msg: Action = {
