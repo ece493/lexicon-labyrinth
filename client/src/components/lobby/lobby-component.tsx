@@ -29,7 +29,7 @@ const LobbySettingsReadOnlyComponent: React.FC<LobbyProps> = ({...p}) => {
             </div>
             <div className="m-0 flex flex-col w-full py-1">
                 <p className="m-0 text-slate-100">Board Width</p>
-                <h2 className="m-0 rounded-lg text-blue-100 text-xl">{p.lobby.board_size[0]}</h2>
+                <h2 className="m-0 rounded-lg text-blue-100 text-xl">{p.lobby.board_size}</h2>
             </div>
         </div>
     );
@@ -76,10 +76,10 @@ const LobbySettingsAdminComponent: React.FC<LobbyProps> = ({ ...p }) => {
                 <Slider
                     size="medium"
                     name="board_size"
-                    min={5}
+                    min={4}
                     max={10}
                     onChangeCommitted={(e, v) => updateSetting("board_size", v as number)}
-                    defaultValue={p.lobby.board_size[0]}
+                    defaultValue={p.lobby.board_size}
                     valueLabelDisplay="auto"
                 />
             </div>
@@ -106,6 +106,7 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id, ctx}) => {
             : undefined;
     const curriedCycleDifficulty = (p: Player | Bot) => (player_id === lobby.host && isPlayerABot(p))
         ? () => {
+            ctx.transitions.updateBot(player_id, toggleDifficulty(p.difficulty), ctx);
             p.difficulty = toggleDifficulty(p.difficulty);
             return difficulties[p.difficulty];
         }

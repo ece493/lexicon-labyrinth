@@ -34,6 +34,10 @@ export const wsReceiveHandler = (
       setPlayerId(action.player_id);
       setScreen(ScreenState.LOBBY);
       break;
+    case ActionsList.return_player_id:
+      // Code for return_lobby_code
+      setPlayerId(action.player_id);
+      break;
     case ActionsList.lobby_does_not_exist:
       // Code for lobby_does_not_exist
       setScreen(ScreenState.LOBBY_CODE_ENTRY_FAILED);
