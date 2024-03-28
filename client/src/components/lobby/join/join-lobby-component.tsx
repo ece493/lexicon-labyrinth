@@ -14,12 +14,19 @@ const JoinLobbyComponent: React.FC = () => {
             <h1 className="m-0 text-slate-100">Enter Your Lobby Code Here</h1>
             <input defaultValue={code} onChange={(e) => setCode(e.target.value)}
                 className="p-1 text-3xl"></input>
-            <Button
-                onClick={() => ctx.sock && ctx.transitions.joinLobby(code, ctx)}
-                className={`${isDisabled ? "bg-slate-400" : "bg-red-400"} h-10 py-2 px-4 text-pink-100`}
-                disabled={isDisabled}
-                style={{ textTransform: 'none' }}
-            >Start</Button>
+            <div className="flex flex-row gap-2">
+                <Button
+                    onClick={() => ctx.sock && ctx.transitions.initialize(ctx)}
+                    className="bg-white h-10 py-2 px-4 text-blue-600"
+                    style={{ textTransform: 'none' }}
+                >New Lobby</Button>
+                <Button
+                    onClick={() => ctx.sock && ctx.transitions.joinLobby(code, ctx)}
+                    className={`${isDisabled ? "bg-slate-400" : "bg-red-400"} h-10 py-2 px-4 text-pink-100`}
+                    disabled={isDisabled}
+                    style={{ textTransform: 'none' }}
+                >Start</Button>
+            </div>
         </DefaultLayout>
     );
 };
