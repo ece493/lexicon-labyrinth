@@ -18,9 +18,8 @@ export const FadeWrapper: React.FC<FadeWrapperProps> = ({ children }) => {
         <motion.div key={key}
             initial={{ opacity: 0}}
             animate={{ opacity: 1}}
-            exit={{ opacity: 0}}
         >
             {children}
         </motion.div>
-    </AnimatePresence>;
+    </AnimatePresence>
 }
