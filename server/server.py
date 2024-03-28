@@ -111,7 +111,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             action_dict['data'] = None
         action = Action(ActionEnum(action_dict['action']), action_dict['player_id'], action_dict['data'])
         actionEnum = ActionEnum(action_dict['action'])
-        if actionEnum in [ActionEnum.INITIALIZE, ActionEnum.JOIN_LOBBY, ActionEnum.LEAVE_LOBBY]:
+        if actionEnum in [ActionEnum.INITIALIZE, ActionEnum.JOIN_LOBBY, ActionEnum.LEAVE_LOBBY, ActionEnum.REMOVE_PLAYER]:
             # These actions are handled outside of a lobby or game, so we just handle them right here
             if actionEnum == ActionEnum.INITIALIZE:
                 # Generate a unique 4-letter lobby code
@@ -186,6 +186,24 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                     print(f"Player {self.id} attempted to leave a lobby but wasn't part of any.")
                     # Send a message back to the player that they weren't in a lobby
                     error_resp = Action(ActionEnum.ERROR.value, self.id, "Not part of any lobby to leave.")
+                    self.send_message(error_resp)
+            elif actionEnum == ActionEnum.REMOVE_PLAYER:
+                # The host sent a message to remove another player
+                assert action.player_id == self.lobbies[self.lobby_id].host, f"Only the host can remove bots or players! Player of id {action.player_id} is not the host who has id {self.lobbies[self.lobby_id].host}"
+                assert action.data['player_id'] == self.lobby_id, f"The lobby code the client passed to leave of {action.data['lobby_code']} doesn't match the client's actual current lobby {self.lobby_id}!"
+                assert action.player_id != action.data['player_id'], f"The lobby host shouldn't be removing themself with this method! Please send the leave lobby message instead, thx."
+                if self.lobby_id in self.lobbies:
+                    lobby = self.lobbies[self.lobby_id]
+                    is_host_leaving = lobby.remove_player(self.id)
+                    assert not is_host_leaving, f"This shouldn't be the host!!"
+                    # Broadcast to all players (including the original player) that this player has left the lobby
+                    leave_message = Action(ActionEnum.REMOVE_PLAYER.value, self.id, {"lobby", lobby.to_json()})
+                    self.broadcast_to_lobby(self.lobby_id, leave_message)
+
+                else:
+                    print(f"Player {self.id} attempted to kick someone out of a lobby, but wasn't themselves part of any.")
+                    # Send a message back to the player that they weren't in a lobby
+                    error_resp = Action(ActionEnum.ERROR.value, self.id, "Not part of any lobby when doing action!")
                     self.send_message(error_resp)
             elif actionEnum == ActionEnum.READY_LOBBY:
                 # The owner of the lobby is trying to start the game.
