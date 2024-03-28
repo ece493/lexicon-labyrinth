@@ -65,6 +65,7 @@ enum CLIENT_ACTIONS {
 
 enum SERVER_ACTIONS {
 	"return_lobby_code",
+  "return_player_id",
   "lobby_does_not_exist",
   "lobby_full",
   "successfully_joined_lobby",

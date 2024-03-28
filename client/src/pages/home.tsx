@@ -45,6 +45,9 @@ const Home: React.FC = () => {
       <h2 onClick={() => ctx.setScreen(ScreenState.LOBBY_CODE_ENTRY)}>
         Click to go to Lobby Code Entry test page
       </h2>
+      <h2 onClick={() => ctx.setScreen(ScreenState.START)}>
+        Click to go to the Start Screen
+      </h2>
       <h2
         onClick={() => {
           ctx.transitions.initialize(ctx);
