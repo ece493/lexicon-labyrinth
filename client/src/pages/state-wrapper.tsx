@@ -66,9 +66,11 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
         sequenceNumber: 0,
       }}
     >
-    {stateToScreen(screen)}
-      {/* <div className="m-0 bg-blue-400 h-screen w-screen">
-      </div> */}
+      <div className="m-0 bg-blue-400 h-screen w-screen overflow-hidden relative">
+        <AnimatePresence mode="wait">
+          {stateToScreen(screen)}
+        </AnimatePresence>
+      </div>
     </GameContext.Provider>
   );
 };
