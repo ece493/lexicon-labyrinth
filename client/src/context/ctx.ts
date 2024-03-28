@@ -18,6 +18,7 @@ export type GameContextData = {
   setPlayerId: (s: string) => void;
   setScreen: (s: ScreenState) => void;
   lobby: Lobby | null;
+  setLobby: (l: Lobby) => void;
   transitions: ServerTransitions;
   receiveCallBacks: ReceiveCallbacks;
   playerId: string | null;
@@ -32,6 +33,7 @@ export const GameContext = createContext<GameContextData>({
   setPlayerId: (s: string) => {},
   setScreen: (s: ScreenState) => {},
   lobby: null,
+  setLobby: (l: Lobby) => {},
   transitions: TransitionManager,
   receiveCallBacks: ReceiveCallbacksDefault,
   playerId: null,

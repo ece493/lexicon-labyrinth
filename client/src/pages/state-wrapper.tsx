@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GameContext } from "../context/ctx";
-import { ScreenState } from "../data/model";
+import { Lobby, ScreenState } from "../data/model";
 import { TransitionManager } from "../ws-client/server/transitions";
 import { connect } from "../ws-client/client";
 import Home from "./home";
@@ -22,11 +22,12 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   initScreen = ScreenState.START,
 }) => {
   const [screen, setScreen] = useState<ScreenState>(initScreen);
+  const [lobby, setLobby] = useState<Lobby|null>(null);
   const [playerId, setPlayerId] = useState<string>("");
   const dReceiveCallbacks = ReceiveCallbacksDefault;
   const [sock, setSock] = useState<WebSocket|null>(null);
   const [playerName, setPlayerName] = useState("");
-  useEffect(() => setSock(connect(setPlayerId, setScreen, dReceiveCallbacks)), []);
+  useEffect(() => setSock(connect(setLobby, setPlayerId, setScreen, dReceiveCallbacks)), []);
   
   const stateToScreen = (s: ScreenState) => {
     switch (s) {
@@ -60,7 +61,8 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
         sock: sock,
         screen,
         setScreen,
-        lobby: null,
+        lobby,
+        setLobby,
         transitions: TransitionManager,
         receiveCallBacks: dReceiveCallbacks,
         sequenceNumber: 0,

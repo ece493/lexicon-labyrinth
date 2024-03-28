@@ -1,9 +1,10 @@
-import { Action, ScreenState, isAction } from "../data/model";
+import { Action, Lobby, ScreenState, isAction } from "../data/model";
 import { ActionsList } from "./model";
 import { ReceiveCallbacks } from "./receive-callbacks";
 
 // https://socket.io/how-to/use-with-react
 export const connect = (
+  setLobby: (l: Lobby) => void,
   setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
   receiveCallBacks: ReceiveCallbacks
@@ -12,11 +13,12 @@ export const connect = (
   // const url = process.env.NODE_ENV === 'production' ? "undefined" : 'ws://localhost:8888/websocket';
   const ws = new WebSocket("ws://localhost:8888/websocket");
   ws.onopen = (_) => console.log("connected websocket!");
-  ws.onmessage = (ev) => wsReceiveHandler(setPlayerId, setScreen, ev, receiveCallBacks);
+  ws.onmessage = (ev) => wsReceiveHandler(setLobby, setPlayerId, setScreen, ev, receiveCallBacks);
   return ws;
 };
 
 export const wsReceiveHandler = (
+  setLobby: (l: Lobby) => void,
   setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
   ev: MessageEvent<any>,
@@ -43,6 +45,7 @@ export const wsReceiveHandler = (
     case ActionsList.successfully_joined_lobby:
       // Code for successfully_joined_lobby
       setScreen(ScreenState.LOBBY);
+      setLobby(action.data.lobby);
       break;
     case ActionsList.success:
       // Code for success
@@ -90,6 +93,7 @@ export const wsReceiveHandler = (
       setScreen(ScreenState.END);
       break;
     default:
+      setLobby(action.data.lobby);
       break;
   }
 };

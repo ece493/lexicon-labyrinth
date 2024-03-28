@@ -18,7 +18,7 @@ const Home: React.FC = () => {
       <h2
         onClick={() => {
           ctx.setScreen(ScreenState.GAME);
-          ctx.sock = connect(ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
+          ctx.sock = connect(ctx.setLobby, ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
           ctx.sock.onopen = () => {
             ctx.transitions.initialize(ctx);
             ctx.transitions.readyLobby(ctx);
@@ -30,7 +30,7 @@ const Home: React.FC = () => {
       <h2
         onClick={() => {
           ctx.setScreen(ScreenState.END);
-          ctx.sock = connect(ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
+          ctx.sock = connect(ctx.setLobby, ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
           ctx.sock.onopen = () => {
             ctx.transitions.initialize(ctx);
             ctx.transitions.readyLobby(ctx);
@@ -44,21 +44,6 @@ const Home: React.FC = () => {
       </h2>
       <h2 onClick={() => ctx.setScreen(ScreenState.LOBBY_CODE_ENTRY)}>
         Click to go to Lobby Code Entry test page
-      </h2>
-      <h2
-        onClick={() => {
-          const sock = connect(ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
-          sock.onopen = () => {
-            sock.send("test");
-          };
-          sock.onmessage = (m) => {
-            const lobby: Lobby = JSON.parse(m.data);
-            console.log(lobby);
-            sock.close();
-          };
-        }}
-      >
-        Test Sock Inwards
       </h2>
       <h2
         onClick={() => {

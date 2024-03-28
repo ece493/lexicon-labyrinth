@@ -100,7 +100,7 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id, ctx}) => {
 
     const curriedDeletePlayer = (p: Player | Bot) => (player_id === lobby.host)
             ? () => {
-                "delete sequence";
+                ctx.transitions.removePlayer(p.id, ctx);
                 return;
             }
             : undefined;
