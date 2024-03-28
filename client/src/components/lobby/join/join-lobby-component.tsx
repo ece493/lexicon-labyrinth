@@ -33,7 +33,7 @@ export const JoinLobbyErrorComponent: React.FC<{msg: string}> = ({msg}) => {
                 onClick={() => ctx.setScreen(ScreenState.LOBBY_CODE_ENTRY)}
                 className={"bg-red-400 h-10 py-2 px-4 text-pink-100"}
                 style={{ textTransform: 'none' }}
-            >Start</Button>
+            >Return</Button>
         </DefaultLayout>
     );
 };
