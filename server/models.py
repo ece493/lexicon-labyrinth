@@ -64,7 +64,10 @@ class Lobby(object):
 
     def to_json(self) -> dict[str, Any]:
         # SHOULD BE UNUSED!
-        game_dict = self.game.to_json()
+        if self.game is not None:
+            game_dict = self.game.to_json()
+        else:
+            game_dict = {'board': [[]]}
         state = {
             "curr_turn": 0, # TODO, index of player of whose turn it is
             "board": game_dict['board'],
@@ -727,6 +730,7 @@ class ActionEnum(Enum):
     ADD_BOT = "add_bot" # Also sent from server to client
     UPDATE_BOT = "update_bot"
     DELETE_BOT = "delete_bot"
+    REMOVE_PLAYER = "remove_player"
     # server side
     RETURN_PLAYER_ID = "return_player_id"
     RETURN_LOBBY_CODE = "return_lobby_code"
