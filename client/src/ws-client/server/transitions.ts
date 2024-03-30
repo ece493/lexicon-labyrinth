@@ -198,6 +198,18 @@ const leaveGame = (ctx: GameContextData) => {
   ctx.sequenceNumber += 1;
 };
 
+const notifyTurnEnd = (ctx: GameContextData) => {
+  console.log("sending turn end request");
+  const msg: Action = {
+    action: ActionsList.end_turn,
+    player_id: ctx.playerId!,
+    data: null,
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
+
 export const TransitionManager: ServerTransitions = {
   initialize,
   joinLobby,

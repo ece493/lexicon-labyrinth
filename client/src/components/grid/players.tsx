@@ -58,7 +58,6 @@ const PlayersComponent = forwardRef<PlayersRef, PlayersComponentProp>(
         orderedLivePlayers.push(livePlayers[j]);
         j++;
       }
-      console.log(orderedLivePlayers)
       return [...orderedLivePlayers, ...players.filter((p) => p.lives === 0)];
     }
 

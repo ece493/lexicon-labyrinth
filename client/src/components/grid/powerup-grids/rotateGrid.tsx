@@ -27,7 +27,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
   setPowerup,
   resetWordSelection,
 }) => {
-  const [tiles, setTiles] = useState(structuredClone(ogGrid.tiles));
+  const [tiles, setTiles] = useState(structuredClone(ogGrid));
   const [selectedRow, setSelectedRow] = useState(-1);
   const [selectedCol, setSelectedCol] = useState(-1);
   const [rotations, setRotations] = useState(0);
@@ -45,7 +45,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
     //rotates left by default
 
     const tilesCopy =
-      prevSelectedRow === rowNum ? [...tiles] : structuredClone(ogGrid.tiles);
+      prevSelectedRow === rowNum ? [...tiles] : structuredClone(ogGrid);
 
     const row = [...tilesCopy[rowNum]];
 
@@ -69,7 +69,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
     //rotates down by default
 
     const tilesCopy =
-      prevSelectedCol === colNum ? [...tiles] : structuredClone(ogGrid.tiles);
+      prevSelectedCol === colNum ? [...tiles] : structuredClone(ogGrid);
 
     if (down) {
       const temp = tilesCopy[board_size[0] - 1][colNum];
@@ -121,7 +121,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
     downArrows.push("");
     tileCopy.push(downArrows);
 
-    return { tiles: tileCopy };
+    return tileCopy ;
   }
 
   function incrementRotCount(type: string) {

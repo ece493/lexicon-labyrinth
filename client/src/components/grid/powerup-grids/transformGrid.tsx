@@ -91,7 +91,7 @@ export const TransformGridComponent: React.FC<TransformGridComponentProps> = ({
         <Zoom in={true}>
           <div>
             <GridComponent
-              grid={{ tiles: alphabetTiles }}
+              grid={alphabetTiles}
               board_size={[6, 5]}
               buildChild={buildAlphabetTile}
             />

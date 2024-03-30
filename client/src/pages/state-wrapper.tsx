@@ -29,7 +29,7 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   const dReceiveCallbacks = ReceiveCallbacksDefault;
   const [sock, setSock] = useState<WebSocket|null>(null);
   const [playerName, setPlayerName] = useState("");
-  useEffect(() => setSock(connect(setLobby, setPlayerId, setScreen, dReceiveCallbacks)), []);
+  useEffect(() => setSock(connect(setLobby, setPlayerId, setScreen, dReceiveCallbacks, ctx)), []);
   
   const stateToScreen = (s: ScreenState) => {
     switch (s) {

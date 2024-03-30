@@ -32,9 +32,9 @@ const shiftVal = 64;
 function getDefaultPosGrid(grid: Board): TilePos[][] {
   const tilePos: TilePos[][] = [];
 
-  for (let i = 0; i < grid.tiles.length; i++) {
+  for (let i = 0; i < grid.length; i++) {
     tilePos.push([]);
-    for (let j = 0; j < grid.tiles.length; j++) {
+    for (let j = 0; j < grid.length; j++) {
       tilePos[i].push({ x: 0, y: 0 });
     }
   }
@@ -74,13 +74,13 @@ export const SelectionGridComponent = forwardRef<
     const displayGrid = animating ? animationGrid : grid;
 
     useEffect(() => {
-      setTimeout(() => animateRotate("col", 0, 4), 1000);
+      // setTimeout(() => animateRotate("col", 0, 4), 1000);
     }, []);
 
     function animateTransform(coords: number[], newVal: string) {
       const setRandomChar = () => {
-        const animationGridCopy = { tiles: animationGrid.tiles };
-        animationGridCopy.tiles[coords[0]][coords[1]] = getRandomCharacter();
+        const animationGridCopy = [...animationGrid ];
+        animationGridCopy[coords[0]][coords[1]] = getRandomCharacter();
       };
       setAnimating(true);
       setAnimatingGrid(displayGrid);
@@ -90,8 +90,8 @@ export const SelectionGridComponent = forwardRef<
       setTimeout(setRandomChar, 150);
       setTimeout(setRandomChar, 300);
       setTimeout(() => {
-        const animationGridCopy = { tiles: animationGrid.tiles };
-        animationGridCopy.tiles[coords[0]][coords[1]] = newVal;
+        const animationGridCopy = [...animationGrid ];
+        animationGridCopy[coords[0]][coords[1]] = newVal;
         setAnimating(false);
       }, 900);
     }
@@ -121,7 +121,10 @@ export const SelectionGridComponent = forwardRef<
                 });
               }
             } else {
-              newTilePos[i].push({ x: tilePositions[i][j].x, y: tilePositions[i][j].y });
+              newTilePos[i].push({
+                x: tilePositions[i][j].x,
+                y: tilePositions[i][j].y,
+              });
             }
           }
         }
@@ -142,12 +145,11 @@ export const SelectionGridComponent = forwardRef<
     function animateRotate(type: string, index: number, rotations: number) {
       setAnimating(true);
       setAnimatingGrid(displayGrid);
-      setTilePositions(rotateTilesOne(type, index, 1))
+      setTilePositions(rotateTilesOne(type, index, 1));
 
       for (let i = 1; i <= rotations; i++) {
         setTimeout(
-          () =>
-            setTilePositions(rotateTilesOne(type, index, 1)),
+          () => setTilePositions(rotateTilesOne(type, index, 1)),
           200 * i
         );
       }
@@ -201,7 +203,7 @@ export const SelectionGridComponent = forwardRef<
 
     function handleSelectStart(x: number, y: number) {
       setFirstTile([x, y]);
-      setWord(displayGrid.tiles[y][x]);
+      setWord(displayGrid[y][x]);
       setError(null);
       setWordPath([[x, y]]);
       setSelecting(true);
@@ -209,7 +211,7 @@ export const SelectionGridComponent = forwardRef<
 
     function handleSelectNonFirstTile(x: number, y: number) {
       if (selecting && isSelectableNonFirstTile(x, y)) {
-        setWord(word + displayGrid.tiles[y][x]);
+        setWord(word + displayGrid[y][x]);
         setWordPath([...wordPath, [x, y]]);
       }
     }

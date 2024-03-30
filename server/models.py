@@ -475,7 +475,7 @@ class Game:
     #     }
     def to_json(self) -> dict[str, Any]:
         state = {
-            "curr_turn": self.current_player_index,
+            "curr_turn": self.players[self.current_player_index].player_id,
             "board": self.board.to_json() if self.board else None,
             "timer": 123.4,
             "memory": [],

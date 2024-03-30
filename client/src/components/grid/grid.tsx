@@ -13,7 +13,6 @@ export const GridComponent: React.FC<GridComponentProps> = ({
   board_size,
   buildChild,
 }) => {
-  
 
   function buildGrid() {
     var idx = 0;
@@ -22,7 +21,7 @@ export const GridComponent: React.FC<GridComponentProps> = ({
       for (let j = 0; j < board_size[1]; j++) {
         arr.push(
           <div key={`${i}-${j}`}>
-            {buildChild(j, i, grid.tiles[i][j])}
+            {buildChild(j, i, grid[i][j])}
           </div>
         );
         idx++;

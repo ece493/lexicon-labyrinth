@@ -114,7 +114,7 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id, ctx}) => {
         : undefined;
 
     const startButton = () => {
-        const isDisabled = lobby.players.length <= 2;
+        const isDisabled = lobby.players.length <= 1;
         return <div className="m-0 w-full h-16">
             <div className="m-0 flex flex-auto justify-end h-auto px-2">
                 <Button
