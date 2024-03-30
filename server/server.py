@@ -82,19 +82,9 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             GameWebSocketHandler.pending_messages[player_id] = []
         
         expected_sequence_number = GameWebSocketHandler.last_processed_sequence_number[player_id] + 1
-        if action_sequence_number == expected_sequence_number:
-            # We gucci, process message normally
-            GameWebSocketHandler.last_processed_sequence_number[player_id] = action_sequence_number
-            self.process_message(action)  # You'll implement this based on your existing logic
-            self.process_pending_messages(player_id)
-        elif action_sequence_number > expected_sequence_number:
-            # Message is out of order! Store it until the missing messages arrive
-            print(f"Message received out of order! We were expecting number {expected_sequence_number}, but we got {action_sequence_number} so messages have been skipped.")
-            GameWebSocketHandler.pending_messages[player_id].append((action_sequence_number, action))
-        else:
-            # Sequence number is lower than expected, indicating a duplicate or old message
-            print(f"Received an old or duplicate message with sequence {action_sequence_number} from player {player_id}")
-            raise Exception()
+        GameWebSocketHandler.last_processed_sequence_number[player_id] = action_sequence_number
+        self.process_message(action)  # You'll implement this based on your existing logic
+        self.process_pending_messages(player_id)
     
     def process_pending_messages(self, player_id: str) -> None:
         # Sort pending messages by their sequence numbers
@@ -111,7 +101,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             action_dict['data'] = None
         action = Action(ActionEnum(action_dict['action']), action_dict['player_id'], action_dict['data'])
         actionEnum = ActionEnum(action_dict['action'])
-        if actionEnum in [ActionEnum.INITIALIZE, ActionEnum.JOIN_LOBBY, ActionEnum.LEAVE_LOBBY]:
+        if actionEnum in [ActionEnum.INITIALIZE, ActionEnum.JOIN_LOBBY, ActionEnum.LEAVE_LOBBY, ActionEnum.REMOVE_PLAYER]:
             # These actions are handled outside of a lobby or game, so we just handle them right here
             if actionEnum == ActionEnum.INITIALIZE:
                 # Generate a unique 4-letter lobby code
@@ -138,7 +128,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 resp = Action(ActionEnum.RETURN_LOBBY_CODE.value, self.id, lobby_code)
                 self.send_message(resp)
                 # Tell the player they joined their own lobby. Technically we should be telling everyone within the lobby, but it's only the player in there right now.
-                resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_code, "player_name": action.data['player_name']})
+                resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_code, "player_name": action.data['player_name'], "lobby": self.lobbies[lobby_code].to_json()})
                 self.send_message(resp)
             elif actionEnum == ActionEnum.JOIN_LOBBY:
                 # The player is trying to join an existing lobby
@@ -149,7 +139,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                     p.set_send_message_func(GameWebSocketHandler.send_to_player_func)
                     self.lobbies[lobby_id].add_player(p)
                     self.lobby_id = lobby_id
-                    resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_id, "player_name": action.data['player_name']})
+                    resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_id, "player_name": action.data['player_name'], "lobby": self.lobbies[lobby_id].to_json()})
                     GameWebSocketHandler.broadcast_to_lobby(self.lobby_id, resp)
                 else:
                     resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, self.id, None)
@@ -186,6 +176,24 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                     print(f"Player {self.id} attempted to leave a lobby but wasn't part of any.")
                     # Send a message back to the player that they weren't in a lobby
                     error_resp = Action(ActionEnum.ERROR.value, self.id, "Not part of any lobby to leave.")
+                    self.send_message(error_resp)
+            elif actionEnum == ActionEnum.REMOVE_PLAYER:
+                # The host sent a message to remove another player
+                assert action.player_id == self.lobbies[self.lobby_id].host, f"Only the host can remove bots or players! Player of id {action.player_id} is not the host who has id {self.lobbies[self.lobby_id].host}"
+                assert action.data['player_id'] == self.lobby_id, f"The lobby code the client passed to leave of {action.data['lobby_code']} doesn't match the client's actual current lobby {self.lobby_id}!"
+                assert action.player_id != action.data['player_id'], f"The lobby host shouldn't be removing themself with this method! Please send the leave lobby message instead, thx."
+                if self.lobby_id in self.lobbies:
+                    lobby = self.lobbies[self.lobby_id]
+                    is_host_leaving = lobby.remove_player(self.id)
+                    assert not is_host_leaving, f"This shouldn't be the host!!"
+                    # Broadcast to all players (including the original player) that this player has left the lobby
+                    leave_message = Action(ActionEnum.REMOVE_PLAYER.value, self.id, {"lobby", lobby.to_json()})
+                    self.broadcast_to_lobby(self.lobby_id, leave_message)
+
+                else:
+                    print(f"Player {self.id} attempted to kick someone out of a lobby, but wasn't themselves part of any.")
+                    # Send a message back to the player that they weren't in a lobby
+                    error_resp = Action(ActionEnum.ERROR.value, self.id, "Not part of any lobby when doing action!")
                     self.send_message(error_resp)
             elif actionEnum == ActionEnum.READY_LOBBY:
                 # The owner of the lobby is trying to start the game.

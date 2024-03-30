@@ -56,7 +56,7 @@ enum CLIENT_ACTIONS {
   "pick_powerup",
   "add_bot",
   "update_bot",
-  "delete_bot",
+  "remove_player",
   "pick_rotate_powerup",
   "pick_transform_powerup",
   "pick_scramble_powerup",
@@ -65,7 +65,9 @@ enum CLIENT_ACTIONS {
 
 enum SERVER_ACTIONS {
 	"return_lobby_code",
+  "return_player_id",
   "lobby_does_not_exist",
+  "lobby_full",
   "successfully_joined_lobby",
   "success",
   "error",

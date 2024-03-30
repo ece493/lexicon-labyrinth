@@ -1,10 +1,12 @@
 import { GameContextData } from "../context/ctx";
-import { Action, ScreenState, isAction } from "../data/model";
+import { Action, Lobby, ScreenState, isAction } from "../data/model";
 import { ActionsList } from "./model";
 import { ReceiveCallbacks } from "./receive-callbacks";
 
 // https://socket.io/how-to/use-with-react
 export const connect = (
+  setLobby: (l: Lobby) => void,
+  setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
   receiveCallBacks: ReceiveCallbacks,
   ctx: GameContextData,
@@ -13,11 +15,13 @@ export const connect = (
   // const url = process.env.NODE_ENV === 'production' ? "undefined" : 'ws://localhost:8888/websocket';
   const ws = new WebSocket("ws://localhost:8888/websocket");
   ws.onopen = (_) => console.log("connected websocket!");
-  ws.onmessage = (ev) => wsReceiveHandler(setScreen, ev, receiveCallBacks, ctx);
+  ws.onmessage = (ev) => wsReceiveHandler(setLobby, setPlayerId, setScreen, ev, receiveCallBacks, ctx);
   return ws;
 };
 
 export const wsReceiveHandler = (
+  setLobby: (l: Lobby) => void,
+  setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
   ev: MessageEvent<any>,
   receiveCallBacks: ReceiveCallbacks,
@@ -26,18 +30,29 @@ export const wsReceiveHandler = (
   const data = JSON.parse(ev.data);
   if (!isAction(data)) return null;
   const action = data as Action;
+  console.log(action);
   switch (action.action) {
     case ActionsList.return_lobby_code:
       // Code for return_lobby_code
+      setPlayerId(action.player_id);
       setScreen(ScreenState.LOBBY);
+      break;
+    case ActionsList.return_player_id:
+      // Code for return_lobby_code
+      setPlayerId(action.player_id);
       break;
     case ActionsList.lobby_does_not_exist:
       // Code for lobby_does_not_exist
       setScreen(ScreenState.LOBBY_CODE_ENTRY_FAILED);
       break;
+    case ActionsList.lobby_full:
+      // Code for lobby_does_not_exist
+      setScreen(ScreenState.LOBBY_FULL);
+      break;
     case ActionsList.successfully_joined_lobby:
       // Code for successfully_joined_lobby
       setScreen(ScreenState.LOBBY);
+      setLobby(action.data.lobby);
       break;
     case ActionsList.success:
       // Code for success
@@ -81,6 +96,7 @@ export const wsReceiveHandler = (
       setScreen(ScreenState.END);
       break;
     default:
+      setLobby(action.data.lobby);
       break;
   }
 };
