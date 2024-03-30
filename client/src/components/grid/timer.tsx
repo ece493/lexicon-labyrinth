@@ -11,9 +11,10 @@ interface TimerComponentProp {}
 
 const TimerComponent: React.FC<TimerComponentProp> = () => {
   const [time, setTime] = React.useState(60);
-  const ctx = useContext(GameContext)
+  const ctx = useContext(GameContext);
 
   const [startTime, setStartTime] = React.useState(Date.now());
+  const [stop, setStop] = React.useState(false);
 
   function countDown() {
     let newTime = Math.ceil(60 - (Date.now() - startTime) / 1000);
@@ -21,12 +22,13 @@ const TimerComponent: React.FC<TimerComponentProp> = () => {
       setTime(newTime);
     } else {
       ctx.transitions.notifyTurnEnd(ctx);
+      setStop(true)
     }
   }
 
   function startCountdown() {
     setInterval(() => {
-      countDown();
+      if(!stop) countDown();
     }, 1000);
   }
 
