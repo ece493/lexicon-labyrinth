@@ -13,14 +13,6 @@ from models import Lobby, Action, ActionEnum, Player
 from tempTestObjects import StaticTestObjects
 # Define a WebSocketHandler
 
-def get_random_player_id(length: int = 10) -> str:
-    """Generate a random string of letters for a player ID."""
-    # Combines uppercase and lowercase letters
-    letters = string.ascii_letters
-    # Randomly selects letters to create the ID
-    player_id = ''.join(random.choice(letters) for i in range(length))
-    return player_id
-
 class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     connections: set['GameWebSocketHandler'] = set()
     lobbies: dict[str, Lobby] = {} # each lobby is assigned to a player UUID
@@ -116,8 +108,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             if actionEnum == ActionEnum.INITIALIZE:
                 # Generate a unique 4-letter lobby code
                 while True:
-                    lobby_code = ''.join(random.choices(
-                        string.ascii_uppercase, k=4))
+                    lobby_code = ''.join(random.choices(string.ascii_uppercase, k=4))
                     if lobby_code not in self.lobbies:
                         break  # Exit the loop if the generated code is unique
                 #lobby_code = "ABCD" # TODO: REMOVE
@@ -149,7 +140,10 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                     p.set_send_message_func(GameWebSocketHandler.send_to_player_func)
                     self.lobbies[lobby_id].add_player(p)
                     self.lobby_id = lobby_id
-                    resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_id, "player_name": action.data['player_name'], "lobby": self.lobbies[lobby_id].to_json()})
+                    resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id,
+                                  {"lobby_code": lobby_id,
+                                   "player_name": action.data['player_name'],
+                                   "lobby": self.lobbies[lobby_id].to_json()})
                     GameWebSocketHandler.broadcast_to_lobby(self.lobby_id, resp)
                 else:
                     resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, self.id, None)
