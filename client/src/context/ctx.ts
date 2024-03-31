@@ -11,10 +11,14 @@ import {
 } from "../ws-client/receive-callbacks";
 
 export type GameContextData = {
+  playerName: String;
+  setPlayerName: (s: string) => void;
   sock: WebSocket | null;
   screen: ScreenState;
+  setPlayerId: (s: string) => void;
   setScreen: (s: ScreenState) => void;
   lobby: Lobby | null;
+  setLobby: (l: Lobby) => void;
   transitions: ServerTransitions;
   receiveCallBacks: ReceiveCallbacks;
   playerId: string | null;
@@ -22,10 +26,14 @@ export type GameContextData = {
 };
 
 export const GameContext = createContext<GameContextData>({
+  playerName: "",
+  setPlayerName: (s: string) => { },
   sock: null,
   screen: ScreenState.START,
+  setPlayerId: (s: string) => {},
   setScreen: (s: ScreenState) => {},
   lobby: null,
+  setLobby: (l: Lobby) => {},
   transitions: TransitionManager,
   receiveCallBacks: ReceiveCallbacksDefault,
   playerId: null,

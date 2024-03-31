@@ -5,7 +5,7 @@ import {
 } from "../components/grid/selectionGrid";
 import TurnComponent, { TurnRef } from "../components/grid/turn";
 import PowerupsComponent from "../components/grid/powerups";
-import PlayersComponent from "../components/grid/players";
+import PlayersComponent, { PlayersRef } from "../components/grid/players";
 import { Bot, Lobby, Player } from "../data/model";
 import { useState, useContext } from "react";
 import { SwapGridComponent } from "../components/grid/powerup-grids/swapGrid";
@@ -16,62 +16,10 @@ import { GameContext } from "../context/ctx";
 import { isJSDocNullableType } from "typescript";
 import { Fade, Zoom } from "@mui/material";
 import { motion } from "framer-motion";
+import { lobby1, lobby2, lobby3 } from "../mocks/lobbyMocks";
 
 const Game: React.FC = () => {
-  const host: Player = {
-    id: "0",
-    name: "John Player",
-    is_spectator: false,
-    lives: 3,
-    money: 100,
-  };
-  const p2: Player = {
-    id: "1",
-    name: "P2",
-    is_spectator: false,
-    lives: 3,
-    money: 10,
-  };
-  const dead: Player = {
-    id: "2",
-    name: "P2",
-    is_spectator: false,
-    lives: 0,
-    money: 100,
-  };
-  const bot: Bot = {
-    id: "3",
-    name: "John Bot",
-    is_spectator: false,
-    lives: 3,
-    money: 100,
-    difficulty: 1,
-    memory: [],
-  };
-  const [lobby, setLobby] = useState<Lobby>({
-    state: {
-      curr_turn: "1",
-      board: {
-        tiles: [
-          ["a", "b", "c", "d", "e", "f", "g"],
-          ["h", "i", "j", "k", "l", "m", "n"],
-          ["o", "p", "q", "r", "s", "t", "u"],
-          ["v", "w", "x", "y", "z", "A", "B"],
-          ["C", "D", "E", "F", "G", "H", "I"],
-          ["J", "K", "L", "M", "N", "O", "P"],
-          ["Q", "R", "S", "T", "U", "V", "W"],
-        ],
-      },
-      timer: 0,
-      memory: [],
-    },
-    max_lives: 5,
-    host: 0,
-    board_size: [7, 7],
-    timer_setting: 30,
-    lobby_code: "X3Y0EG",
-    players: [host, p2, dead, bot],
-  });
+  const [lobby, setLobby] = useState<Lobby>(lobby1);
 
   useEffect(() => {
     // setTimeout(() => {
@@ -97,6 +45,7 @@ const Game: React.FC = () => {
 
   const turnRef = useRef<TurnRef>(null);
   const selectGridRef = useRef<SelectGridRef>(null);
+  const playersRef = useRef<PlayersRef>(null);
 
   const [powerup, setPowerup] = useState<string | null>(null);
   const [tiles, setTiles] = useState([
@@ -137,8 +86,21 @@ const Game: React.FC = () => {
     };
     gameContext.receiveCallBacks.handleNewTurn = (newLobby: Lobby) => {
       setLobby(newLobby);
-      turnRef.current?.resetTimer()
+      turnRef.current?.resetTimer();
     };
+    gameContext.receiveCallBacks.handleLoseLife = (
+      newLobby: Lobby,
+      playerId: string
+    ) => {
+      playersRef.current?.loseLife(playerId, () => setLobby(newLobby));
+    };
+    gameContext.receiveCallBacks.handleDeath = (
+      newLobby: Lobby,
+      playerId: string
+    ) => {
+      playersRef.current?.endPlayer(playerId, () => setLobby(newLobby));
+    };
+    gameContext.receiveCallBacks.handleGameEnd = (newLobby: Lobby) => {};
   }
 
   function reconstructWord(path: number[][]) {
@@ -152,6 +114,11 @@ const Game: React.FC = () => {
   useEffect(() => {
     loadReceiveCallBacks();
     setShowGame(true);
+
+    setTimeout(
+      () => gameContext.receiveCallBacks.handleLoseLife(lobby3, "1"),
+      400
+    );
   }, []);
 
   function getPowerupGrid() {
@@ -281,6 +248,7 @@ const Game: React.FC = () => {
                 currentTurn={lobby.state.curr_turn}
                 players={lobby.players}
                 powerup={powerup}
+                ref={playersRef}
               />
             </div>
           </div>

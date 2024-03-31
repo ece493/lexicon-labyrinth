@@ -815,6 +815,7 @@ class ActionEnum(Enum):
     UPDATE_LOBBY_SETTINGS = "update_lobby_settings"
     WORD_ACCEPTED = "word_accepted"
     WORD_DENIED = "word_denied"
+    LOSE_LIFE = "lose_life"
     END_TURN = "end_turn"
     START_TURN = "start_turn"
     POWERUP_DENIED = "powerup_denied"
