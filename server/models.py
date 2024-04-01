@@ -352,7 +352,7 @@ class Game:
     def handle_player_elimination_or_time_out(self, player_id) -> None:
         """Handles the scenario where a player is eliminated or runs out of time."""
         # Implement player elimination logic
-        # This is a placeholder for any additional logic you may need for player elimination
+        # This is a placeholder for any additional logic
         # TODO: Implement additional player elimination logic here if necessary
 
         # Remove the player or deduct life
