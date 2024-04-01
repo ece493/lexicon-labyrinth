@@ -82,9 +82,8 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
 
         # We gucci, process message normally
         GameWebSocketHandler.last_processed_sequence_number[player_id] = action_sequence_number
-        self.process_message(action)  # You'll implement this based on your existing logic
+        self.process_message(action)
         self.process_pending_messages(player_id)
-
 
 
         # elif action_sequence_number > expected_sequence_number:
@@ -192,14 +191,14 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             elif actionEnum == ActionEnum.REMOVE_PLAYER:
                 # The host sent a message to remove another player
                 assert action.player_id == self.lobbies[self.lobby_id].host, f"Only the host can remove bots or players! Player of id {action.player_id} is not the host who has id {self.lobbies[self.lobby_id].host}"
-                assert action.data['player_id'] == self.lobby_id, f"The lobby code the client passed to leave of {action.data['lobby_code']} doesn't match the client's actual current lobby {self.lobby_id}!"
+                assert action.data['lobby_code'] == self.lobby_id, f"The lobby code the client passed to leave of {action.data['lobby_code']} doesn't match the client's actual current lobby {self.lobby_id}!"
                 assert action.player_id != action.data['player_id'], f"The lobby host shouldn't be removing themself with this method! Please send the leave lobby message instead, thx."
                 if self.lobby_id in self.lobbies:
                     lobby = self.lobbies[self.lobby_id]
-                    is_host_leaving = lobby.remove_player(self.id)
+                    is_host_leaving = lobby.remove_player(action.data['player_id'])
                     assert not is_host_leaving, f"This shouldn't be the host!!"
                     # Broadcast to all players (including the original player) that this player has left the lobby
-                    leave_message = Action(ActionEnum.REMOVE_PLAYER.value, self.id, {"lobby", lobby.to_json()})
+                    leave_message = Action(ActionEnum.REMOVE_PLAYER.value, self.id, {"lobby": lobby.to_json()})
                     self.broadcast_to_lobby(self.lobby_id, leave_message)
 
                 else:
