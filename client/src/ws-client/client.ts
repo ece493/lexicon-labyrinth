@@ -5,6 +5,7 @@ import { ReceiveCallbacks } from "./receive-callbacks";
 
 // https://socket.io/how-to/use-with-react
 export const connect = (
+  playerId: String,
   setLobby: (l: Lobby) => void,
   setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
@@ -14,12 +15,12 @@ export const connect = (
   // const url = process.env.NODE_ENV === 'production' ? "undefined" : 'ws://localhost:8888/websocket';
   const ws = new WebSocket("ws://localhost:8888/websocket");
   ws.onopen = (_) => console.log("connected websocket!");
-  ws.onmessage = (ev) =>
-    wsReceiveHandler(setLobby, setPlayerId, setScreen, ev, receiveCallBacks);
+  ws.onmessage = (ev) => wsReceiveHandler(playerId, setLobby, setPlayerId, setScreen, ev, receiveCallBacks);
   return ws;
 };
 
 export const wsReceiveHandler = (
+  player_id: String,
   setLobby: (l: Lobby) => void,
   setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
@@ -69,9 +70,6 @@ export const wsReceiveHandler = (
     case ActionsList.player_left:
       // Code for player_left
       break;
-    case ActionsList.update_lobby_settings:
-      // Code for update_lobby_settings
-      break;
     case ActionsList.word_accepted:
       receiveCallBacks.handleWordAccept(action.data.path, action.data.lobby);
       break;
@@ -119,6 +117,12 @@ export const wsReceiveHandler = (
         setScreen(ScreenState.END);
       }, 1200); //TEMP FIX
 
+      break;
+    case ActionsList.remove_player:
+      if (action.data.player_id == player_id) {
+        setScreen(ScreenState.START);
+      }
+      setLobby(action.data.lobby);
       break;
     default:
       setLobby(action.data.lobby);

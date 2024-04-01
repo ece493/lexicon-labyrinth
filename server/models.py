@@ -1,11 +1,13 @@
 import random
 import string
 import time
+import json
 
 from enum import Enum, auto
 from typing import Optional, Callable, Any
 
-# from server import GameWebSocketHandler
+#from server import GameWebSocketHandler
+from utils import *
 
 PLAYER_LIMIT = 5
 DICTIONARY_PATH = "dictionary.txt"
@@ -29,6 +31,13 @@ class GameState(Enum):
     CHECK_FOR_WIN = auto()
     GAME_OVER = auto()
 
+class BotDifficulty(Enum):
+    EASY = 0
+    MEDIUM = 1
+    HARD = 2
+
+    def __str__(self) -> str:
+        return self.name
 
 class Lobby(object):
     def __init__(self, host, lobby_id) -> None:
@@ -55,13 +64,21 @@ class Lobby(object):
         return
 
     def handle_action(self, player_id: str, actionEnum: 'ActionEnum', action: 'Action') -> None:
-        if actionEnum in [ActionEnum.CHANGE_PARAM, ActionEnum.READY_LOBBY]:
+        if actionEnum in [ActionEnum.CHANGE_PARAM, ActionEnum.READY_LOBBY, ActionEnum.ADD_BOT, ActionEnum.UPDATE_BOT]:
             if actionEnum == ActionEnum.CHANGE_PARAM:
                 # The owner of the lobby is trying to change the lobby's settings
                 self.change_lobby_settings(action.data)
+            elif actionEnum == ActionEnum.ADD_BOT:
+                assert self.host == player_id, f"Error! Only the lobby's host is able to add a bot! The host is {self.host} and the player trying to add the bot is {player_id}"
+                self.add_bot(action.data)
             elif actionEnum == ActionEnum.READY_LOBBY:
                 assert self.host == player_id, f"Error! Player who tried to start game ({player_id}) is not the host of the lobby ({self.host})!"
                 self.start_game()
+            elif actionEnum == ActionEnum.UPDATE_BOT:
+                assert self.host == player_id, f"Error! Player who tried to update bot ({player_id}) is not the host of the lobby ({self.host})!"
+                self.update_bot(action.data)
+            else:
+                print(f"Unknown action {action} cannot be handled by the lobby!")
         elif actionEnum in [ActionEnum.PICK_WORD, ActionEnum.PICK_TRANSFORM_POWERUP, ActionEnum.PICK_ROTATE_POWERUP, ActionEnum.PICK_SCRAMBLE_POWERUP, ActionEnum.PICK_SWAP_POWERUP, ActionEnum.END_TURN]:
             self.game.handle_action(player_id, actionEnum, action)
         else:
@@ -106,14 +123,9 @@ class Lobby(object):
         if self.broadcast_func:
             lobby_settings_message = Action(action=ActionEnum.UPDATE_LOBBY_SETTINGS.value,
                                             player_id=self.host,
-                                            data={
-                                                "board_size": self.board_size,
-                                                "timer_setting": self.timer_setting,
-                                                "max_lives": self.max_lives
-                                            }
-                                            )
-            print(
-                f"Broadcasting new lobby settings to all players within lobby {self.lobby_id}: {lobby_settings_message}")
+                                            data={"lobby": self.to_json()}
+            )
+            print(f"Broadcasting new lobby settings to all players within lobby {self.lobby_id}: {lobby_settings_message}")
             self.broadcast_func(self.lobby_id, lobby_settings_message)
 
     def add_player(self, player: 'Player') -> bool:
@@ -154,21 +166,64 @@ class Lobby(object):
                 f"Player (ID: {player_id}) removed from lobby {self.lobby_id}.")
 
             # If the host leaves, we'll handle lobby deletion outside this method
+            print(f"Checking whether the {self.host=} is {player_id=} when removing a player from the lobby")
             return self.host == player_id
         else:
             print(
                 f"No player with ID {player_id} found in lobby {self.lobby_id}.")
             return False
-
-    def add_bot(self, bot) -> None:
+    
+    def add_bot(self, data) -> bool:
         # Initialize bot with specified difficulty
         # Add them to the list of players
         # Send a message to all players saying a new bot player joined
-        pass  # TODO
+        if not self.is_full:
+            new_bot_id = get_random_player_id()
+            # TODO: Make the name better
+            new_bot_name = new_bot_id
+            bot = Bot(new_bot_id, new_bot_name, BotDifficulty.MEDIUM)
+            self.players.append(bot)
+            print(f"Bot of name {bot.name} and id {bot.player_id} added to lobby {self.lobby_id}.")
+
+            # Broadcast that a new player has joined the lobby
+            
+            if self.broadcast_func:
+                join_message = Action(action=ActionEnum.ADD_BOT.value,
+                                      player_id=bot.player_id,
+                                      data={
+                                                "lobby": self.to_json()
+                                            }
+                )
+                self.broadcast_func(self.lobby_id, join_message)
+            else:
+                raise Exception("The lobby's broadcast function doesn't exist!")
+            
+            return True
+        else:
+            print(f"Lobby {self.lobby_id} is full. Cannot add new bot.")
+            return False
+    
+    def update_bot(self, data) -> None:
+        bot_id = data['player_id']
+        difficulty = data['difficulty']
+        if difficulty == 0:
+            difficulty_enum = BotDifficulty.EASY
+        elif difficulty == 1:
+            difficulty_enum = BotDifficulty.MEDIUM
+        elif difficulty == 2:
+            difficulty_enum = BotDifficulty.HARD
+        else:
+            raise Exception(f"Unknown bot difficulty number {difficulty}! Must be 0, 1, or 2")
+        for player in self.players:
+            if player.player_id == bot_id and player.is_bot:
+                player.update_difficulty(difficulty_enum)
+                return
+        raise Exception(f"Bot to update difficulty of is not found in the list of bots in this lobby!")
 
     def remove_bot(self, bot_id) -> None:
         # Remove bot
         # Send message to all players saying the bot left
+        # UNUSED, USE REMOVE PLAYER INSTEAD!
         pass  # TODO
 
     def set_broadcast_function(self, func: Callable) -> None:
@@ -319,7 +374,7 @@ class Game:
     def handle_player_elimination_or_time_out(self, player_id) -> None:
         """Handles the scenario where a player is eliminated or runs out of time."""
         # Implement player elimination logic
-        # This is a placeholder for any additional logic you may need for player elimination
+        # This is a placeholder for any additional logic
         # TODO: Implement additional player elimination logic here if necessary
 
         # Remove the player or deduct life
@@ -592,12 +647,24 @@ class Player(object):
 
 
 class Bot(Player, object):
-    def __init__(self, player_id, name, difficulty) -> None:
+    def __init__(self, player_id, name, difficulty: BotDifficulty) -> None:
         super().__init__(player_id, name)
         self.is_bot = True
-        self.difficulty = difficulty
+        self.difficulty: BotDifficulty = difficulty
         self.memory: list[str] = []
         # Additional properties and methods specific to bot behavior
+        self.dictionary = self.pull_dictionary(self.difficulty)
+
+    def pull_dictionary(self, difficulty: BotDifficulty) -> None:
+        if difficulty == BotDifficulty.EASY:
+            dict_path = 'easy_bot_dictionary.txt'
+        elif difficulty == BotDifficulty.MEDIUM:
+            dict_path = 'medium_bot_dictionary.txt'
+        elif difficulty == BotDifficulty.HARD:
+            dict_path = 'medium_bot_dictionary.txt'
+        else:
+            raise Exception(f"Failed to pull bot dictionary of specified difficulty {difficulty}")
+        return load_words_from_scowl(dict_path)
 
     def send_message(self, message) -> None:
         # Send a message from the game to the bot
@@ -606,9 +673,13 @@ class Bot(Player, object):
             f"Bot with name {self.name} and id {self.player_id} received message: {message}")
         self.process_bot_action(message)
 
+    def update_difficulty(self, difficulty_enum: BotDifficulty) -> None:
+        self.difficulty = difficulty_enum
+
     def process_bot_action(self, message) -> None:
         # Process the message and simulate a bot response/action
         print(f"Bot is processing message {message}")
+        
         pass
 
     def to_json(self) -> dict[str, Any]:
@@ -620,7 +691,7 @@ class Bot(Player, object):
             "lives": self.lives,
             "money": self.currency,
             "score": self.score,
-            "difficulty": self.difficulty,
+            "difficulty": self.difficulty.value,
             "memory": self.memory,
         }
 
@@ -718,20 +789,8 @@ class GameDictionary(object):
         self.words = self.load_words()
 
     def load_words(self) -> None:
-        # Load words from the SCOWL dataset
-        words = []
-        start_processing = False
-        with open(DICTIONARY_PATH, 'r', encoding='utf8') as file:
-            for line in file:
-                # Strip newline and other trailing whitespace characters
-                line = line.strip()
-                if start_processing:
-                    if line:  # Check if the line is not empty
-                        words.append(line)
-                elif line == '---':
-                    start_processing = True
-        return words
-
+        return load_words_from_scowl(DICTIONARY_PATH)
+    
     def is_valid_word(self, word: str) -> bool:
         return word.lower() in self.words
 

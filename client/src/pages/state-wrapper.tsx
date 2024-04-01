@@ -45,14 +45,8 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   const [playerName, setPlayerName] = useState("");
   const [freezeInputs, setFreezeInputs] = useState(false);
 
-  useEffect(  
-    () =>
-      setSock(
-        connect(setLobby, setPlayerId, setScreen, receiveCallbacks)
-      ),
-    []
-  );
-
+  useEffect(() => setSock(connect(playerId, setLobby, setPlayerId, setScreen, receiveCallbacks)), []);
+  
   const stateToScreen = (s: ScreenState) => {
     switch (s) {
       case ScreenState.TEST_HOME:

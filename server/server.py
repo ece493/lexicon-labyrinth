@@ -11,15 +11,9 @@ from typing import Optional, Any
 
 from models import Lobby, Action, ActionEnum, Player
 from tempTestObjects import StaticTestObjects
-# Define a WebSocketHandler
 
-def get_random_player_id(length: int = 10) -> str:
-    """Generate a random string of letters for a player ID."""
-    # Combines uppercase and lowercase letters
-    letters = string.ascii_letters
-    # Randomly selects letters to create the ID
-    player_id = ''.join(random.choice(letters) for i in range(length))
-    return player_id
+from utils import *
+# Define a WebSocketHandler
 
 class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     connections: set['GameWebSocketHandler'] = set()
@@ -82,9 +76,24 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             GameWebSocketHandler.pending_messages[player_id] = []
         
         expected_sequence_number = GameWebSocketHandler.last_processed_sequence_number[player_id] + 1
+        # if action_sequence_number == expected_sequence_number:
+
+
+
+        # We gucci, process message normally
         GameWebSocketHandler.last_processed_sequence_number[player_id] = action_sequence_number
-        self.process_message(action)  # You'll implement this based on your existing logic
+        self.process_message(action)
         self.process_pending_messages(player_id)
+
+
+        # elif action_sequence_number > expected_sequence_number:
+        #     # Message is out of order! Store it until the missing messages arrive
+        #     print(f"Message received out of order! We were expecting number {expected_sequence_number}, but we got {action_sequence_number} so messages have been skipped.")
+        #     GameWebSocketHandler.pending_messages[player_id].append((action_sequence_number, action))
+        # else:
+        #     # Sequence number is lower than expected, indicating a duplicate or old message
+        #     print(f"Received an old or duplicate message with sequence {action_sequence_number} from player {player_id}")
+        #     raise Exception()
     
     def process_pending_messages(self, player_id: str) -> None:
         # Sort pending messages by their sequence numbers
@@ -106,8 +115,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             if actionEnum == ActionEnum.INITIALIZE:
                 # Generate a unique 4-letter lobby code
                 while True:
-                    lobby_code = ''.join(random.choices(
-                        string.ascii_uppercase, k=4))
+                    lobby_code = ''.join(random.choices(string.ascii_uppercase, k=4))
                     if lobby_code not in self.lobbies:
                         break  # Exit the loop if the generated code is unique
                 #lobby_code = "ABCD" # TODO: REMOVE
@@ -139,7 +147,10 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                     p.set_send_message_func(GameWebSocketHandler.send_to_player_func)
                     self.lobbies[lobby_id].add_player(p)
                     self.lobby_id = lobby_id
-                    resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id, {"lobby_code": lobby_id, "player_name": action.data['player_name'], "lobby": self.lobbies[lobby_id].to_json()})
+                    resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id,
+                                  {"lobby_code": lobby_id,
+                                   "player_name": action.data['player_name'],
+                                   "lobby": self.lobbies[lobby_id].to_json()})
                     GameWebSocketHandler.broadcast_to_lobby(self.lobby_id, resp)
                 else:
                     resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, self.id, None)
@@ -180,14 +191,14 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             elif actionEnum == ActionEnum.REMOVE_PLAYER:
                 # The host sent a message to remove another player
                 assert action.player_id == self.lobbies[self.lobby_id].host, f"Only the host can remove bots or players! Player of id {action.player_id} is not the host who has id {self.lobbies[self.lobby_id].host}"
-                assert action.data['player_id'] == self.lobby_id, f"The lobby code the client passed to leave of {action.data['lobby_code']} doesn't match the client's actual current lobby {self.lobby_id}!"
+                assert action.data['lobby_code'] == self.lobby_id, f"The lobby code the client passed to leave of {action.data['lobby_code']} doesn't match the client's actual current lobby {self.lobby_id}!"
                 assert action.player_id != action.data['player_id'], f"The lobby host shouldn't be removing themself with this method! Please send the leave lobby message instead, thx."
                 if self.lobby_id in self.lobbies:
                     lobby = self.lobbies[self.lobby_id]
-                    is_host_leaving = lobby.remove_player(self.id)
+                    is_host_leaving = lobby.remove_player(action.data['player_id'])
                     assert not is_host_leaving, f"This shouldn't be the host!!"
                     # Broadcast to all players (including the original player) that this player has left the lobby
-                    leave_message = Action(ActionEnum.REMOVE_PLAYER.value, self.id, {"lobby", lobby.to_json()})
+                    leave_message = Action(ActionEnum.REMOVE_PLAYER.value, action.data['player_id'], {"lobby": lobby.to_json()})
                     self.broadcast_to_lobby(self.lobby_id, leave_message)
 
                 else:
