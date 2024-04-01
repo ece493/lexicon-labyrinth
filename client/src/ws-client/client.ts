@@ -122,9 +122,8 @@ export const wsReceiveHandler = (
 
       break;
     case ActionsList.remove_player:
-      if (action.player_id === action.data.player_id_removed) {
+      if (action.player_id === action.data.player_id_removed)
         setScreen(ScreenState.START);
-      }
       setLobby(action.data.lobby);
       break;
     default:
