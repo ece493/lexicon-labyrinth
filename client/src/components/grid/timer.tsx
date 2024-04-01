@@ -21,8 +21,10 @@ const TimerComponent: React.FC<TimerComponentProp> = () => {
     if (newTime >= 0) {
       setTime(newTime);
     } else {
-      ctx.transitions.notifyTurnEnd(ctx);
       setStop(true)
+      if (ctx.playerId === ctx.lobby?.state?.curr_turn){
+        ctx.transitions.notifyTurnEnd(ctx);
+      }
     }
   }
 

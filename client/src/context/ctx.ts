@@ -1,5 +1,4 @@
 import { createContext } from "react";
-import { connect } from "../ws-client/client";
 import { Lobby, ScreenState } from "../data/model";
 import {
   ServerTransitions,
@@ -7,7 +6,7 @@ import {
 } from "../ws-client/server/transitions";
 import {
   ReceiveCallbacks,
-  ReceiveCallbacksDefault,
+  GetReceiveCallbacksDefault,
 } from "../ws-client/receive-callbacks";
 
 export type GameContextData = {
@@ -35,7 +34,7 @@ export const GameContext = createContext<GameContextData>({
   lobby: null,
   setLobby: (l: Lobby) => {},
   transitions: TransitionManager,
-  receiveCallBacks: ReceiveCallbacksDefault,
+  receiveCallBacks: GetReceiveCallbacksDefault(),
   playerId: null,
   sequenceNumber: 0,
 });

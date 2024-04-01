@@ -6,7 +6,7 @@ import {
 import TurnComponent, { TurnRef } from "../components/grid/turn";
 import PowerupsComponent from "../components/grid/powerups";
 import PlayersComponent, { PlayersRef } from "../components/grid/players";
-import { Bot, Lobby, Player } from "../data/model";
+import { Board, Bot, Lobby, Player, ScreenState } from "../data/model";
 import { useState, useContext } from "react";
 import { SwapGridComponent } from "../components/grid/powerup-grids/swapGrid";
 import { RotateGridComponent } from "../components/grid/powerup-grids/rotateGrid";
@@ -14,50 +14,36 @@ import { TransformGridComponent } from "../components/grid/powerup-grids/transfo
 import { ScrambleGridComponent } from "../components/grid/powerup-grids/scrambleGrid";
 import { GameContext } from "../context/ctx";
 import { isJSDocNullableType } from "typescript";
-import { Fade, Zoom } from "@mui/material";
+import { Fade, Zoom, CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
 import { lobby1, lobby2, lobby3 } from "../mocks/lobbyMocks";
 
 const Game: React.FC = () => {
-  const [lobby, setLobby] = useState<Lobby>();
-
   useEffect(() => {
     // setTimeout(() => {
-    //   let lobbyCopy = { ...lobby };
+    //   let lobbyCopy = { ...ctx.lobby };
     //   lobbyCopy.state.curr_turn = "3";
-    //   setLobby(lobbyCopy);
+    //   ctx.setLobby(lobbyCopy);
     // }, 1000);
   }, []);
 
-  const gameContext = useContext(GameContext);
+  const ctx = useContext(GameContext);
   const [word, setWord] = useState("");
   const [error, setError] = useState<null | string>(null);
   const [showGame, setShowGame] = useState(false);
   const [disableInput, setDisableInput] = useState(false);
 
   function isSpectator() {
-    return lobby?.state.curr_turn !== gameContext.playerId;
+    return ctx.lobby?.state.curr_turn !== ctx.playerId;
   }
-  console.log(lobby?.state.curr_turn, gameContext.playerId)
 
   // May have to change where this is stored to prevent too much re-rendering
   const [wordPath, setWordPath] = useState<number[][]>([]);
+  const [powerup, setPowerup] = useState<string | null>(null);
 
   const turnRef = useRef<TurnRef>(null);
   const selectGridRef = useRef<SelectGridRef>(null);
   const playersRef = useRef<PlayersRef>(null);
-
-  const [powerup, setPowerup] = useState<string | null>(null);
-  const [tiles, setTiles] = useState([
-    ["a", "b", "c", "d", "a", "b", "c", "d"],
-    ["a", "f", "g", "h", "a", "b", "c", "d"],
-    ["i", "j", "k", "l", "a", "b", "c", "d"],
-    ["m", "n", "o", "p", "a", "b", "c", "d"],
-    ["m", "n", "o", "p", "a", "b", "c", "d"],
-    ["m", "n", "o", "p", "a", "b", "c", "d"],
-    ["m", "n", "o", "p", "a", "b", "c", "d"],
-    ["m", "n", "o", "p", "a", "b", "c", "d"],
-  ]);
 
   function resetWordSelection() {
     setWord("");
@@ -65,59 +51,54 @@ const Game: React.FC = () => {
   }
 
   function handleSubmit() {
-    if (gameContext.sock !== null) {
-      gameContext.transitions.pickWord(wordPath, gameContext);
+    if (ctx.sock !== null) {
+      ctx.transitions.pickWord(wordPath, ctx);
     }
   }
 
   function loadReceiveCallBacks() {
-    gameContext.receiveCallBacks.handleWordDeny = (path: number[][]) => {
-      setError("Word has already been played!");
+    console.log(ctx.playerName, "Loading callbacks");
+    ctx.receiveCallBacks.handleWordDeny = (path: number[][], tiles: Board) => {
+      setError("Word has already been played or is invalid!");
       if (turnRef.current) turnRef.current.shakeWord();
-      setWord(reconstructWord(path));
+      setWord(reconstructWord(path, tiles));
     };
-    gameContext.receiveCallBacks.handleWordAccept = (
+    ctx.receiveCallBacks.handleWordAccept = (
       path: number[][],
       newLobby: Lobby
     ) => {
-      setWord(reconstructWord(path));
+      setWord(reconstructWord(path, newLobby.state.board));
       setWordPath(path);
-      selectGridRef.current?.fadePath(1200, () => setLobby(newLobby));
+      selectGridRef.current?.fadePath(1200, () => ctx.setLobby(newLobby));
     };
-    gameContext.receiveCallBacks.handleNewTurn = (newLobby: Lobby) => {
-      setLobby(newLobby);
+    ctx.receiveCallBacks.handleNewTurn = (newLobby: Lobby) => {
+      console.log(ctx.playerName, "Handling new turn");
+
+      ctx.setLobby(newLobby);
       turnRef.current?.resetTimer();
     };
-    gameContext.receiveCallBacks.handleLoseLife = (
+    ctx.receiveCallBacks.handleLoseLife = (
       newLobby: Lobby,
       playerId: string
     ) => {
-      playersRef.current?.loseLife(playerId, () => setLobby(newLobby));
+      playersRef.current?.loseLife(playerId, () => ctx.setLobby(newLobby));
     };
-    gameContext.receiveCallBacks.handleDeath = (
-      newLobby: Lobby,
-      playerId: string
-    ) => {
-      playersRef.current?.endPlayer(playerId, () => setLobby(newLobby));
+    ctx.receiveCallBacks.handleDeath = (newLobby: Lobby, playerId: string) => {
+      playersRef.current?.endPlayer(playerId, () => ctx.setLobby(newLobby));
     };
-    gameContext.receiveCallBacks.handleGameEnd = (newLobby: Lobby) => {};
+    ctx.receiveCallBacks.handleGameEnd = (newLobby: Lobby) => {};
   }
 
-  function reconstructWord(path: number[][]) {
+  function reconstructWord(path: number[][], tiles: Board) {
     let word = "";
     for (let wCoord of path) {
-      word += lobby!.state.board[wCoord[0]][wCoord[1]];
+      word += tiles[wCoord[1]][wCoord[0]];
     }
     return word;
   }
 
   useEffect(() => {
     loadReceiveCallBacks();
-
-    // setTimeout(
-    //   () => gameContext.receiveCallBacks.handleLoseLife(lobby3, "1"),
-    //   400
-    // );
   }, []);
 
   function getPowerupGrid() {
@@ -130,8 +111,11 @@ const Game: React.FC = () => {
                 help={word}
                 setPowerup={setPowerup}
                 setHelp={setWord}
-                board_size={[lobby?.board_size ?? 0, lobby?.board_size ?? 0]}
-                grid={lobby?.state?.board ?? []}
+                board_size={[
+                  ctx.lobby?.board_size ?? 0,
+                  ctx.lobby?.board_size ?? 0,
+                ]}
+                grid={ctx.lobby?.state?.board ?? []}
                 resetWordSelection={resetWordSelection}
               />
             </div>
@@ -145,8 +129,11 @@ const Game: React.FC = () => {
                 help={word}
                 setPowerup={setPowerup}
                 setHelp={setWord}
-                board_size={[lobby?.board_size ?? 0, lobby?.board_size ?? 0]}
-                ogGrid={lobby?.state?.board ?? []}
+                board_size={[
+                  ctx.lobby?.board_size ?? 0,
+                  ctx.lobby?.board_size ?? 0,
+                ]}
+                ogGrid={ctx.lobby?.state?.board ?? []}
                 resetWordSelection={resetWordSelection}
               />
             </div>
@@ -160,8 +147,11 @@ const Game: React.FC = () => {
                 help={word}
                 setPowerup={setPowerup}
                 setHelp={setWord}
-                board_size={[lobby?.board_size ?? 0, lobby?.board_size ?? 0]}
-                grid={lobby?.state?.board ?? []}
+                board_size={[
+                  ctx.lobby?.board_size ?? 0,
+                  ctx.lobby?.board_size ?? 0,
+                ]}
+                grid={ctx.lobby?.state?.board ?? []}
                 resetWordSelection={resetWordSelection}
               />
             </div>
@@ -173,8 +163,11 @@ const Game: React.FC = () => {
             help={word}
             setPowerup={setPowerup}
             setHelp={setWord}
-            board_size={[lobby?.board_size ?? 0, lobby?.board_size ?? 0]}
-            grid={lobby?.state?.board ?? []}
+            board_size={[
+              ctx.lobby?.board_size ?? 0,
+              ctx.lobby?.board_size ?? 0,
+            ]}
+            grid={ctx.lobby?.state?.board ?? []}
             resetWordSelection={resetWordSelection}
           />
         );
@@ -183,72 +176,100 @@ const Game: React.FC = () => {
         return <div></div>;
     }
   }
-  console.log(lobby)
-  return (
-    <Fade in={!!lobby} timeout={400}>
-      {!lobby ? <></> : (
-        <motion.div
-          onClick={() => setError(null)}
-          animate={{ backgroundColor: powerup ? "#1E3A8A" : "#60A5FA" }}
-          className={`flex ${
-            powerup ? "bg-blue-900" : "bg-blue-400"
-          } pb-20 box-border min-h-screen`}
-        >
-          {disableInput ? (
-            <div className="bg-transparent w-full h-full absolute z-40" />
-          ) : null}
-          <div className="flex align-top justify-center width w-full">
-            <div className="flex flex-col items-center pt-5">
-              <TurnComponent
-                ref={turnRef}
-                handleSubmit={handleSubmit}
-                word={word}
-                disabled={isSpectator()}
-                error={error}
-                player={
-                  lobby?.players.find((p) => p.id === lobby.state.curr_turn)
-                    ?.name ?? "player"
-                }
-                powerup={powerup}
-              />
-              <div className="flex flex-row items-start justify-center">
-                <PowerupsComponent
-                  funds={
-                    lobby?.players?.find((p) => p.id === gameContext.playerId)
-                      ?.money ?? 0
+
+  function renderGame() {
+    console.log(ctx.lobby);
+    return (
+      <div>
+        {!ctx.lobby?.state?.board?.[0].length ||
+        !(ctx.screen === ScreenState.GAME) ? (
+          <></>
+        ) : (
+          <motion.div
+            onClick={() => setError(null)}
+            animate={{ backgroundColor: powerup ? "#1E3A8A" : "#60A5FA" }}
+            className={`flex ${
+              powerup ? "bg-blue-900" : "bg-blue-400"
+            } pb-20 box-border min-h-screen`}
+          >
+            {disableInput ? (
+              <div className="bg-transparent w-full h-full absolute z-40" />
+            ) : null}
+            <div className="flex align-top justify-center width w-full">
+              <div className="flex flex-col items-center pt-5">
+                <TurnComponent
+                  ref={turnRef}
+                  handleSubmit={handleSubmit}
+                  word={word}
+                  disabled={isSpectator()}
+                  error={error}
+                  player={
+                    ctx.lobby?.players.find(
+                      (p) => p.id === ctx.lobby?.state.curr_turn
+                    )?.name ?? "player"
                   }
                   powerup={powerup}
-                  setPowerup={setPowerup}
-                  disabled={isSpectator()}
-                ></PowerupsComponent>
-                <div style={{ opacity: powerup ? "0.2" : "" }}>
-                  <SelectionGridComponent
-                    wordPath={wordPath}
-                    resetSelection={resetWordSelection}
-                    setWordPath={setWordPath}
-                    word={word}
-                    setWord={setWord}
-                    setError={setError}
-                    board_size={[lobby?.board_size ?? 0, lobby?.board_size ?? 0]}
-                    grid={lobby?.state?.board ?? []}
-                    ref={selectGridRef}
+                />
+                <div className="flex flex-row items-start justify-center">
+                  <PowerupsComponent
+                    funds={
+                      ctx.lobby?.players?.find((p) => p.id === ctx.playerId)
+                        ?.money ?? 0
+                    }
+                    powerup={powerup}
+                    setPowerup={setPowerup}
                     disabled={isSpectator()}
+                  ></PowerupsComponent>
+                  <div style={{ opacity: powerup ? "0.2" : "" }}>
+                    <SelectionGridComponent
+                      wordPath={wordPath}
+                      resetSelection={resetWordSelection}
+                      setWordPath={setWordPath}
+                      word={word}
+                      setWord={setWord}
+                      setError={setError}
+                      board_size={[
+                        ctx.lobby?.board_size ?? 0,
+                        ctx.lobby?.board_size ?? 0,
+                      ]}
+                      grid={ctx.lobby?.state?.board ?? [["e"]]}
+                      ref={selectGridRef}
+                      disabled={isSpectator()}
+                    />
+                  </div>
+                  <div className="absolute z-20">{getPowerupGrid()}</div>
+                  <PlayersComponent
+                    currentTurn={ctx.lobby?.state?.curr_turn ?? ""}
+                    players={ctx.lobby?.players ?? []}
+                    powerup={powerup}
+                    ref={playersRef}
                   />
                 </div>
-                <div className="absolute z-20">{getPowerupGrid()}</div>
-                <PlayersComponent
-                  currentTurn={lobby?.state?.curr_turn ?? ""}
-                  players={lobby?.players ?? []}
-                  powerup={powerup}
-                  ref={playersRef}
-                />
               </div>
             </div>
-          </div>
-        </motion.div>
-      )}
-    </Fade>
-  );
+          </motion.div>
+        )}{" "}
+      </div>
+    );
+  }
+  return ctx.screen === ScreenState.GAME ? (
+    <div>
+      <Fade in={!ctx.lobby?.state?.board?.[0].length} timeout={400}>
+        <div className="flex pt-20">
+          <CircularProgress className="m-auto" />
+        </div>
+      </Fade>
+      <Fade
+        in={
+          !!ctx.lobby?.state?.board?.[0].length &&
+          ctx.screen === ScreenState.GAME
+        }
+        timeout={400}
+      >
+        {renderGame()}
+      </Fade>
+    </div>
+  ) : <h1>TEST</h1>;
 };
 
 export default Game;

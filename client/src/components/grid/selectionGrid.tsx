@@ -29,7 +29,7 @@ function getRandomCharacter() {
 
 type TilePos = { x: number; y: number };
 const shiftVal = 64;
-function getDefaultPosGrid(grid: Board): TilePos[][] {
+function getDefaultPosGrid(grid: Board): TilePos[][] {  
   const tilePos: TilePos[][] = [];
 
   for (let i = 0; i < grid.length; i++) {
@@ -74,12 +74,16 @@ export const SelectionGridComponent = forwardRef<
     const displayGrid = animating ? animationGrid : grid;
 
     useEffect(() => {
-      // setTimeout(() => animateRotate("col", 0, 4), 1000);
+      console.log("Select init", grid, word);
     }, []);
+
+    useEffect(() => {
+      setTilePositions(getDefaultPosGrid(grid));
+    }, [grid]);
 
     function animateTransform(coords: number[], newVal: string) {
       const setRandomChar = () => {
-        const animationGridCopy = [...animationGrid ];
+        const animationGridCopy = [...animationGrid];
         animationGridCopy[coords[0]][coords[1]] = getRandomCharacter();
       };
       setAnimating(true);
@@ -90,7 +94,7 @@ export const SelectionGridComponent = forwardRef<
       setTimeout(setRandomChar, 150);
       setTimeout(setRandomChar, 300);
       setTimeout(() => {
-        const animationGridCopy = [...animationGrid ];
+        const animationGridCopy = [...animationGrid];
         animationGridCopy[coords[0]][coords[1]] = newVal;
         setAnimating(false);
       }, 900);
@@ -238,8 +242,8 @@ export const SelectionGridComponent = forwardRef<
           className="relative"
           animate={{
             opacity: fadeOutSelected ? (selected ? 0 : 1) : 1,
-            x: tilePositions[y][x].x,
-            y: tilePositions[y][x].y,
+            x: tilePositions[y][x]?.x ?? 0,
+            y: tilePositions[y][x]?.y ?? 0,
           }}
         >
           <div

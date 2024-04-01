@@ -218,6 +218,7 @@ class Game:
         # Send the initial game state, including the board, to all players
         self.broadcast_func(self.lobby_id, start_game_message)
         # Transition from WAITING_FOR_PLAYERS to TURN_START
+        # time.sleep(2)
         self.state = GameState.TURN_START
         self.next_turn()
 
@@ -275,7 +276,7 @@ class Game:
         print(f"Transitioning to next player from {self.current_player_index}")
         self.current_player_index = (self.current_player_index + 1) % len(self.players)
 
-        self.inform_player_turn()
+        self.next_turn()
 
     def inform_player_turn(self) -> None:
         """Informs the current player that it's their turn."""
@@ -352,9 +353,8 @@ class Game:
             #self.winner_determined()
             self.transition_to_next_player()
         else:
-            self.send_to_player_func(player_id, Action(ActionEnum.WORD_DENIED.value, player_id, self.to_json()))
+            self.send_to_player_func(player_id, Action(ActionEnum.WORD_DENIED.value, player_id, {'lobby': self.to_json(),'path': move_data}))
             self.state = GameState.MOVE_REJECTED
-            self.retry_current_player_turn()
 
     def winner_determined(self, winner: 'Player') -> None:
         self.state = GameState.GAME_OVER

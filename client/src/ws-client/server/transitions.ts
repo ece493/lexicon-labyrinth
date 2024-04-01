@@ -42,7 +42,6 @@ const initialize = (ctx: GameContextData) => {
 };
 
 const joinLobby = (code: string, ctx: GameContextData) => {
-  console.log("player_name", ctx.playerName);
   const msg: Action = {
     action: ActionsList.join_lobby,
     player_id: ctx.playerId || "",
