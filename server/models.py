@@ -8,6 +8,7 @@ from typing import Optional, Callable, Any
 
 #from server import GameWebSocketHandler
 from utils import *
+from bot import Bot
 
 PLAYER_LIMIT = 5
 DICTIONARY_PATH = "dictionary.txt"
@@ -64,6 +65,7 @@ class Lobby(object):
         return
 
     def handle_action(self, player_id: str, actionEnum: 'ActionEnum', action: 'Action') -> None:
+        assert action.action == actionEnum, f"Actionenum not matching the action!"
         if actionEnum in [ActionEnum.CHANGE_PARAM, ActionEnum.READY_LOBBY, ActionEnum.ADD_BOT, ActionEnum.UPDATE_BOT]:
             if actionEnum == ActionEnum.CHANGE_PARAM:
                 # The owner of the lobby is trying to change the lobby's settings
@@ -181,7 +183,7 @@ class Lobby(object):
             new_bot_id = get_random_player_id()
             # TODO: Make the name better
             new_bot_name = new_bot_id
-            bot = Bot(new_bot_id, new_bot_name, BotDifficulty.MEDIUM)
+            bot = Bot(new_bot_id, new_bot_name, BotDifficulty.MEDIUM, self.handle_action) # Pass a callback to the bot so it can send actions back to the game
             self.players.append(bot)
             print(f"Bot of name {bot.name} and id {bot.player_id} added to lobby {self.lobby_id}.")
 
@@ -440,6 +442,12 @@ class Game:
             # Now that the word is selected, we need to replace the letters used with new random letters
             for (col, row) in move_data:
                 self.board.randomly_replace_letter(row, col)
+            # Give the money to the player
+            player = get_player_from_id(self.players, player_id)
+            assert player is not None
+            player.add_money(money_to_give_player)
+            # Broadcast the lobby state to all
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_ACCEPTED.value, player_id, {'lobby': self.to_json(), 'path': move_data}))
             self.state = GameState.TURN_END
             # self.winner_determined()
             self.transition_to_next_player()
@@ -625,7 +633,10 @@ class Player(object):
     def set_send_message_func(self, func) -> None:
         self.send_func = func
 
-    def send_message(self, message) -> None:
+    def add_money(self, money_to_add: int) -> None:
+        self.currency += money_to_add
+
+    def send_message(self, message: 'Action') -> None:
         # This is a real player, so we need to send a websocket message
         if self.send_func:
             print(
@@ -643,56 +654,6 @@ class Player(object):
             "lives": self.lives,
             "money": self.currency,
             "score": self.score,
-        }
-
-
-class Bot(Player, object):
-    def __init__(self, player_id, name, difficulty: BotDifficulty) -> None:
-        super().__init__(player_id, name)
-        self.is_bot = True
-        self.difficulty: BotDifficulty = difficulty
-        self.memory: list[str] = []
-        # Additional properties and methods specific to bot behavior
-        self.dictionary = self.pull_dictionary(self.difficulty)
-
-    def pull_dictionary(self, difficulty: BotDifficulty) -> None:
-        if difficulty == BotDifficulty.EASY:
-            dict_path = 'easy_bot_dictionary.txt'
-        elif difficulty == BotDifficulty.MEDIUM:
-            dict_path = 'medium_bot_dictionary.txt'
-        elif difficulty == BotDifficulty.HARD:
-            dict_path = 'medium_bot_dictionary.txt'
-        else:
-            raise Exception(f"Failed to pull bot dictionary of specified difficulty {difficulty}")
-        return load_words_from_scowl(dict_path)
-
-    def send_message(self, message) -> None:
-        # Send a message from the game to the bot
-        # For local bots, directly process the message
-        print(
-            f"Bot with name {self.name} and id {self.player_id} received message: {message}")
-        self.process_bot_action(message)
-
-    def update_difficulty(self, difficulty_enum: BotDifficulty) -> None:
-        self.difficulty = difficulty_enum
-
-    def process_bot_action(self, message) -> None:
-        # Process the message and simulate a bot response/action
-        print(f"Bot is processing message {message}")
-        
-        pass
-
-    def to_json(self) -> dict[str, Any]:
-        return {
-            "id": self.player_id,
-            "name": self.name,
-            "is_spectator": self.is_spectator,
-            "is_bot": self.is_bot,
-            "lives": self.lives,
-            "money": self.currency,
-            "score": self.score,
-            "difficulty": self.difficulty.value,
-            "memory": self.memory,
         }
 
 

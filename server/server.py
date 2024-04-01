@@ -198,7 +198,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                     is_host_leaving = lobby.remove_player(action.data['player_id'])
                     assert not is_host_leaving, f"This shouldn't be the host!!"
                     # Broadcast to all players (including the original player) that this player has left the lobby
-                    leave_message = Action(ActionEnum.REMOVE_PLAYER.value, action.data['player_id'], {"lobby": lobby.to_json()})
+                    leave_message = Action(ActionEnum.REMOVE_PLAYER.value, self.id, {"lobby": lobby.to_json(), "player_id_removed": action.data['player_id']})
                     self.broadcast_to_lobby(self.lobby_id, leave_message)
 
                 else:
