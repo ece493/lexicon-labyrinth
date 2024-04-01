@@ -673,6 +673,12 @@ class Bot(Player, object):
         self.dictionary: list[str] = self.pull_dictionary(self.difficulty)
         self.send_to_game_func: Callable = send_to_game_func
 
+    def check_whether_prefix_is_in_dictionary(self, prefix: str) -> bool:
+        for word in self.dictionary:
+            if word.startswith(prefix):
+                return True
+        return False
+
     def pull_dictionary(self, difficulty: BotDifficulty) -> list[str]:
         if difficulty == BotDifficulty.EASY:
             dict_path = 'easy_bot_dictionary.txt'
@@ -739,7 +745,7 @@ class Bot(Player, object):
             return 0 <= x < board_size and 0 <= y < board_size and (x, y) not in path
         
         def find_word(x, y, path, prefix: str):
-            if prefix.lower() not in self.dictionary:
+            if not self.check_whether_prefix_is_in_dictionary(prefix):
                 return None
             for dx in [-1, 0, 1]:
                 for dy in [-1, 0, 1]:
@@ -748,8 +754,8 @@ class Bot(Player, object):
                     nx, ny = x + dx, y + dy
                     if is_valid_move(nx, ny, path):
                         new_prefix = prefix + game_board[nx][ny]
-                        new_path = path + [(nx, ny)]
-                        if new_prefix.lower() in self.dictionary:
+                        new_path = path.append((nx, ny))
+                        if self.check_whether_prefix_is_in_dictionary(new_prefix):
                             return new_prefix, new_path
                         else:
                             # Continue searching

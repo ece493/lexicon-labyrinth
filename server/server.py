@@ -29,6 +29,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         # TODO: Perhaps more efficient way would be to maintain a mapping from lobby IDs to a set of connection, but this is fine for now
         for connection in cls.connections:
             if connection.lobby_id is not None and connection.lobby_id == lobby_id:  # Make sure to set conn.lobby_id when joining a lobby
+                message.player_id = connection.id # Overwrite the player ID to be the ID of the player we're sending this to
                 connection.send_message(message)
 
     @classmethod
@@ -36,6 +37,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         # TODO: Make more efficient
         for connection in cls.connections:
             if connection.id is not None and connection.id == player_id:
+                message.player_id = player_id # Overwrite the player ID to be the ID of the player we're sending this to
                 connection.send_message(message)
 
     def open(self) -> None:
