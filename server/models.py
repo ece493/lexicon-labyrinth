@@ -7,7 +7,7 @@ from enum import Enum, auto
 from typing import Optional, Callable, Any
 
 #from server import GameWebSocketHandler
-from utils import get_random_player_id, get_player_from_id, load_words_from_scowl, get_player_from_id_dicts
+from utils import get_random_player_id, load_words_from_scowl, get_player_from_id_dicts
 #from bot import Bot
 
 PLAYER_LIMIT = 5
@@ -39,6 +39,12 @@ class BotDifficulty(Enum):
 
     def __str__(self) -> str:
         return self.name
+
+def get_player_from_id(player_list: list['Player'], player_id: str) -> 'Player':
+    for player in player_list:
+        if player.player_id == player_id:
+            return player
+    return None
 
 class Lobby(object):
     def __init__(self, host, lobby_id) -> None:
