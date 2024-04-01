@@ -32,6 +32,9 @@ export const TestDoubleStateWrapper: React.FC = (
     <div>
       <StateWrapper bypassLobby bypassLobbyRole="PLAYER" lobbyCode={lobbyCode} setLobbyCode={setLobbyCode}/>
     </div>
+    <div>
+      <StateWrapper bypassLobby bypassLobbyRole="PLAYER" lobbyCode={lobbyCode} setLobbyCode={setLobbyCode}/>
+    </div>
   </div>
   );
 };

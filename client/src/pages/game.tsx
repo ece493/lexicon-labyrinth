@@ -57,7 +57,6 @@ const Game: React.FC = () => {
   }
 
   function loadReceiveCallBacks() {
-    console.log(ctx.playerName, "Loading callbacks");
     ctx.receiveCallBacks.handleWordDeny = (path: number[][], tiles: Board) => {
       setError("Word has already been played or is invalid!");
       if (turnRef.current) turnRef.current.shakeWord();
@@ -72,8 +71,6 @@ const Game: React.FC = () => {
       selectGridRef.current?.fadePath(1200, () => ctx.setLobby(newLobby));
     };
     ctx.receiveCallBacks.handleNewTurn = (newLobby: Lobby) => {
-      console.log(ctx.playerName, "Handling new turn");
-
       ctx.setLobby(newLobby);
       turnRef.current?.resetTimer();
     };
@@ -81,9 +78,21 @@ const Game: React.FC = () => {
       newLobby: Lobby,
       playerId: string
     ) => {
+      let player = newLobby.players.find((p) => p.id === playerId);
+      if (playerId === ctx.playerId){
+        setWord(`You lost a life!`);
+      }else{
+        setWord(`${player?.name?? player} lost a life!`);
+      }
       playersRef.current?.loseLife(playerId, () => ctx.setLobby(newLobby));
     };
     ctx.receiveCallBacks.handleDeath = (newLobby: Lobby, playerId: string) => {
+      let player = newLobby.players.find((p) => p.id === playerId);
+      if (playerId === ctx.playerId){
+        setWord(`You are out!`);
+      }else{
+        setWord(`${player?.name?? player} is out!`);
+      }
       playersRef.current?.endPlayer(playerId, () => ctx.setLobby(newLobby));
     };
     ctx.receiveCallBacks.handleGameEnd = (newLobby: Lobby) => {};
@@ -178,7 +187,6 @@ const Game: React.FC = () => {
   }
 
   function renderGame() {
-    console.log(ctx.lobby);
     return (
       <div>
         {!ctx.lobby?.state?.board?.[0].length ||
@@ -209,6 +217,7 @@ const Game: React.FC = () => {
                     )?.name ?? "player"
                   }
                   powerup={powerup}
+                  maxTime={1}
                 />
                 <div className="flex flex-row items-start justify-center">
                   <PowerupsComponent
@@ -269,7 +278,9 @@ const Game: React.FC = () => {
         {renderGame()}
       </Fade>
     </div>
-  ) : <h1>TEST</h1>;
+  ) : (
+    <h1>TEST</h1>
+  );
 };
 
 export default Game;

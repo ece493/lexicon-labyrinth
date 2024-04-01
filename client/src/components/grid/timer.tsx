@@ -7,31 +7,37 @@ import React, {
 import { Typography } from "@mui/material";
 import TimerIcon from "../icons/timerIcon";
 import { GameContext } from "../../context/ctx";
-interface TimerComponentProp {}
+interface TimerComponentProp {
+  maxTime: number;
+}
 
-const TimerComponent: React.FC<TimerComponentProp> = () => {
-  const [time, setTime] = React.useState(60);
+const TimerComponent: React.FC<TimerComponentProp> = ({ maxTime }) => {
+  const [time, setTime] = React.useState(maxTime);
   const ctx = useContext(GameContext);
 
   const [startTime, setStartTime] = React.useState(Date.now());
-  const [stop, setStop] = React.useState(false);
+  const [intervalRef, setIntervalRef] = React.useState<any>(null);
 
   function countDown() {
-    let newTime = Math.ceil(60 - (Date.now() - startTime) / 1000);
+    let newTime = Math.ceil(maxTime - (Date.now() - startTime) / 1000);
     if (newTime >= 0) {
       setTime(newTime);
-    } else {
-      setStop(true)
-      if (ctx.playerId === ctx.lobby?.state?.curr_turn){
-        ctx.transitions.notifyTurnEnd(ctx);
-      }
     }
   }
 
+  useEffect(() => {
+    if (time === 0 && ctx.playerId === ctx.lobby?.state?.curr_turn) {
+      clearInterval(intervalRef);
+      ctx.transitions.notifyTurnEnd(ctx);
+    }
+  }, [time]);
+
   function startCountdown() {
-    setInterval(() => {
-      if(!stop) countDown();
-    }, 1000);
+    setIntervalRef(
+      setInterval(() => {
+        countDown();
+      }, 1000)
+    );
   }
 
   useEffect(() => {

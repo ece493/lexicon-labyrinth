@@ -19,10 +19,10 @@ interface PowerupsComponentProp {
 }
 
 const prices = {
-  rotate: 25,
-  scramble: 25,
-  transform: 20,
-  swap: 10,
+  rotate: 5,
+  scramble: 4,
+  transform: 9,
+  swap: 8,
 };
 
 const PowerupsComponent: React.FC<PowerupsComponentProp> = ({

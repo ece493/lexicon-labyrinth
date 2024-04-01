@@ -74,7 +74,6 @@ export const SelectionGridComponent = forwardRef<
     const displayGrid = animating ? animationGrid : grid;
 
     useEffect(() => {
-      console.log("Select init", grid, word);
     }, []);
 
     useEffect(() => {

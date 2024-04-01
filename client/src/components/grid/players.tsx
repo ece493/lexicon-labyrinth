@@ -29,6 +29,7 @@ const PlayersComponent = forwardRef<PlayersRef, PlayersComponentProp>(
   ({ players, powerup, currentTurn }, ref) => {
     useImperativeHandle(ref, () => ({
       endPlayer(pId: string, setLobbyState: () => void) {
+        console.log("SHKE", pId, players, setLobbyState);
         setShake(pId);
         setTimeout(() => setShake(null), 0);
         setTimeout(() => setLobbyState(), 100);
@@ -47,10 +48,20 @@ const PlayersComponent = forwardRef<PlayersRef, PlayersComponentProp>(
       const livePlayers = players.filter((p) => p.lives !== 0);
       let j = livePlayers.findIndex((p) => p.id === currentTurn);
       if (j === -1) {
-        let p = livePlayers.findIndex((p) => p.id === currentTurn);
-        let pNext = p === players.length - 1? 0 : p + 1
-        j = livePlayers.findIndex((p) => p.id === players[pNext].id);
+        let p = players.findIndex((p) => p.id === currentTurn);
+        for (let i = 0; i < players.length; i++) {
+          // finds next alive player at pretends it's their turn
+          if (p === players.length) {
+            p = 0;
+          }
+          if (players[p].lives > 0) {
+            j = livePlayers.findIndex((pl) => pl.id === players[p].id);
+            break;
+          }
+          p++;
+        }
       }
+      console.log(j)
       for (let i = 0; i < livePlayers.length; i++) {
         if (j === livePlayers.length) {
           j = 0;
@@ -58,6 +69,10 @@ const PlayersComponent = forwardRef<PlayersRef, PlayersComponentProp>(
         orderedLivePlayers.push(livePlayers[j]);
         j++;
       }
+      console.log([
+        ...orderedLivePlayers,
+        ...players.filter((p) => p.lives === 0),
+      ]);
       return [...orderedLivePlayers, ...players.filter((p) => p.lives === 0)];
     }
 
