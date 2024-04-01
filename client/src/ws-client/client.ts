@@ -4,6 +4,7 @@ import { ReceiveCallbacks } from "./receive-callbacks";
 
 // https://socket.io/how-to/use-with-react
 export const connect = (
+  playerId: String,
   setLobby: (l: Lobby) => void,
   setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
@@ -13,11 +14,12 @@ export const connect = (
   // const url = process.env.NODE_ENV === 'production' ? "undefined" : 'ws://localhost:8888/websocket';
   const ws = new WebSocket("ws://localhost:8888/websocket");
   ws.onopen = (_) => console.log("connected websocket!");
-  ws.onmessage = (ev) => wsReceiveHandler(setLobby, setPlayerId, setScreen, ev, receiveCallBacks);
+  ws.onmessage = (ev) => wsReceiveHandler(playerId, setLobby, setPlayerId, setScreen, ev, receiveCallBacks);
   return ws;
 };
 
 export const wsReceiveHandler = (
+  player_id: String,
   setLobby: (l: Lobby) => void,
   setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
@@ -92,6 +94,12 @@ export const wsReceiveHandler = (
     case ActionsList.you_win:
       receiveCallBacks.handleGameEnd(action.data.lobby)
       setScreen(ScreenState.END);
+      break;
+    case ActionsList.remove_player:
+      if (action.data.player_id == player_id) {
+        setScreen(ScreenState.START);
+      }
+      setLobby(action.data.lobby);
       break;
     default:
       setLobby(action.data.lobby);

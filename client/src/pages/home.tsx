@@ -18,7 +18,7 @@ const Home: React.FC = () => {
       <h2
         onClick={() => {
           ctx.setScreen(ScreenState.GAME);
-          ctx.sock = connect(ctx.setLobby, ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
+          ctx.sock = connect(ctx.playerId || "", ctx.setLobby, ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
           ctx.sock.onopen = () => {
             ctx.transitions.initialize(ctx);
             ctx.transitions.readyLobby(ctx);
@@ -30,7 +30,7 @@ const Home: React.FC = () => {
       <h2
         onClick={() => {
           ctx.setScreen(ScreenState.END);
-          ctx.sock = connect(ctx.setLobby, ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
+          ctx.sock = connect(ctx.playerId || "", ctx.setLobby, ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
           ctx.sock.onopen = () => {
             ctx.transitions.initialize(ctx);
             ctx.transitions.readyLobby(ctx);
