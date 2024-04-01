@@ -112,6 +112,7 @@ const readyLobby = (ctx: GameContextData) => {
 };
 
 const pickWord = (path: number[][], ctx: GameContextData) => {
+  ctx.setFreezeInputs(true)
   console.log(
     "sending word pick request with: ",
     path,
@@ -134,6 +135,7 @@ const pickRotatePowerup = (
   rotations: number,
   ctx: GameContextData
 ) => {
+  ctx.setFreezeInputs(true)
   console.log("sending rotate request with: ", { type, index, rotations });
   const msg: Action = {
     action: ActionsList.pick_rotate_powerup,
@@ -146,6 +148,7 @@ const pickRotatePowerup = (
 };
 
 const pickScramblePowerup = (ctx: GameContextData) => {
+  ctx.setFreezeInputs(true)
   console.log("sending scramble request");
   const msg: Action = {
     action: ActionsList.pick_scramble_powerup,
@@ -158,6 +161,7 @@ const pickScramblePowerup = (ctx: GameContextData) => {
 };
 
 const pickSwapPowerup = (tiles: number[][], ctx: GameContextData) => {
+  ctx.setFreezeInputs(true)
   console.log("sending swap request with: ", tiles);
   const msg: Action = {
     action: ActionsList.pick_swap_powerup,
@@ -174,6 +178,7 @@ const pickTransformPowerup = (
   newChar: string,
   ctx: GameContextData
 ) => {
+  ctx.setFreezeInputs(true)
   console.log("sending transform request with: ", { tile, newChar });
   const msg: Action = {
     action: ActionsList.pick_transform_powerup,
@@ -198,6 +203,7 @@ const leaveGame = (ctx: GameContextData) => {
 };
 
 const notifyTurnEnd = (ctx: GameContextData) => {
+  ctx.setFreezeInputs(true)
   console.log("sending turn end request");
   const msg: Action = {
     action: ActionsList.end_turn,

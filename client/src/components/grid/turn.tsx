@@ -85,7 +85,7 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
               label="Submit"
               long
               invert
-              disabled={!!powerup || disabled}
+              disabled={!!powerup || disabled || word === ""}
             />
           </motion.div>
           <div

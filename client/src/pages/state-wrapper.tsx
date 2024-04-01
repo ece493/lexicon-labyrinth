@@ -43,6 +43,8 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   const [receiveCallbacks, setReceiveCallbacks] = useState<ReceiveCallbacks>(GetReceiveCallbacksDefault());
   const [sock, setSock] = useState<WebSocket | null>(null);
   const [playerName, setPlayerName] = useState("");
+  const [freezeInputs, setFreezeInputs] = useState(false);
+
   useEffect(  
     () =>
       setSock(
@@ -90,6 +92,8 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
         transitions: TransitionManager,
         receiveCallBacks: receiveCallbacks,
         sequenceNumber: 0,
+        freezeInputs,
+        setFreezeInputs
       }}
     >
       {!bypassLobby ? null : (

@@ -58,50 +58,64 @@ const Game: React.FC = () => {
 
   function loadReceiveCallBacks() {
     ctx.receiveCallBacks.handleWordDeny = (path: number[][], tiles: Board) => {
-      setPowerup(null)
+      setPowerup(null);
       setError("Word has already been played or is invalid!");
       if (turnRef.current) turnRef.current.shakeWord();
       setWord(reconstructWord(path, tiles));
+      setTimeout(() => ctx.setFreezeInputs(false), 500);
     };
     ctx.receiveCallBacks.handleWordAccept = (
       path: number[][],
       newLobby: Lobby
     ) => {
-      setPowerup(null)
+      setPowerup(null);
       setWord(reconstructWord(path, newLobby.state.board));
       setWordPath(path);
-      selectGridRef.current?.fadePath(1200, () => ctx.setLobby(newLobby));
+      selectGridRef.current?.fadePath(1200, () => {
+        ctx.setLobby(newLobby);
+        setTimeout(() => ctx.setFreezeInputs(false), 500);
+      });
     };
     ctx.receiveCallBacks.handleNewTurn = (newLobby: Lobby) => {
-      setPowerup(null)
+      setPowerup(null);
       ctx.setLobby(newLobby);
       turnRef.current?.resetTimer();
+      setTimeout(() => ctx.setFreezeInputs(false), 500);
     };
     ctx.receiveCallBacks.handleLoseLife = (
       newLobby: Lobby,
       playerId: string
     ) => {
-      setPowerup(null)
+      setPowerup(null);
       let player = newLobby.players.find((p) => p.id === playerId);
       if (playerId === ctx.playerId) {
         setWord(`You lost a life!`);
       } else {
         setWord(`${player?.name ?? player} lost a life!`);
       }
-      playersRef.current?.loseLife(playerId, () => ctx.setLobby(newLobby));
+      playersRef.current?.loseLife(
+        playerId,
+        () => ctx.setLobby(newLobby),
+        () => ctx.setFreezeInputs(false)
+      );
     };
     ctx.receiveCallBacks.handleDeath = (newLobby: Lobby, playerId: string) => {
-      setPowerup(null)
+      setPowerup(null);
       let player = newLobby.players.find((p) => p.id === playerId);
       if (playerId === ctx.playerId) {
         setWord(`You are out!`);
       } else {
         setWord(`${player?.name ?? player} is out!`);
       }
-      playersRef.current?.endPlayer(playerId, () => ctx.setLobby(newLobby));
+      playersRef.current?.endPlayer(
+        playerId,
+        () => ctx.setLobby(newLobby),
+        () => ctx.setFreezeInputs(false)
+      );
     };
-    ctx.receiveCallBacks.handleGameEnd = (newLobby: Lobby) => { 
-      setPowerup(null)
+    ctx.receiveCallBacks.handleGameEnd = (newLobby: Lobby) => {
+      setPowerup(null);
+      setTimeout(() => ctx.setFreezeInputs(false), 500);
     };
     ctx.receiveCallBacks.handleRotateAccept = (
       newLobby: Lobby,
@@ -109,27 +123,31 @@ const Game: React.FC = () => {
       index: number,
       rotations: number
     ) => {
-      setPowerup(null)
+      setPowerup(null);
       ctx.setLobby(newLobby);
+      setTimeout(() => ctx.setFreezeInputs(false), 500);
     };
     ctx.receiveCallBacks.handleTransformAccept = (
       newLobby: Lobby,
       tile: number[],
       newChar: string
     ) => {
-      setPowerup(null)
+      setPowerup(null);
       ctx.setLobby(newLobby);
+      setTimeout(() => ctx.setFreezeInputs(false), 500);
     };
     ctx.receiveCallBacks.handleScrambleAccept = (newLobby: Lobby) => {
-      setPowerup(null)
+      setPowerup(null);
       ctx.setLobby(newLobby);
+      setTimeout(() => ctx.setFreezeInputs(false), 500);
     };
     ctx.receiveCallBacks.handleSwapAccept = (
       newLobby: Lobby,
       tiles: number[][]
     ) => {
-      setPowerup(null)
+      setPowerup(null);
       ctx.setLobby(newLobby);
+      setTimeout(() => ctx.setFreezeInputs(false), 500);
     };
   }
 
@@ -235,16 +253,20 @@ const Game: React.FC = () => {
               powerup ? "bg-blue-900" : "bg-blue-400"
             } pb-20 box-border min-h-screen`}
           >
-            {disableInput ? (
-              <div className="bg-transparent w-full h-full absolute z-40" />
-            ) : null}
+            <Fade in={ctx.freezeInputs}>
+              <div>
+                {ctx.freezeInputs ? (
+                  <div className="bg-black opacity-20 w-full h-full absolute z-40" />
+                ) : null}
+              </div>
+            </Fade>
             <div className="flex align-top justify-center width w-full">
               <div className="flex flex-col items-center pt-5">
                 <TurnComponent
                   ref={turnRef}
                   handleSubmit={handleSubmit}
                   word={word}
-                  disabled={isSpectator()}
+                  disabled={isSpectator() || ctx.freezeInputs}
                   error={error}
                   player={
                     ctx.lobby?.players.find(
@@ -252,7 +274,7 @@ const Game: React.FC = () => {
                     )?.name ?? "player"
                   }
                   powerup={powerup}
-                  maxTime={2 }
+                  maxTime={60}
                 />
                 <div className="flex flex-row items-start justify-center">
                   <PowerupsComponent
@@ -262,7 +284,7 @@ const Game: React.FC = () => {
                     }
                     powerup={powerup}
                     setPowerup={setPowerup}
-                    disabled={isSpectator()}
+                    disabled={isSpectator() || ctx.freezeInputs}
                   ></PowerupsComponent>
                   <div style={{ opacity: powerup ? "0.2" : "" }}>
                     <SelectionGridComponent

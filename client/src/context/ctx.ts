@@ -22,6 +22,8 @@ export type GameContextData = {
   receiveCallBacks: ReceiveCallbacks;
   playerId: string | null;
   sequenceNumber: number;
+  freezeInputs: boolean;
+  setFreezeInputs: (b: boolean) => void;
 };
 
 export const GameContext = createContext<GameContextData>({
@@ -37,4 +39,6 @@ export const GameContext = createContext<GameContextData>({
   receiveCallBacks: GetReceiveCallbacksDefault(),
   playerId: null,
   sequenceNumber: 0,
+  freezeInputs: false,
+  setFreezeInputs: (l: boolean)=>{}
 });
