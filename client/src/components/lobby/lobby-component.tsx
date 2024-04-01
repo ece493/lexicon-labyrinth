@@ -99,7 +99,7 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id, ctx}) => {
     const difficulties = ["Easy", "Medium", "Hard"];
     const toggleDifficulty = (currentDifficulty: number): number => (currentDifficulty + 1) % 3;
 
-    const curriedDeletePlayer = (p: Player | Bot) => (player_id === lobby.host)
+    const curriedDeletePlayer = (p: Player | Bot) => (player_id === lobby.host) && (p.id !== player_id)
             ? () => {
                 ctx.transitions.removePlayer(p.id, ctx);
                 return;
@@ -107,14 +107,14 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id, ctx}) => {
             : undefined;
     const curriedCycleDifficulty = (p: Player | Bot) => (player_id === lobby.host && isPlayerABot(p))
         ? () => {
-            ctx.transitions.updateBot(player_id, toggleDifficulty(p.difficulty), ctx);
+            ctx.transitions.updateBot(p.id, toggleDifficulty(p.difficulty), ctx);
             p.difficulty = toggleDifficulty(p.difficulty);
             return difficulties[p.difficulty];
         }
         : undefined;
 
     const startButton = () => {
-        const isDisabled = lobby.players.length <= 2;
+        const isDisabled = lobby.players.length < 2;
         return <div className="m-0 w-full h-16">
             <div className="m-0 flex flex-auto justify-end h-auto px-2">
                 <Button
@@ -133,10 +133,10 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id, ctx}) => {
                     <div className="m-0 h-[70vh] w-auto flex flex-row gap-2">
                         <div className="m-0 h-auto w-auto flex flex-col p-8 bg-blue-500 justify-center items-center">
                             <div className="m-0 flex flex-row h-1/2 w-fit gap-4">
-                                {lobby.players.slice(0, 3).map((p, i) => <PlayerBotManagerComponent key={i} player={p} delete_player={curriedDeletePlayer(p)} cycle_difficulty={curriedCycleDifficulty(p)} />)}
+                                {lobby.players.slice(0, 3).map((p, i) => <PlayerBotManagerComponent key={i} is_player={p.id===player_id} player={p} delete_player={curriedDeletePlayer(p)} cycle_difficulty={curriedCycleDifficulty(p)} />)}
                             </div>
                             <div className="m-0 flex flex-row h-1/2 w-fit gap-4">
-                                {lobby.players.slice(3, 6).map((p, i) => <PlayerBotManagerComponent key={i} player={p} delete_player={curriedDeletePlayer(p)} cycle_difficulty={curriedCycleDifficulty(p)} />)}
+                                {lobby.players.slice(3, 6).map((p, i) => <PlayerBotManagerComponent key={i} is_player={p.id === player_id} player={p} delete_player={curriedDeletePlayer(p)} cycle_difficulty={curriedCycleDifficulty(p)} />)}
                             </div>
                         </div>
                         <div className="m-0 h-auto w-64 bg-blue-500 p-12" >
