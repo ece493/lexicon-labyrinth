@@ -3,9 +3,12 @@ import { Action, Lobby, ScreenState, isAction } from "../data/model";
 import { ActionsList } from "./model";
 import { ReceiveCallbacks } from "./receive-callbacks";
 
+type PlayerId = {
+  playerId: string | null
+}
+
 // https://socket.io/how-to/use-with-react
 export const connect = (
-  ctx: GameContextData,
   setLobby: (l: Lobby) => void,
   setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
@@ -15,12 +18,11 @@ export const connect = (
   // const url = process.env.NODE_ENV === 'production' ? "undefined" : 'ws://localhost:8888/websocket';
   const ws = new WebSocket("ws://localhost:8888/websocket");
   ws.onopen = (_) => console.log("connected websocket!");
-  ws.onmessage = (ev) => wsReceiveHandler(ctx, setLobby, setPlayerId, setScreen, ev, receiveCallBacks);
+  ws.onmessage = (ev) => wsReceiveHandler(setLobby, setPlayerId, setScreen, ev, receiveCallBacks);
   return ws;
 };
 
 export const wsReceiveHandler = (
-  ctx: GameContextData,
   setLobby: (l: Lobby) => void,
   setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
@@ -34,11 +36,12 @@ export const wsReceiveHandler = (
   switch (action.action) {
     case ActionsList.return_lobby_code:
       // Code for return_lobby_code
-      setPlayerId(action.player_id);
+      console.log("action.player_id", action.player_id);
       setScreen(ScreenState.LOBBY);
       break;
     case ActionsList.return_player_id:
       // Code for return_lobby_code
+      console.log("action.player_id", action.player_id);
       setPlayerId(action.player_id);
       break;
     case ActionsList.lobby_does_not_exist:
@@ -119,7 +122,7 @@ export const wsReceiveHandler = (
 
       break;
     case ActionsList.remove_player:
-      if (action.data.player_id == ctx.playerId) {
+      if (action.player_id === action.data.player_id_removed) {
         setScreen(ScreenState.START);
       }
       setLobby(action.data.lobby);
