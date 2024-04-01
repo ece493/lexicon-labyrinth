@@ -156,6 +156,7 @@ class Lobby(object):
             print(f"Player (ID: {player_id}) removed from lobby {self.lobby_id}.")
 
             # If the host leaves, we'll handle lobby deletion outside this method
+            print(f"Checking whether the {self.host=} is {player_id=} when removing a player from the lobby")
             return self.host == player_id
         else:
             print(f"No player with ID {player_id} found in lobby {self.lobby_id}.")
@@ -192,7 +193,7 @@ class Lobby(object):
             return False
     
     def update_bot(self, data) -> None:
-        bot_id = data['bot_id']
+        bot_id = data['player_id']
         difficulty = data['difficulty']
         if difficulty == 0:
             difficulty_enum = BotDifficulty.EASY
@@ -614,6 +615,7 @@ class Bot(Player, object):
     def process_bot_action(self, message) -> None:
         # Process the message and simulate a bot response/action
         print(f"Bot is processing message {message}")
+        
         pass
 
     def to_json(self) -> dict[str, Any]:
