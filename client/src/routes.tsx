@@ -4,6 +4,7 @@ import Game from "./pages/game";
 import Lobby from "./pages/lobby";
 import JoinLobby from "./pages/join-lobby";
 import { StateWrapper } from "./pages/state-wrapper";
+import { TestDoubleStateWrapper } from "./pages/test-double-state-wrapper";
 
 export const router = createBrowserRouter([
   {
@@ -11,8 +12,8 @@ export const router = createBrowserRouter([
     element: <StateWrapper />,
   },
   {
-    path: "/game/:gameId",
-    element: <Game />,
+    path: "/game-test",
+    element: <TestDoubleStateWrapper />,
   },
   {
     path: "/lobby/:lobbyId",

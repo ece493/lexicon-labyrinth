@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import { GameContext } from "../../../context/ctx";
-import { connect } from "../../../ws-client/client";
 import { ScreenState } from "../../../data/model";
 import DefaultLayout from "../../layout/default-layout";
 import Button from "@mui/material/Button";
