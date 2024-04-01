@@ -58,6 +58,7 @@ const Game: React.FC = () => {
 
   function loadReceiveCallBacks() {
     ctx.receiveCallBacks.handleWordDeny = (path: number[][], tiles: Board) => {
+      setPowerup(null)
       setError("Word has already been played or is invalid!");
       if (turnRef.current) turnRef.current.shakeWord();
       setWord(reconstructWord(path, tiles));
@@ -66,11 +67,13 @@ const Game: React.FC = () => {
       path: number[][],
       newLobby: Lobby
     ) => {
+      setPowerup(null)
       setWord(reconstructWord(path, newLobby.state.board));
       setWordPath(path);
       selectGridRef.current?.fadePath(1200, () => ctx.setLobby(newLobby));
     };
     ctx.receiveCallBacks.handleNewTurn = (newLobby: Lobby) => {
+      setPowerup(null)
       ctx.setLobby(newLobby);
       turnRef.current?.resetTimer();
     };
@@ -78,6 +81,7 @@ const Game: React.FC = () => {
       newLobby: Lobby,
       playerId: string
     ) => {
+      setPowerup(null)
       let player = newLobby.players.find((p) => p.id === playerId);
       if (playerId === ctx.playerId) {
         setWord(`You lost a life!`);
@@ -87,6 +91,7 @@ const Game: React.FC = () => {
       playersRef.current?.loseLife(playerId, () => ctx.setLobby(newLobby));
     };
     ctx.receiveCallBacks.handleDeath = (newLobby: Lobby, playerId: string) => {
+      setPowerup(null)
       let player = newLobby.players.find((p) => p.id === playerId);
       if (playerId === ctx.playerId) {
         setWord(`You are out!`);
@@ -95,13 +100,16 @@ const Game: React.FC = () => {
       }
       playersRef.current?.endPlayer(playerId, () => ctx.setLobby(newLobby));
     };
-    ctx.receiveCallBacks.handleGameEnd = (newLobby: Lobby) => {};
+    ctx.receiveCallBacks.handleGameEnd = (newLobby: Lobby) => { 
+      setPowerup(null)
+    };
     ctx.receiveCallBacks.handleRotateAccept = (
       newLobby: Lobby,
       type: string,
       index: number,
       rotations: number
     ) => {
+      setPowerup(null)
       ctx.setLobby(newLobby);
     };
     ctx.receiveCallBacks.handleTransformAccept = (
@@ -109,15 +117,18 @@ const Game: React.FC = () => {
       tile: number[],
       newChar: string
     ) => {
+      setPowerup(null)
       ctx.setLobby(newLobby);
     };
     ctx.receiveCallBacks.handleScrambleAccept = (newLobby: Lobby) => {
+      setPowerup(null)
       ctx.setLobby(newLobby);
     };
     ctx.receiveCallBacks.handleSwapAccept = (
       newLobby: Lobby,
       tiles: number[][]
     ) => {
+      setPowerup(null)
       ctx.setLobby(newLobby);
     };
   }
@@ -241,7 +252,7 @@ const Game: React.FC = () => {
                     )?.name ?? "player"
                   }
                   powerup={powerup}
-                  maxTime={60 }
+                  maxTime={2 }
                 />
                 <div className="flex flex-row items-start justify-center">
                   <PowerupsComponent
