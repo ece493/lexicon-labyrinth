@@ -36,16 +36,14 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   lobbyCode,
   setLobbyCode,
 }) => {
-  const ctx = useContext(GameContext);
   const [screen, setScreen] = useState<ScreenState>(initScreen);
   const [lobby, setLobby] = useState<Lobby | null>(null);
-  const [playerId, setPlayerId] = useState<string>("");
+  const [playerId, setPlayerId] = useState<string | null>(null);
   const [receiveCallbacks, setReceiveCallbacks] = useState<ReceiveCallbacks>(GetReceiveCallbacksDefault());
   const [sock, setSock] = useState<WebSocket | null>(null);
   const [playerName, setPlayerName] = useState("");
   const [freezeInputs, setFreezeInputs] = useState(false);
-
-  useEffect(() => setSock(connect(playerId, setLobby, setPlayerId, setScreen, receiveCallbacks)), []);
+  useEffect(() => setSock(connect(setLobby, setPlayerId, setScreen, receiveCallbacks)), []);
   
   const stateToScreen = (s: ScreenState) => {
     switch (s) {
@@ -74,11 +72,11 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   return (
     <GameContext.Provider
       value={{
-        playerName: playerName,
+        playerName,
         setPlayerName,
         playerId,
         setPlayerId,
-        sock: sock,
+        sock,
         screen,
         setScreen,
         lobby,

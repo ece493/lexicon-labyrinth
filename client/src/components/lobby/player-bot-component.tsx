@@ -10,6 +10,7 @@ import AddIcon from "../icons/addIcon";
 type PlayerBotManagerComponentProps = {
     player: Player | Bot,
     is_player: boolean,
+    b_difficulty?: number,
     delete_player?: () => void,
     cycle_difficulty?: () => string,
     toggleManageMode?: () => void,
@@ -33,8 +34,9 @@ export const BotPlayerComponent: React.FC<PlayerBotDisplayComponentProps> = ({is
     );
 }
 
-export const PlayerBotAdminComponent: React.FC<PlayerBotManagerComponentProps> = ({ is_player, delete_player, cycle_difficulty, toggleManageMode }) => {
-    const [difficulty, setDifficulty] = useState<string>("Medium");
+export const PlayerBotAdminComponent: React.FC<PlayerBotManagerComponentProps> = ({ b_difficulty=0, is_player, delete_player, cycle_difficulty, toggleManageMode }) => {
+    const difficulties = ["Easy", "Medium", "Hard"];
+    const [difficulty, setDifficulty] = useState<string>(difficulties[b_difficulty]);
     return (
         <div className={`m-0 flex flex-auto flex-col items-center justify-between h-48 w-40 bg-blue-400 ${is_player?"border-white border-2": ""}`}>
             <div className="w-full h-10 m-0">
@@ -78,7 +80,8 @@ export const PlayerBotManagerComponent: React.FC<PlayerBotManagerComponentProps>
     return <div className={`h-auto w-auto p-0 m-0 ${!manageMode && delete_player ? "transition ease-in-out duration-150 hover:opacity-80": ""}`}
         onClick={(manageMode) ? () => { } : () => setManageMode(!manageMode)}>{
             (manageMode && delete_player)
-                ? <PlayerBotAdminComponent player={player} is_player={is_player} delete_player={() => {
+                ? <PlayerBotAdminComponent b_difficulty={isPlayerABot(player)?player.difficulty:0}
+                    player={player} is_player={is_player} delete_player={() => {
                     setManageMode(!manageMode);
                     delete_player();
                     }} cycle_difficulty={cycle_difficulty} toggleManageMode={toggleManageMode}/>
