@@ -93,7 +93,10 @@ const removePlayer = (player_id: string, ctx: GameContextData) => {
   const msg: Action = {
     action: ActionsList.remove_player,
     player_id: ctx.playerId || "",
-    data: { "player_id": player_id },
+    data: {
+      "player_id": player_id,
+      "lobby_code": ctx.lobby?.lobby_code
+    },
     sequence_number: ctx.sequenceNumber,
   };
   ctx.sock!.send(JSON.stringify(msg));
