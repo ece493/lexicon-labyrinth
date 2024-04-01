@@ -7,7 +7,7 @@ import React, {
 
 import { Player } from "../../data/model";
 import FundsIcon from "../icons/fundsIcon";
-import { Typography } from "@mui/material";
+import { Grow, Typography } from "@mui/material";
 import TimerIcon from "../icons/timerIcon";
 import AddIcon from "../icons/addIcon";
 import ButtonComponent from "./button";
@@ -22,6 +22,7 @@ interface TurnComponentProp {
   handleSubmit: () => void;
   error: string | null;
   disabled?: boolean;
+  maxTime: number;
 }
 
 export interface TurnRef {
@@ -30,10 +31,11 @@ export interface TurnRef {
 }
 
 const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
-  ({ word, player, powerup, handleSubmit, error, disabled }, ref) => {
-    
+  ({ word, player, powerup, handleSubmit, error, disabled, maxTime }, ref) => {
     const [wordX, setWordX] = React.useState(0);
-    const [timerComp, setTimerComp] = React.useState(<TimerComponent />);
+    const [timerComp, setTimerComp] = React.useState(
+      <TimerComponent maxTime={maxTime} />
+    );
 
     useImperativeHandle(ref, () => ({
       shakeWord() {
@@ -42,8 +44,8 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
         setTimeout(() => setWordX(0), 160);
       },
       resetTimer() {
-        setTimerComp(<div style={{width:"54px"}}/>);
-        setTimeout(() => setTimerComp(<TimerComponent />), 0);
+        setTimerComp(<div style={{ width: "54px" }} />);
+        setTimeout(() => setTimerComp(<TimerComponent maxTime={maxTime} />), 0);
       },
     }));
 
@@ -63,16 +65,17 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
             {player}'s turn
           </Typography>
         )}
-        <motion.div animate={{ x: wordX }}>
-          {" "}
-          <Typography className="text-slate-100 text-4xl p-2">
-            {word
-              ? word
-              : disabled
-              ? `${player} is playing`
-              : "click and drag to select a word"}
-          </Typography>
-        </motion.div>
+        <Zoom key={word} in={true} appear timeout={300}>
+          <motion.div animate={{ x: wordX }}>
+            <Typography className="text-slate-100 text-4xl p-2">
+              {word
+                ? word
+                : disabled
+                ? `${player} is playing`
+                : "click and drag to select a word"}
+            </Typography>
+          </motion.div>
+        </Zoom>
 
         <div className="flex flex-row space-x-2 items-center p-1">
           {timerComp}
@@ -82,7 +85,7 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
               label="Submit"
               long
               invert
-              disabled={!!powerup || disabled}
+              disabled={!!powerup || disabled || word === ""}
             />
           </motion.div>
           <div
@@ -91,7 +94,9 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
           >
             <AddIcon />
             <FundsIcon />
-            <Typography className="text-slate-100">{word.length}</Typography>
+            <Typography className="text-slate-100">
+              {disabled ? 0 : word.length}
+            </Typography>
           </div>
         </div>
       </div>

@@ -31,7 +31,10 @@ export enum ActionsList {
     end_turn = "end_turn",
     start_turn = "start_turn",
     powerup_denied = "powerup_denied",
-    powerup_activated = "powerup_activated",
+    rotate_powerup_accept = "rotate_powerup_accept",
+    scramble_powerup_accept = "scramble_powerup_accept",
+    swap_powerup_accept = "swap_powerup_accept",
+    transform_powerup_accept = "transform_powerup_accept",
     you_died = "you_died",
     you_win = "you_win",
 }

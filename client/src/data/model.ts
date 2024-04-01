@@ -17,9 +17,8 @@ export type GameState = {
     memory: string[];
 };
 
-export type Board = {
-    tiles: string[][];
-};
+export type Board =  string[][];
+
 
 export type Player = {
     id: string;

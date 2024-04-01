@@ -25,6 +25,7 @@ export type ServerTransitions = {
   pickSwapPowerup: (tiles: number[][], ctx: GameContextData) => void;
   pickScramblePowerup: (ctx: GameContextData) => void;
   leaveGame: (ctx: GameContextData) => void;
+  notifyTurnEnd: (ctx: GameContextData) => void;
 };
 
 const initialize = (ctx: GameContextData) => {
@@ -41,7 +42,6 @@ const initialize = (ctx: GameContextData) => {
 };
 
 const joinLobby = (code: string, ctx: GameContextData) => {
-  console.log("player_name", ctx.playerName);
   const msg: Action = {
     action: ActionsList.join_lobby,
     player_id: ctx.playerId || "",
@@ -115,6 +115,7 @@ const readyLobby = (ctx: GameContextData) => {
 };
 
 const pickWord = (path: number[][], ctx: GameContextData) => {
+  ctx.setFreezeInputs(true)
   console.log(
     "sending word pick request with: ",
     path,
@@ -137,6 +138,7 @@ const pickRotatePowerup = (
   rotations: number,
   ctx: GameContextData
 ) => {
+  ctx.setFreezeInputs(true)
   console.log("sending rotate request with: ", { type, index, rotations });
   const msg: Action = {
     action: ActionsList.pick_rotate_powerup,
@@ -149,6 +151,7 @@ const pickRotatePowerup = (
 };
 
 const pickScramblePowerup = (ctx: GameContextData) => {
+  ctx.setFreezeInputs(true)
   console.log("sending scramble request");
   const msg: Action = {
     action: ActionsList.pick_scramble_powerup,
@@ -161,11 +164,12 @@ const pickScramblePowerup = (ctx: GameContextData) => {
 };
 
 const pickSwapPowerup = (tiles: number[][], ctx: GameContextData) => {
+  ctx.setFreezeInputs(true)
   console.log("sending swap request with: ", tiles);
   const msg: Action = {
     action: ActionsList.pick_swap_powerup,
     player_id: ctx.playerId || "",
-    data: tiles,
+    data: {tiles},
     sequence_number: ctx.sequenceNumber,
   };
   ctx.sock!.send(JSON.stringify(msg));
@@ -177,11 +181,12 @@ const pickTransformPowerup = (
   newChar: string,
   ctx: GameContextData
 ) => {
+  ctx.setFreezeInputs(true)
   console.log("sending transform request with: ", { tile, newChar });
   const msg: Action = {
     action: ActionsList.pick_transform_powerup,
     player_id: ctx.playerId || "",
-    data: { tile, newChar },
+    data: { tile, new_char: newChar },
     sequence_number: ctx.sequenceNumber,
   };
   ctx.sock!.send(JSON.stringify(msg));
@@ -193,6 +198,19 @@ const leaveGame = (ctx: GameContextData) => {
   const msg: Action = {
     action: ActionsList.leave_game,
     player_id: ctx.playerId || "",
+    data: null,
+    sequence_number: ctx.sequenceNumber,
+  };
+  ctx.sock!.send(JSON.stringify(msg));
+  ctx.sequenceNumber += 1;
+};
+
+const notifyTurnEnd = (ctx: GameContextData) => {
+  ctx.setFreezeInputs(true)
+  console.log("sending turn end request");
+  const msg: Action = {
+    action: ActionsList.end_turn,
+    player_id: ctx.playerId!,
     data: null,
     sequence_number: ctx.sequenceNumber,
   };
@@ -214,4 +232,5 @@ export const TransitionManager: ServerTransitions = {
   pickSwapPowerup,
   pickScramblePowerup,
   leaveGame,
+  notifyTurnEnd,
 };

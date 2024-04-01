@@ -21,22 +21,24 @@ interface PlayersComponentProp {
 }
 
 export interface PlayersRef {
-  endPlayer: (pId: string, setLobbyState: () => void) => void;
-  loseLife: (pId: string, setLobbyState: () => void) => void;
+  endPlayer: (pId: string, setLobbyState: () => void, setFreezeInputs: ()=> void) => void;
+  loseLife: (pId: string, setLobbyState: () => void,  setFreezeInputs: ()=> void) => void;
 }
 
 const PlayersComponent = forwardRef<PlayersRef, PlayersComponentProp>(
   ({ players, powerup, currentTurn }, ref) => {
     useImperativeHandle(ref, () => ({
-      endPlayer(pId: string, setLobbyState: () => void) {
+      endPlayer(pId: string, setLobbyState: () => void, setFreezeInputs: ()=> void) {
         setShake(pId);
         setTimeout(() => setShake(null), 0);
         setTimeout(() => setLobbyState(), 100);
+        setTimeout(() => setFreezeInputs(), 500);
       },
-      loseLife(pId: string, setLobbyState: () => void) {
+      loseLife(pId: string, setLobbyState: () => void, setFreezeInputs: ()=> void) {
         setShake(pId);
         setTimeout(() => setShake(null), 0);
         setTimeout(() => setLobbyState(), 100);
+        setTimeout(() => setFreezeInputs(), 500);
       },
     }));
 
@@ -47,9 +49,18 @@ const PlayersComponent = forwardRef<PlayersRef, PlayersComponentProp>(
       const livePlayers = players.filter((p) => p.lives !== 0);
       let j = livePlayers.findIndex((p) => p.id === currentTurn);
       if (j === -1) {
-        let p = livePlayers.findIndex((p) => p.id === currentTurn);
-        let pNext = p === players.length - 1? 0 : p + 1
-        j = livePlayers.findIndex((p) => p.id === players[pNext].id);
+        let p = players.findIndex((p) => p.id === currentTurn);
+        for (let i = 0; i < players.length; i++) {
+          // finds next alive player at pretends it's their turn
+          if (p === players.length) {
+            p = 0;
+          }
+          if (players[p].lives > 0) {
+            j = livePlayers.findIndex((pl) => pl.id === players[p].id);
+            break;
+          }
+          p++;
+        }
       }
       for (let i = 0; i < livePlayers.length; i++) {
         if (j === livePlayers.length) {
@@ -58,7 +69,6 @@ const PlayersComponent = forwardRef<PlayersRef, PlayersComponentProp>(
         orderedLivePlayers.push(livePlayers[j]);
         j++;
       }
-      console.log(orderedLivePlayers)
       return [...orderedLivePlayers, ...players.filter((p) => p.lives === 0)];
     }
 
