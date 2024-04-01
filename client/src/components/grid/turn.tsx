@@ -7,7 +7,7 @@ import React, {
 
 import { Player } from "../../data/model";
 import FundsIcon from "../icons/fundsIcon";
-import { Grow,Typography } from "@mui/material";
+import { Grow, Typography } from "@mui/material";
 import TimerIcon from "../icons/timerIcon";
 import AddIcon from "../icons/addIcon";
 import ButtonComponent from "./button";
@@ -94,7 +94,9 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
           >
             <AddIcon />
             <FundsIcon />
-            <Typography className="text-slate-100">{word.length}</Typography>
+            <Typography className="text-slate-100">
+              {disabled ? 0 : word.length}
+            </Typography>
           </div>
         </div>
       </div>

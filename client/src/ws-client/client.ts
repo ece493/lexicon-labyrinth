@@ -89,6 +89,27 @@ export const wsReceiveHandler = (
       break;
     case ActionsList.powerup_denied:
       break;
+    case ActionsList.rotate_powerup_accept:
+      receiveCallBacks.handleRotateAccept(
+        action.data.lobby,
+        action.data.powerup_data.type,
+        action.data.powerup_data.index,
+        action.data.powerup_data.rotations
+      );
+      break;
+    case ActionsList.transform_powerup_accept:
+      receiveCallBacks.handleTransformAccept(
+        action.data.lobby,
+        action.data.powerup_data.tile,
+        action.data.powerup_data.newChar
+      );
+      break;
+    case ActionsList.swap_powerup_accept:
+      receiveCallBacks.handleSwapAccept(action.data.lobby, action.data.powerup_data.tiles);
+      break;
+    case ActionsList.scramble_powerup_accept:
+      receiveCallBacks.handleScrambleAccept(action.data.lobby);
+      break;
     case ActionsList.you_died:
       receiveCallBacks.handleDeath(action.data.lobby, action.data.player_id);
       break;

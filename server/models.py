@@ -278,7 +278,7 @@ class Game:
         elif actionEnum == ActionEnum.PICK_ROTATE_POWERUP:
             self.apply_rotate_powerup(player_id, action.data)
         elif actionEnum == ActionEnum.PICK_SCRAMBLE_POWERUP:
-            self.apply_scramble_powerup(player_id, action.data)
+            self.apply_scramble_powerup(player_id)
         elif actionEnum == ActionEnum.PICK_SWAP_POWERUP:
             self.apply_swap_powerup(player_id, action.data)
         elif actionEnum == ActionEnum.PICK_TRANSFORM_POWERUP:
@@ -489,7 +489,7 @@ class Game:
         cost = POWERUP_COSTS["Transform"]
         if self.check_and_deduct_funds(player_id, cost):
             # Apply transform logic here
-            self.board.set_letter(tile[0], tile[1], new_char)
+            self.board.set_letter(tile[1], tile[0], new_char)
             # Broadcast success message
             self.broadcast_func(self.lobby_id, Action(ActionEnum.TRANSFORM_POWERUP_ACCEPTED.value, player_id, {
                                 'lobby': self.to_json(), 'powerup_data': data}))
@@ -504,7 +504,8 @@ class Game:
         cost = POWERUP_COSTS["Swap"]
         if self.check_and_deduct_funds(player_id, cost):
             # Apply swap logic here
-            self.board.swap_tiles(data['tiles'][0], data['tiles'][1])
+            self.board.swap_tiles(
+                [data['tiles'][0][1], data['tiles'][0][0]],  [data['tiles'][1][1], data['tiles'][1][0]])
             # Broadcast success message
             self.broadcast_func(self.lobby_id, Action(ActionEnum.SWAP_POWERUP_ACCEPTED.value, player_id, {
                                 'lobby': self.to_json(), 'powerup_data': data}))
@@ -521,7 +522,7 @@ class Game:
             self.board.scramble()
             # Broadcast success message
             self.broadcast_func(self.lobby_id, Action(
-                ActionEnum.SCRAMBLE_POWERUP_ACCEPTED.value, player_id, self.to_json()))
+                ActionEnum.SCRAMBLE_POWERUP_ACCEPTED.value, player_id, {"lobby": self.to_json()}))
         else:
             # Broadcast denial due to insufficient funds
             self.broadcast_func(self.lobby_id, Action(

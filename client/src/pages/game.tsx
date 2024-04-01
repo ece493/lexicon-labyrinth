@@ -79,23 +79,47 @@ const Game: React.FC = () => {
       playerId: string
     ) => {
       let player = newLobby.players.find((p) => p.id === playerId);
-      if (playerId === ctx.playerId){
+      if (playerId === ctx.playerId) {
         setWord(`You lost a life!`);
-      }else{
-        setWord(`${player?.name?? player} lost a life!`);
+      } else {
+        setWord(`${player?.name ?? player} lost a life!`);
       }
       playersRef.current?.loseLife(playerId, () => ctx.setLobby(newLobby));
     };
     ctx.receiveCallBacks.handleDeath = (newLobby: Lobby, playerId: string) => {
       let player = newLobby.players.find((p) => p.id === playerId);
-      if (playerId === ctx.playerId){
+      if (playerId === ctx.playerId) {
         setWord(`You are out!`);
-      }else{
-        setWord(`${player?.name?? player} is out!`);
+      } else {
+        setWord(`${player?.name ?? player} is out!`);
       }
       playersRef.current?.endPlayer(playerId, () => ctx.setLobby(newLobby));
     };
     ctx.receiveCallBacks.handleGameEnd = (newLobby: Lobby) => {};
+    ctx.receiveCallBacks.handleRotateAccept = (
+      newLobby: Lobby,
+      type: string,
+      index: number,
+      rotations: number
+    ) => {
+      ctx.setLobby(newLobby);
+    };
+    ctx.receiveCallBacks.handleTransformAccept = (
+      newLobby: Lobby,
+      tile: number[],
+      newChar: string
+    ) => {
+      ctx.setLobby(newLobby);
+    };
+    ctx.receiveCallBacks.handleScrambleAccept = (newLobby: Lobby) => {
+      ctx.setLobby(newLobby);
+    };
+    ctx.receiveCallBacks.handleSwapAccept = (
+      newLobby: Lobby,
+      tiles: number[][]
+    ) => {
+      ctx.setLobby(newLobby);
+    };
   }
 
   function reconstructWord(path: number[][], tiles: Board) {
@@ -217,7 +241,7 @@ const Game: React.FC = () => {
                     )?.name ?? "player"
                   }
                   powerup={powerup}
-                  maxTime={1}
+                  maxTime={60 }
                 />
                 <div className="flex flex-row items-start justify-center">
                   <PowerupsComponent

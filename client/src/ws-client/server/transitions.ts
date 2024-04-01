@@ -162,7 +162,7 @@ const pickSwapPowerup = (tiles: number[][], ctx: GameContextData) => {
   const msg: Action = {
     action: ActionsList.pick_swap_powerup,
     player_id: ctx.playerId || "",
-    data: tiles,
+    data: {tiles},
     sequence_number: ctx.sequenceNumber,
   };
   ctx.sock!.send(JSON.stringify(msg));
@@ -178,7 +178,7 @@ const pickTransformPowerup = (
   const msg: Action = {
     action: ActionsList.pick_transform_powerup,
     player_id: ctx.playerId || "",
-    data: { tile, newChar },
+    data: { tile, new_char: newChar },
     sequence_number: ctx.sequenceNumber,
   };
   ctx.sock!.send(JSON.stringify(msg));
