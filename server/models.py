@@ -1,11 +1,13 @@
 import random
 import string
 import time
+import json
 
 from enum import Enum, auto
 from typing import Optional, Callable, Any
 
 #from server import GameWebSocketHandler
+from utils import *
 
 PLAYER_LIMIT = 5
 DICTIONARY_PATH = "dictionary.txt"
@@ -15,7 +17,7 @@ POWERUP_COSTS = {
     "Rotate": 5,
     "Scramble": 4,
     "Swap": 8,
-    "Transform": 10
+    "Transform": 9
 }
 
 class GameState(Enum):
@@ -33,13 +35,8 @@ class BotDifficulty(Enum):
     MEDIUM = auto()
     HARD = auto()
 
-def get_random_player_id(length: int = 10) -> str:
-    """Generate a random string of letters for a player ID."""
-    # Combines uppercase and lowercase letters
-    letters = string.ascii_letters
-    # Randomly selects letters to create the ID
-    player_id = ''.join(random.choice(letters) for i in range(length))
-    return player_id
+    def __str__(self) -> str:
+        return self.name
 
 class Lobby(object):
     def __init__(self, host, lobby_id) -> None:
@@ -598,8 +595,16 @@ class Bot(Player, object):
         # Additional properties and methods specific to bot behavior
         self.dictionary = self.pull_dictionary(self.difficulty)
 
-    def pull_dictionary(difficulty: BotDifficulty) -> None:
-        ...
+    def pull_dictionary(self, difficulty: BotDifficulty) -> None:
+        if difficulty == BotDifficulty.EASY:
+            dict_path = 'easy_bot_dictionary.txt'
+        elif difficulty == BotDifficulty.MEDIUM:
+            dict_path = 'medium_bot_dictionary.txt'
+        elif difficulty == BotDifficulty.HARD:
+            dict_path = 'medium_bot_dictionary.txt'
+        else:
+            raise Exception(f"Failed to pull bot dictionary of specified difficulty {difficulty}")
+        return load_words_from_scowl(dict_path)
 
     def send_message(self, message) -> None:
         # Send a message from the game to the bot
@@ -624,7 +629,7 @@ class Bot(Player, object):
             "lives": self.lives,
             "money": self.currency,
             "score": self.score,
-            "difficulty": self.difficulty,
+            "difficulty": "easy" if self.difficulty == BotDifficulty.EASY else ("medium" if self.difficulty == BotDifficulty.MEDIUM else "hard"),
             "memory": self.memory,
         }
 
@@ -719,19 +724,7 @@ class GameDictionary(object):
         self.words = self.load_words()
     
     def load_words(self) -> None:
-        # Load words from the SCOWL dataset
-        words = []
-        start_processing = False
-        with open(DICTIONARY_PATH, 'r', encoding='utf8') as file:
-            for line in file:
-                # Strip newline and other trailing whitespace characters
-                line = line.strip()
-                if start_processing:
-                    if line:  # Check if the line is not empty
-                        words.append(line)
-                elif line == '---':
-                    start_processing = True
-        return words
+        return load_words_from_scowl(DICTIONARY_PATH)
     
     def is_valid_word(self, word: str) -> bool:
         return word.lower() in self.words
