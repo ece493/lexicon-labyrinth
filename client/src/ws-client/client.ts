@@ -67,9 +67,6 @@ export const wsReceiveHandler = (
     case ActionsList.player_left:
       // Code for player_left
       break;
-    case ActionsList.update_lobby_settings:
-      // Code for update_lobby_settings
-      break;
     case ActionsList.word_accepted:
       receiveCallBacks.handleWordAccept(action.data.path, action.data.lobby);
       break;
