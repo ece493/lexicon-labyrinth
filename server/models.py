@@ -31,9 +31,9 @@ class GameState(Enum):
     GAME_OVER = auto()
 
 class BotDifficulty(Enum):
-    EASY = auto()
-    MEDIUM = auto()
-    HARD = auto()
+    EASY = 0
+    MEDIUM = 1
+    HARD = 2
 
     def __str__(self) -> str:
         return self.name
@@ -118,11 +118,7 @@ class Lobby(object):
         if self.broadcast_func:
             lobby_settings_message = Action(action=ActionEnum.UPDATE_LOBBY_SETTINGS.value,
                                             player_id=self.host,
-                                            data={
-                                                    "board_size": self.board_size,
-                                                    "timer_setting": self.timer_setting,
-                                                    "max_lives": self.max_lives
-                                                }
+                                            data={"lobby": self.to_json()}
             )
             print(f"Broadcasting new lobby settings to all players within lobby {self.lobby_id}: {lobby_settings_message}")
             self.broadcast_func(self.lobby_id, lobby_settings_message)
@@ -629,7 +625,7 @@ class Bot(Player, object):
             "lives": self.lives,
             "money": self.currency,
             "score": self.score,
-            "difficulty": "easy" if self.difficulty == BotDifficulty.EASY else ("medium" if self.difficulty == BotDifficulty.MEDIUM else "hard"),
+            "difficulty": self.difficulty.value,
             "memory": self.memory,
         }
 
