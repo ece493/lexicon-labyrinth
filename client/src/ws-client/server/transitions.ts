@@ -59,7 +59,7 @@ const changeParam = (param: string, value: string, ctx: GameContextData) => {
   const msg: Action = {
     action: ActionsList.change_param,
     player_id: ctx.playerId || "",
-    data: [param, value],
+    data: { [param]: value },
     sequence_number: ctx.sequenceNumber,
   };
   ctx.sock!.send(JSON.stringify(msg));
@@ -70,7 +70,7 @@ const addBot = (ctx: GameContextData) => {
   const msg: Action = {
     action: ActionsList.add_bot,
     player_id: ctx.playerId || "",
-    data: [],
+    data: {},
     sequence_number: ctx.sequenceNumber,
   };
   ctx.sock!.send(JSON.stringify(msg));

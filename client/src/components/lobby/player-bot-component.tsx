@@ -75,7 +75,7 @@ export const PlayerBotAdminComponent: React.FC<PlayerBotManagerComponentProps> =
 export const PlayerBotManagerComponent: React.FC<PlayerBotManagerComponentProps> = ({ is_player, player, delete_player, cycle_difficulty })=> {
     const [manageMode, setManageMode] = useState<boolean>(false);
     const toggleManageMode = () => setManageMode(m => !m);
-    return <div className={`h-auto w-auto p-0 m-0 ${!manageMode && delete_player? "hover:opacity-80": ""}`}
+    return <div className={`h-auto w-auto p-0 m-0 ${!manageMode && delete_player ? "transition ease-in-out duration-150 hover:opacity-80": ""}`}
         onClick={(manageMode) ? () => { } : () => setManageMode(!manageMode)}>{
             (manageMode && delete_player)
                 ? <PlayerBotAdminComponent player={player} is_player={is_player} delete_player={() => {
