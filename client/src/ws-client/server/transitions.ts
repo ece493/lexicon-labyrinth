@@ -77,11 +77,11 @@ const addBot = (ctx: GameContextData) => {
   ctx.sequenceNumber += 1;
 };
 
-const updateBot = (player_id: string, difficulty: number, ctx: GameContextData) => {
+const updateBot = (bot_id: string, difficulty: number, ctx: GameContextData) => {
   const msg: Action = {
     action: ActionsList.update_bot,
     player_id: ctx.playerId || "",
-    data: { "player_id": player_id, difficulty: difficulty },
+    data: { "player_id": bot_id, difficulty: difficulty },
     sequence_number: ctx.sequenceNumber,
   };
   ctx.sock!.send(JSON.stringify(msg));

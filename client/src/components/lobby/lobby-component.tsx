@@ -107,7 +107,7 @@ const LobbyComponent: React.FC<LobbyProps> = ({lobby, player_id, ctx}) => {
             : undefined;
     const curriedCycleDifficulty = (p: Player | Bot) => (player_id === lobby.host && isPlayerABot(p))
         ? () => {
-            ctx.transitions.updateBot(player_id, toggleDifficulty(p.difficulty), ctx);
+            ctx.transitions.updateBot(p.id, toggleDifficulty(p.difficulty), ctx);
             p.difficulty = toggleDifficulty(p.difficulty);
             return difficulties[p.difficulty];
         }
