@@ -1,10 +1,11 @@
+import { GameContextData } from "../context/ctx";
 import { Action, Lobby, ScreenState, isAction } from "../data/model";
 import { ActionsList } from "./model";
 import { ReceiveCallbacks } from "./receive-callbacks";
 
 // https://socket.io/how-to/use-with-react
 export const connect = (
-  playerId: String,
+  ctx: GameContextData,
   setLobby: (l: Lobby) => void,
   setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
@@ -19,7 +20,7 @@ export const connect = (
 };
 
 export const wsReceiveHandler = (
-  player_id: String,
+  ctx: GameContextData,
   setLobby: (l: Lobby) => void,
   setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
@@ -96,7 +97,7 @@ export const wsReceiveHandler = (
       setScreen(ScreenState.END);
       break;
     case ActionsList.remove_player:
-      if (action.data.player_id == player_id) {
+      if (action.data.player_id == ctx.playerId) {
         setScreen(ScreenState.START);
       }
       setLobby(action.data.lobby);

@@ -28,6 +28,7 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   const dReceiveCallbacks = ReceiveCallbacksDefault;
   const [sock, setSock] = useState<WebSocket|null>(null);
   const [playerName, setPlayerName] = useState("");
+  const ctx = useContext(GameContext);
   useEffect(() => setSock(connect(playerId, setLobby, setPlayerId, setScreen, dReceiveCallbacks)), []);
   
   const stateToScreen = (s: ScreenState) => {
