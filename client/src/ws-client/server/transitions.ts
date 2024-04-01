@@ -59,7 +59,7 @@ const changeParam = (param: string, value: string, ctx: GameContextData) => {
   const msg: Action = {
     action: ActionsList.change_param,
     player_id: ctx.playerId || "",
-    data: [param, value],
+    data: { [param]: value },
     sequence_number: ctx.sequenceNumber,
   };
   ctx.sock!.send(JSON.stringify(msg));
@@ -70,18 +70,18 @@ const addBot = (ctx: GameContextData) => {
   const msg: Action = {
     action: ActionsList.add_bot,
     player_id: ctx.playerId || "",
-    data: [],
+    data: {},
     sequence_number: ctx.sequenceNumber,
   };
   ctx.sock!.send(JSON.stringify(msg));
   ctx.sequenceNumber += 1;
 };
 
-const updateBot = (player_id: string, difficulty: number, ctx: GameContextData) => {
+const updateBot = (bot_id: string, difficulty: number, ctx: GameContextData) => {
   const msg: Action = {
     action: ActionsList.update_bot,
     player_id: ctx.playerId || "",
-    data: { "player_id": player_id, difficulty: difficulty },
+    data: { "player_id": bot_id, difficulty: difficulty },
     sequence_number: ctx.sequenceNumber,
   };
   ctx.sock!.send(JSON.stringify(msg));
