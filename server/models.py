@@ -451,9 +451,6 @@ class Game:
             self.add_funds(player_id, money_to_give_player)
             #self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_ACCEPTED.value, player_id, {'lobby': self.to_json(), 'path': move_data}))
 
-            # Now that the word is selected, we need to replace the letters used with new random letters
-            for (col, row) in move_data:
-                self.board.randomly_replace_letter(row, col)
             # Give the money to the player
             player = get_player_from_id(self.players, player_id)
             assert player is not None
@@ -463,6 +460,11 @@ class Game:
             # Record that the word was used
             self.used_words.add(word_to_check)
             self.state = GameState.TURN_END
+            
+            # Must be after the ACCEPTED broadcast. Now that the word is selected, we need to replace the letters used with new random letters
+            for (col, row) in move_data:
+                self.board.randomly_replace_letter(row, col)
+            
             # self.winner_determined()
             self.transition_to_next_player()
         else:
