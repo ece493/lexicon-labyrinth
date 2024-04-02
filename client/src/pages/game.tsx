@@ -55,7 +55,6 @@ const Game: React.FC = () => {
       ctx.transitions.pickWord(wordPath, ctx);
     }
   }
-
   function loadReceiveCallBacks() {
     ctx.receiveCallBacks.handleWordDeny = (path: number[][], tiles: Board) => {
       setPowerup(null);
@@ -68,19 +67,23 @@ const Game: React.FC = () => {
       path: number[][],
       newLobby: Lobby
     ) => {
+      console.log("DOING WORD ACCEPT", newLobby,path)
       setPowerup(null);
       setWord(reconstructWord(path, newLobby.state.board));
       setWordPath(path);
       selectGridRef.current?.fadePath(1200, () => {
         ctx.setLobby(newLobby);
-        setTimeout(() => ctx.setFreezeInputs(false), 500);
+        // setTimeout(() => ctx.setFreezeInputs(false), 500);
       });
     };
     ctx.receiveCallBacks.handleNewTurn = (newLobby: Lobby) => {
+      console.log("DOING TURN CALLBACK", newLobby)
       setPowerup(null);
       ctx.setLobby(newLobby);
+      console.log("Checkpoint")
       turnRef.current?.resetTimer();
       setTimeout(() => ctx.setFreezeInputs(false), 500);
+      
     };
     ctx.receiveCallBacks.handleLoseLife = (
       newLobby: Lobby,
@@ -96,7 +99,8 @@ const Game: React.FC = () => {
       playersRef.current?.loseLife(
         playerId,
         () => ctx.setLobby(newLobby),
-        () => ctx.setFreezeInputs(false)
+        () => {//ctx.setFreezeInputs(false)
+        }
       );
     };
     ctx.receiveCallBacks.handleDeath = (newLobby: Lobby, playerId: string) => {
@@ -110,7 +114,8 @@ const Game: React.FC = () => {
       playersRef.current?.endPlayer(
         playerId,
         () => ctx.setLobby(newLobby),
-        () => ctx.setFreezeInputs(false)
+        () => {//ctx.setFreezeInputs(false)
+        }
       );
     };
     ctx.receiveCallBacks.handleGameEnd = (newLobby: Lobby) => {
