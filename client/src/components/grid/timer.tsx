@@ -9,9 +9,10 @@ import TimerIcon from "../icons/timerIcon";
 import { GameContext } from "../../context/ctx";
 interface TimerComponentProp {
   maxTime: number;
+  onTimeUp: any;
 }
 
-const TimerComponent: React.FC<TimerComponentProp> = ({ maxTime }) => {
+const TimerComponent: React.FC<TimerComponentProp> = ({ maxTime, onTimeUp }) => {
   const [time, setTime] = React.useState(maxTime);
   const ctx = useContext(GameContext);
 
@@ -28,6 +29,7 @@ const TimerComponent: React.FC<TimerComponentProp> = ({ maxTime }) => {
   useEffect(() => {
     if (time === 0 && ctx.playerId === ctx.lobby?.state?.curr_turn) {
       clearInterval(intervalRef);
+      onTimeUp()
       ctx.transitions.notifyTurnEnd(ctx);
     }
   }, [time]);

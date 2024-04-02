@@ -280,6 +280,7 @@ const Game: React.FC = () => {
                   }
                   powerup={powerup}
                   maxTime={60}
+                  resetWord={resetWordSelection}
                 />
                 <div className="flex flex-row items-start justify-center">
                   <PowerupsComponent
@@ -305,7 +306,7 @@ const Game: React.FC = () => {
                       ]}
                       grid={ctx.lobby?.state?.board ?? [["e"]]}
                       ref={selectGridRef}
-                      disabled={isSpectator()}
+                      disabled={isSpectator() || ctx.freezeInputs}
                     />
                   </div>
                   <div className="absolute z-20">{getPowerupGrid()}</div>
