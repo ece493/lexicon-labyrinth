@@ -33,6 +33,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         #         connection.send_message(message)
 
         for lobby in cls.lobbies.values():
+            print(f"Checking lobby {lobby.lobby_id=} {lobby_id=}")
             if lobby.lobby_id == lobby_id:
                 for player in lobby.players:
                     message.player_id = player.player_id  # Overwrite the player ID to be the ID of the player we're sending this to
