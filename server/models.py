@@ -122,6 +122,10 @@ class Lobby(object):
         print(f"Updating lobby {self.lobby_id}'s settings with: {settings}")
         for key, value in settings.items():
             if hasattr(self, key):
+                if key == 'board_size':
+                    value = int(value)
+                elif key == 'timer_setting':
+                    value = int(value)
                 setattr(self, key, value)
 
         # After updating settings, broadcast the new settings to all players
@@ -270,6 +274,7 @@ class Game:
         self.current_player_index: int = 0
         self.turn_modulus: int = len(players)
         self.dictionary = GameDictionary()
+        self.used_words: set[str] = set()
 
     # def initialize_random_board(self) -> None:
 
@@ -433,17 +438,18 @@ class Game:
         for (col, row) in move_data:
             word_to_check += self.board.get_letter(row, col)
         print(f"Checking word {word_to_check}")
+        word_is_unused = word_to_check not in self.used_words
         word_is_valid = self.dictionary.is_valid_word(word_to_check)
         path_is_valid = self.check_path_validity(move_data)
-        move_is_valid = word_is_valid and path_is_valid
+        move_is_valid = word_is_valid and path_is_valid and word_is_unused
         if not word_is_valid:
             print(f"Word is not in the dictionary! Invalid word.")
+        if not word_is_unused:
+            print(f"Word {word_to_check} is a duplicate")
         if move_is_valid:
-            money_to_give_player = self.dictionary.get_word_score(
-                word_to_check)
+            money_to_give_player = self.dictionary.get_word_score(word_to_check)
             self.add_funds(player_id, money_to_give_player)
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_ACCEPTED.value, player_id, {
-                                'lobby': self.to_json(), 'path': move_data}))
+            #self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_ACCEPTED.value, player_id, {'lobby': self.to_json(), 'path': move_data}))
 
             # Now that the word is selected, we need to replace the letters used with new random letters
             for (col, row) in move_data:
@@ -454,12 +460,13 @@ class Game:
             player.add_money(money_to_give_player)
             # Broadcast the lobby state to all
             self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_ACCEPTED.value, player_id, {'lobby': self.to_json(), 'path': move_data}))
+            # Record that the word was used
+            self.used_words.add(word_to_check)
             self.state = GameState.TURN_END
             # self.winner_determined()
             self.transition_to_next_player()
         else:
-            self.send_to_player_func(player_id, Action(ActionEnum.WORD_DENIED.value, player_id, {
-                                     'lobby': self.to_json(), 'path': move_data}))
+            self.send_to_player_func(player_id, Action(ActionEnum.WORD_DENIED.value, player_id, {'lobby': self.to_json(), 'path': move_data}))
             self.state = GameState.WAITING_FOR_MOVE
 
     def winner_determined(self, winner: 'Player') -> None:

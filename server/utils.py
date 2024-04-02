@@ -22,7 +22,8 @@ def load_words_from_scowl(dictionary_path: str) -> list[str]:
             line = line.strip()
             if start_processing:
                 if line:  # Check if the line is not empty
-                    words.append(line)
+                    if len(line) > 1 or line.lower() in ['i', 'a']:
+                        words.append(line)
             elif line == '---':
                 start_processing = True
     return words
