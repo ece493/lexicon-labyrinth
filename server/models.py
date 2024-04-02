@@ -779,7 +779,7 @@ class Bot(Player, object):
                         assert path is not None
                         new_path = path + [(ny, nx)] # Order is col, row
                         assert new_path is not None, f"Apparently nonnone path {path} plus {[(nx, ny)]} gives a none path"
-                        if new_prefix.lower() in self.dictionary: # This is a full word in the dictionary!
+                        if new_prefix.lower() in self.dictionary and new_prefix.lower() not in self.memory: # This is a full word in the dictionary!
                             if len(new_prefix) >= 5 or len(new_prefix) == 4 and random.random() < 0.02 or len(new_prefix) == 3 and random.random() < 0.01 or len(new_prefix) == 2 and random.random() < 0.002 or len(new_prefix) == 1 and random.random() < 0.0004:
                                 return new_prefix, new_path
                         # Continue searching
