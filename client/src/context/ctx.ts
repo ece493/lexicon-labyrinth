@@ -18,18 +18,19 @@ export type GameContextData = {
   setScreen: (s: ScreenState) => void;
   lobby: Lobby | null;
   setLobby: (l: Lobby) => void;
-  defaultLobbyCode: string,
+  defaultLobbyCode: string;
   transitions: ServerTransitions;
   receiveCallBacks: ReceiveCallbacks;
   playerId: string | null;
   sequenceNumber: number;
   freezeInputs: boolean;
   setFreezeInputs: (b: boolean) => void;
+  pauseMessages: { pause: boolean };
 };
 
 export const GameContext = createContext<GameContextData>({
   playerName: "",
-  setPlayerName: (s: string) => { },
+  setPlayerName: (s: string) => {},
   sock: null,
   screen: ScreenState.START,
   setPlayerId: (s: string) => {},
@@ -42,5 +43,6 @@ export const GameContext = createContext<GameContextData>({
   playerId: null,
   sequenceNumber: 0,
   freezeInputs: false,
-  setFreezeInputs: (l: boolean)=>{}
+  setFreezeInputs: (l: boolean) => {},
+  pauseMessages: { pause: false },
 });

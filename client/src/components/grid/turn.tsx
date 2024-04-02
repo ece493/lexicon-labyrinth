@@ -63,7 +63,7 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
             className="text-slate-200 text-sm  px-3 py-1"
             style={{ opacity: powerup ? "0.1" : "" }}
           >
-            {player}'s turn
+            {`${player}${player === "Your"?"":"'s"} turn`}
           </Typography>
         )}
         <Zoom key={word} in={true} appear timeout={300}>

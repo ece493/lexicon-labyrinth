@@ -8,7 +8,10 @@ import Home from "./home";
 import LobbyPage from "./lobby";
 import Game from "./game";
 import JoinLobbyPage, { JoinLobbyErrorPage } from "./join-lobby";
-import { GetReceiveCallbacksDefault, ReceiveCallbacks } from "../ws-client/receive-callbacks";
+import {
+  GetReceiveCallbacksDefault,
+  ReceiveCallbacks,
+} from "../ws-client/receive-callbacks";
 import EndPage from "./end";
 import NameEntryPage from "./name-entry";
 import {
@@ -31,6 +34,9 @@ interface StateWrapperProps {
   setLobbyCode?: any;
 }
 
+const messageQ: (() => void)[] = [];
+const pauseMessages = { pause: false };
+
 export const StateWrapper: React.FC<StateWrapperProps> = ({
   initScreen = ScreenState.TEST_HOME,
   useURLParams = false,
@@ -43,12 +49,32 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   const [screen, setScreen] = useState<ScreenState>(initScreen);
   const [lobby, setLobby] = useState<Lobby | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(null);
-  const [receiveCallbacks, setReceiveCallbacks] = useState<ReceiveCallbacks>(GetReceiveCallbacksDefault());
+  const [receiveCallbacks, setReceiveCallbacks] = useState<ReceiveCallbacks>(
+    GetReceiveCallbacksDefault()
+  );
   const [sock, setSock] = useState<WebSocket | null>(null);
   const [playerName, setPlayerName] = useState("");
   const [freezeInputs, setFreezeInputs] = useState(false);
-  useEffect(() => setSock(connect(setLobby, setPlayerId, setScreen, receiveCallbacks)), []);
-  
+  // const [messageQ, setMessageQ] = useState<(() => void)[]>([]);
+  // const [pauseMessages, setPauseMessages] = useState({ pause: false });
+
+  function addToQ(f: () => void) {
+    messageQ.push(f);
+  }
+
+  useEffect(() => {
+    setSock(
+      connect(setLobby, setPlayerId, setScreen, receiveCallbacks, addToQ)
+    );
+    setInterval(() => {
+      if (!pauseMessages.pause && messageQ.length > 0) {
+        console.log("Processing message");
+        const f = messageQ.shift();
+        if (f) f();
+      }
+    }, 100);
+  }, []);
+
   const stateToScreen = (s: ScreenState) => {
     switch (s) {
       case ScreenState.TEST_HOME:
@@ -68,7 +94,12 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
       case ScreenState.LOBBY_FULL:
         return JoinLobbyErrorPage("Lobby is Full!");
       case ScreenState.BOOTED_FROM_LOBBY:
-        return <ErrorComponent msg={"You were kicked from the Lobby"} screen={ScreenState.START}/>;
+        return (
+          <ErrorComponent
+            msg={"You were kicked from the Lobby"}
+            screen={ScreenState.START}
+          />
+        );
       case ScreenState.END:
         return <EndPage />;
       default:
@@ -92,7 +123,8 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
         receiveCallBacks: receiveCallbacks,
         sequenceNumber: 0,
         freezeInputs,
-        setFreezeInputs
+        setFreezeInputs,
+        pauseMessages
       }}
     >
       {!bypassLobby ? null : (
