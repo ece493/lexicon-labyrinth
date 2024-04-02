@@ -1,0 +1,25 @@
+# based off of template from https://github.com/docker/awesome-compose/blob/master/react-express-mysql/compose.yaml
+services:
+  client:
+    build:
+      args:
+      - NODE_ENV=production
+      context: client
+    environment:
+      - NODE_ENV=production
+    ports:
+      - 3000:3000
+    networks:
+      - net
+    depends_on:
+      - backend
+  backend:
+    ports:
+      - 8888:8888
+    build:
+      context: server
+    stop_signal: SIGINT
+    networks:
+      - net
+networks:
+  net:

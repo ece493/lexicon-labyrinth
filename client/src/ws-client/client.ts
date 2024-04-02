@@ -1,19 +1,25 @@
+import { GameContextData } from "../context/ctx";
 import { Action, Lobby, ScreenState, isAction } from "../data/model";
 import { ActionsList } from "./model";
 import { ReceiveCallbacks } from "./receive-callbacks";
+
+type PlayerId = {
+  playerId: string | null
+}
 
 // https://socket.io/how-to/use-with-react
 export const connect = (
   setLobby: (l: Lobby) => void,
   setPlayerId: (s: string) => void,
   setScreen: (s: ScreenState) => void,
-  receiveCallBacks: ReceiveCallbacks
+  receiveCallBacks: ReceiveCallbacks,
+  addToQ: (f:()=> void) => void
 ) => {
   // TO-DO: Remove undefined
   // const url = process.env.NODE_ENV === 'production' ? "undefined" : 'ws://localhost:8888/websocket';
   const ws = new WebSocket("ws://localhost:8888/websocket");
   ws.onopen = (_) => console.log("connected websocket!");
-  ws.onmessage = (ev) => wsReceiveHandler(setLobby, setPlayerId, setScreen, ev, receiveCallBacks);
+  ws.onmessage = (ev) => addToQ(()=> wsReceiveHandler(setLobby, setPlayerId, setScreen, ev, receiveCallBacks));
   return ws;
 };
 
@@ -27,15 +33,16 @@ export const wsReceiveHandler = (
   const data = JSON.parse(ev.data);
   if (!isAction(data)) return null;
   const action = data as Action;
-  console.log(action);
+  console.log("received", action);
   switch (action.action) {
     case ActionsList.return_lobby_code:
       // Code for return_lobby_code
-      setPlayerId(action.player_id);
+      console.log("action.player_id", action.player_id);
       setScreen(ScreenState.LOBBY);
       break;
     case ActionsList.return_player_id:
       // Code for return_lobby_code
+      console.log("action.player_id", action.player_id);
       setPlayerId(action.player_id);
       break;
     case ActionsList.lobby_does_not_exist:
@@ -67,34 +74,55 @@ export const wsReceiveHandler = (
     case ActionsList.player_left:
       // Code for player_left
       break;
-    case ActionsList.update_lobby_settings:
-      // Code for update_lobby_settings
-      break;
     case ActionsList.word_accepted:
       receiveCallBacks.handleWordAccept(action.data.path, action.data.lobby);
       break;
     case ActionsList.word_denied:
-      receiveCallBacks.handleWordDeny(action.data.path);
+      receiveCallBacks.handleWordDeny(
+        action.data.path,
+        action.data.lobby.state.board
+      );
       break;
     case ActionsList.lose_life:
-      receiveCallBacks.handleLoseLife(action.data.lobby, action.data.player_id)
+      receiveCallBacks.handleLoseLife(action.data.lobby, action.data.player_id);
       break;
     case ActionsList.start_turn:
-      //TEMPFIX
-      setTimeout(() => receiveCallBacks.handleNewTurn(action.data), 1200);
+      receiveCallBacks.handleNewTurn(action.data);
       break;
     case ActionsList.powerup_denied:
-      // Code for powerup_denied
       break;
-    case ActionsList.powerup_activated:
-      // Code for powerup_activated
+    case ActionsList.rotate_powerup_accept:
+      receiveCallBacks.handleRotateAccept(
+        action.data.lobby,
+        action.data.powerup_data.type,
+        action.data.powerup_data.index,
+        action.data.powerup_data.rotations
+      );
+      break;
+    case ActionsList.transform_powerup_accept:
+      receiveCallBacks.handleTransformAccept(
+        action.data.lobby,
+        action.data.powerup_data.tile,
+        action.data.powerup_data.newChar
+      );
+      break;
+    case ActionsList.swap_powerup_accept:
+      receiveCallBacks.handleSwapAccept(action.data.lobby, action.data.powerup_data.tiles);
+      break;
+    case ActionsList.scramble_powerup_accept:
+      receiveCallBacks.handleScrambleAccept(action.data.lobby);
       break;
     case ActionsList.you_died:
-      receiveCallBacks.handleDeath(action.data.lobby, action.data.player_id)
+      receiveCallBacks.handleDeath(action.data.lobby, action.data.player_id);
       break;
     case ActionsList.you_win:
-      receiveCallBacks.handleGameEnd(action.data.lobby)
-      setScreen(ScreenState.END);
+        receiveCallBacks.handleGameEnd(action.data.lobby);
+        setScreen(ScreenState.END);
+      break;
+    case ActionsList.remove_player:
+      if (action.player_id === action.data.player_id_removed)
+        setScreen(ScreenState.BOOTED_FROM_LOBBY);
+      setLobby(action.data.lobby);
       break;
     default:
       setLobby(action.data.lobby);

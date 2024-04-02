@@ -15,19 +15,7 @@ const Home: React.FC = () => {
       <h2 onClick={() => ctx.setScreen(ScreenState.LOBBY)}>
         Click to go to Lobby test page
       </h2>
-      <h2
-        onClick={() => {
-          ctx.setScreen(ScreenState.GAME);
-          ctx.sock = connect(ctx.setLobby, ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
-          ctx.sock.onopen = () => {
-            ctx.transitions.initialize(ctx);
-            ctx.transitions.readyLobby(ctx);
-          };
-        }}
-      >
-        Click to go to Game test page
-      </h2>
-      <h2
+      {/* <h2
         onClick={() => {
           ctx.setScreen(ScreenState.END);
           ctx.sock = connect(ctx.setLobby, ctx.setPlayerId, ctx.setScreen, ctx.receiveCallBacks);
@@ -38,7 +26,7 @@ const Home: React.FC = () => {
         }}
       >
         Click to go to End Game Page
-      </h2>
+      </h2> */}
       <h2 onClick={() => ctx.setScreen(ScreenState.NAME_ENTRY)}>
         Click to go to Name Entry test page
       </h2>

@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 
 const NameEntryLobbyComponent: React.FC = () => {
     const ctx = useContext(GameContext);
-    const isDisabled = ctx.playerName.length===0;
+    const isDisabled = ctx.playerName.length===0 || ctx.playerName.trim().length===0;
     return (
         <DefaultLayout>
             <h1 className="m-0 text-slate-100">Enter Your Nickname Here</h1>

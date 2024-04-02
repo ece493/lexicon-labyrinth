@@ -4,7 +4,9 @@ import { BotComponent, PlayerBotManagerComponent, PlayerComponent } from "./play
 import Slider from "@mui/material/Slider";
 import { GameContextData } from "../../context/ctx";
 import Button from "@mui/material/Button";
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { FadeWrapper } from "../animations/fade-wrapper";
+import { IconButton } from "@mui/material";
 
 interface LobbyProps {
     lobby: Lobby,
@@ -45,7 +47,13 @@ const LobbySettingsAdminComponent: React.FC<LobbyProps> = ({ ...p }) => {
         <div className="m-0 h-auto w-full">
             <div className="m-0 flex flex-col w-full">
                 <p className="m-0 text-slate-100">Lobby Code</p>
-                <h1 className="m-0 text-slate-100 text-3xl">{p.lobby.lobby_code}</h1>
+                <div className="m-0 flex flex-row w-full">
+                    <h1 className="m-0 text-slate-100 text-3xl mr-2">{p.lobby.lobby_code}</h1>
+                    <IconButton className="my-auto"
+                        onClick={() => navigator.clipboard.writeText(`http://localhost:3000/lobby/${p.lobby.lobby_code}`)}>
+                        <ContentCopyIcon className="invert" />
+                    </IconButton>
+                </div>
             </div>
             <div className="m-0 py-4"></div>
             <div className="m-0 flex flex-col w-full py-1">
