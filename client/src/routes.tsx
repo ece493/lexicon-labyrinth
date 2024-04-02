@@ -5,12 +5,13 @@ import Lobby from "./pages/lobby";
 import JoinLobby from "./pages/join-lobby";
 import { StateWrapper } from "./pages/state-wrapper";
 import { TestDoubleStateWrapper } from "./pages/test-double-state-wrapper";
+import { ScreenState } from "./data/model";
 
 //https://stackoverflow.com/questions/35352638/how-to-get-parameter-value-from-query-string
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <StateWrapper />,
+    element: <StateWrapper initScreen={ScreenState.START}/>,
   },
   {
     path: "/game-test",

@@ -58,6 +58,7 @@ const Game: React.FC = () => {
       newLobby: Lobby
     ) => {
       ctx.pauseMessages.pause = true;
+      setError(null)
       setPowerup(null);
       setWord(reconstructWord(path, newLobby.state.board));
       setWordPath(path);
@@ -68,6 +69,7 @@ const Game: React.FC = () => {
     };
     ctx.receiveCallBacks.handleNewTurn = (newLobby: Lobby) => {
       setPowerup(null);
+      setError(null)
       ctx.setLobby(newLobby);
       console.log("Checkpoint");
       turnRef.current?.resetTimer();
@@ -79,6 +81,7 @@ const Game: React.FC = () => {
     ) => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
+      setError(null)
       let player = newLobby.players.find((p) => p.id === playerId);
       if (playerId === ctx.playerId) {
         setWord(`You lost a life!`);
@@ -99,6 +102,7 @@ const Game: React.FC = () => {
     ctx.receiveCallBacks.handleDeath = (newLobby: Lobby, playerId: string) => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
+      setError(null)
       let player = newLobby.players.find((p) => p.id === playerId);
       if (playerId === ctx.playerId) {
         setWord(`You are out!`);
@@ -118,6 +122,7 @@ const Game: React.FC = () => {
     };
     ctx.receiveCallBacks.handleGameEnd = (newLobby: Lobby) => {
       setPowerup(null);
+      setError(null)
       setTimeout(() => ctx.setFreezeInputs(false), 500);
     };
     ctx.receiveCallBacks.handleRotateAccept = (
@@ -127,6 +132,7 @@ const Game: React.FC = () => {
       rotations: number
     ) => {
       ctx.pauseMessages.pause = true;
+      setError(null)
       setPowerup(null);
       ctx.setLobby(newLobby);
       setTimeout(() => ctx.setFreezeInputs(false), 500);
@@ -139,6 +145,7 @@ const Game: React.FC = () => {
     ) => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
+      setError(null)
       ctx.setLobby(newLobby);
       setTimeout(() => ctx.setFreezeInputs(false), 500);
       setTimeout(() => (ctx.pauseMessages.pause = false), 100);
@@ -146,6 +153,7 @@ const Game: React.FC = () => {
     ctx.receiveCallBacks.handleScrambleAccept = (newLobby: Lobby) => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
+      setError(null)
       ctx.setLobby(newLobby);
       setTimeout(() => ctx.setFreezeInputs(false), 500);
       setTimeout(() => (ctx.pauseMessages.pause = false), 100);
@@ -156,6 +164,7 @@ const Game: React.FC = () => {
     ) => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
+      setError(null)
       ctx.setLobby(newLobby);
       setTimeout(() => ctx.setFreezeInputs(false), 500);
       setTimeout(() => (ctx.pauseMessages.pause = false), 100);
