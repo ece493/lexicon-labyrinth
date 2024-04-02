@@ -468,7 +468,7 @@ class Game:
             # self.winner_determined()
             self.transition_to_next_player()
         else:
-            self.send_to_player_func(player_id, Action(ActionEnum.WORD_DENIED.value, player_id, {'lobby': self.to_json(), 'path': move_data}))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_DENIED.value, player_id, {'lobby': self.to_json(), 'path': move_data}))
             self.state = GameState.WAITING_FOR_MOVE
 
     def winner_determined(self, winner: 'Player') -> None:
@@ -754,9 +754,11 @@ class Bot(Player, object):
         print(f"Bot {self.player_id} is doing turn where the game board is {game_board}, my own representation as a player is {bot_representation_in_lobby}, and I have this much money: {available_money}")
         
         def is_valid_move(x, y, path) -> bool:
+            print(x, y, path)
             return 0 <= x < board_size and 0 <= y < board_size and (x, y) not in path
         
-        def find_word(x, y, path: list[tuple[int, int]], prefix: str):
+        def find_word(x: int, y: int, path: list[tuple[int, int]], prefix: str):
+            assert path is not None
             print(f"Bot in find word, path: {path}")
             if not self.check_whether_prefix_is_in_dictionary(prefix):
                 return None, None
@@ -765,24 +767,27 @@ class Bot(Player, object):
                     if dx == 0 and dy == 0:
                         continue  # Skip the current tile
                     nx, ny = x + dx, y + dy
+                    assert path is not None
                     if is_valid_move(nx, ny, path):
-                        new_prefix = prefix + game_board[nx][ny]
-                        new_path = path + [(nx, ny)]
-                        if self.check_whether_prefix_is_in_dictionary(new_prefix):
-                            if len(new_prefix) >= 3 or len(new_prefix) == 2 and random.random() < 0.1 or len(new_prefix) == 1 and random.random() < 0.02:
+                        new_prefix: str = prefix + game_board[nx][ny]
+                        assert path is not None
+                        new_path = path + [(ny, nx)] # Order is col, row
+                        assert new_path is not None, f"Apparently nonnone path {path} plus {[(nx, ny)]} gives a none path"
+                        if new_prefix.lower() in self.dictionary: # This is a full word in the dictionary!
+                            if len(new_prefix) >= 3 or len(new_prefix) == 2 and random.random() < 0.01 or len(new_prefix) == 1 and random.random() < 0.002:
                                 return new_prefix, new_path
                         # Continue searching
                         result = find_word(nx, ny, new_path, new_prefix)
-                        if result is not None:
+                        if result[0] is not None and result[1] is not None:
                             return result
             return None, None
         
         # The search algorithm is akin to how a player looks for words. Trace out a random path and see whether it spells out a known word
         # Try to find a word starting from a random position
-        for _ in range(1000000):  # Limit attempts
+        for _ in range(2000000):  # Limit attempts
             start_x, start_y = random.randint(0, board_size - 1), random.randint(0, board_size - 1)
             start_letter = game_board[start_x][start_y]
-            word, path = find_word(start_x, start_y, [(start_x, start_y)], start_letter)
+            word, path = find_word(start_x, start_y, [(start_y, start_x)], start_letter)
             if word is not None and path is not None:
                 print(f"Found word: {word} at path {path}")
                 self.send_message_to_game(ActionEnum.PICK_WORD, path)
