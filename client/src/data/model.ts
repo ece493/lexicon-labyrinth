@@ -49,6 +49,7 @@ export enum ScreenState {
     END = 5,
     LOBBY_FULL = 6,
     NAME_ENTRY = 7,
+    BOOTED_FROM_LOBBY = 8,
     TEST_HOME = -1,
 };
 

@@ -123,7 +123,7 @@ export const wsReceiveHandler = (
       break;
     case ActionsList.remove_player:
       if (action.player_id === action.data.player_id_removed)
-        setScreen(ScreenState.START);
+        setScreen(ScreenState.BOOTED_FROM_LOBBY);
       setLobby(action.data.lobby);
       break;
     default:

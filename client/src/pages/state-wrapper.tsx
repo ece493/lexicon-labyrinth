@@ -20,6 +20,7 @@ import {
 } from "framer-motion";
 import StartPage from "./start";
 import BypassButton from "./bypass-button";
+import { ErrorComponent } from "../components/error/error-component";
 
 interface StateWrapperProps {
   initScreen?: ScreenState;
@@ -63,6 +64,8 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
         return JoinLobbyErrorPage("Lobby Does Not Exist!");
       case ScreenState.LOBBY_FULL:
         return JoinLobbyErrorPage("Lobby is Full!");
+      case ScreenState.BOOTED_FROM_LOBBY:
+        return <ErrorComponent msg={"You were kicked from the Lobby"} screen={ScreenState.START}/>;
       case ScreenState.END:
         return <EndPage />;
       default:
