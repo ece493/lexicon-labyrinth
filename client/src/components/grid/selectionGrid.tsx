@@ -73,8 +73,6 @@ export const SelectionGridComponent = forwardRef<
 
     const displayGrid = animating ? animationGrid : grid;
 
-    useEffect(() => {}, []);
-
     useEffect(() => {
       setTilePositions(getDefaultPosGrid(grid));
     }, [grid]);
@@ -238,6 +236,7 @@ export const SelectionGridComponent = forwardRef<
         <motion.div
           draggable="false"
           className="relative"
+          key={`${fadeOutSelected}`}
           animate={{
             opacity: fadeOutSelected ? (selected ? 0 : 1) : 1,
             x: tilePositions[y][x]?.x ?? 0,
@@ -300,11 +299,11 @@ export const SelectionGridComponent = forwardRef<
         {disabled ? (
           <div className="bg-transparent w-full h-full absolute z-40" />
         ) : null}
-        <GridComponent
-          grid={displayGrid}
-          board_size={board_size}
-          buildChild={buildTile}
-        />
+          <GridComponent
+            grid={displayGrid}
+            board_size={board_size}
+            buildChild={buildTile}
+          />
       </div>
     );
   }

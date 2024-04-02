@@ -19,19 +19,9 @@ import { motion } from "framer-motion";
 import { lobby1, lobby2, lobby3 } from "../mocks/lobbyMocks";
 
 const Game: React.FC = () => {
-  useEffect(() => {
-    // setTimeout(() => {
-    //   let lobbyCopy = { ...ctx.lobby };
-    //   lobbyCopy.state.curr_turn = "3";
-    //   ctx.setLobby(lobbyCopy);
-    // }, 1000);
-  }, []);
-
   const ctx = useContext(GameContext);
   const [word, setWord] = useState("");
   const [error, setError] = useState<null | string>(null);
-  const [showGame, setShowGame] = useState(false);
-  const [disableInput, setDisableInput] = useState(false);
 
   function isSpectator() {
     return ctx.lobby?.state.curr_turn !== ctx.playerId;
@@ -67,13 +57,14 @@ const Game: React.FC = () => {
       path: number[][],
       newLobby: Lobby
     ) => {
+      ctx.pauseMessages.pause = true
       console.log("DOING WORD ACCEPT", newLobby,path)
       setPowerup(null);
       setWord(reconstructWord(path, newLobby.state.board));
       setWordPath(path);
       selectGridRef.current?.fadePath(1200, () => {
         ctx.setLobby(newLobby);
-        // setTimeout(() => ctx.setFreezeInputs(false), 500);
+        setTimeout(() => ctx.pauseMessages.pause = false, 100);
       });
     };
     ctx.receiveCallBacks.handleNewTurn = (newLobby: Lobby) => {
