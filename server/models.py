@@ -3,6 +3,7 @@ import string
 import time
 import json
 
+from trie import *
 from enum import Enum, auto
 from typing import Optional, Callable, Any
 
@@ -679,14 +680,19 @@ class Bot(Player, object):
         self.memory: set[str] = set()
         # Additional properties and methods specific to bot behavior
         self.dictionary: list[str] = self.pull_dictionary(self.difficulty)
+        self.dict_trie = Trie()
+        for word in self.dictionary:
+            self.dict_trie.insert(word)
+
         self.send_to_game_func: Callable = send_to_game_func
 
     def check_whether_prefix_is_in_dictionary(self, prefix: str) -> bool:
         # TODO: Optimize using lexicographical stuff
-        for word in self.dictionary:
-            if word.startswith(prefix):
-                return True
-        return False
+        return self.dict_trie.starts_with(prefix)
+        # for word in self.dictionary:
+        #     if word.startswith(prefix):
+        #         return True
+        # return False
 
     def pull_dictionary(self, difficulty: BotDifficulty) -> list[str]:
         if difficulty == BotDifficulty.EASY:
@@ -754,12 +760,12 @@ class Bot(Player, object):
         print(f"Bot {self.player_id} is doing turn where the game board is {game_board}, my own representation as a player is {bot_representation_in_lobby}, and I have this much money: {available_money}")
         
         def is_valid_move(x, y, path) -> bool:
-            print(x, y, path)
-            return 0 <= x < board_size and 0 <= y < board_size and (x, y) not in path
+            #print(x, y, path)
+            return 0 <= x < board_size and 0 <= y < board_size and (y, x) not in path
         
         def find_word(x: int, y: int, path: list[tuple[int, int]], prefix: str):
             assert path is not None
-            print(f"Bot in find word, path: {path}")
+            #print(f"Bot in find word, path: {path}")
             if not self.check_whether_prefix_is_in_dictionary(prefix):
                 return None, None
             for dx in [-1, 0, 1]:
@@ -774,7 +780,7 @@ class Bot(Player, object):
                         new_path = path + [(ny, nx)] # Order is col, row
                         assert new_path is not None, f"Apparently nonnone path {path} plus {[(nx, ny)]} gives a none path"
                         if new_prefix.lower() in self.dictionary: # This is a full word in the dictionary!
-                            if len(new_prefix) >= 3 or len(new_prefix) == 2 and random.random() < 0.01 or len(new_prefix) == 1 and random.random() < 0.002:
+                            if len(new_prefix) >= 5 or len(new_prefix) == 4 and random.random() < 0.02 or len(new_prefix) == 3 and random.random() < 0.01 or len(new_prefix) == 2 and random.random() < 0.002 or len(new_prefix) == 1 and random.random() < 0.0004:
                                 return new_prefix, new_path
                         # Continue searching
                         result = find_word(nx, ny, new_path, new_prefix)
