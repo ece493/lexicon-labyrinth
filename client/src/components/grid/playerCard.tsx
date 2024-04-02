@@ -13,6 +13,7 @@ import { Typography } from "@mui/material";
 import LifeIcon from "../icons/lifeIcon";
 import DeadIcon from "../icons/deadIcon";
 import { motion } from "framer-motion";
+import FundsIcon from "../icons/fundsIcon";
 
 interface PlayerCardProps {
   player: Player;
@@ -23,7 +24,7 @@ function getLivesIcons(lives: number) {
   let icons = [];
   for (let i = 0; i < lives; i += 1) {
     icons.push(
-      <div key={i} className="z-1">
+      <div key={i} className="z-1 pt-1">
         <LifeIcon />
       </div>
     );
@@ -37,27 +38,14 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, shake }) => {
 
   function shakeCard() {
     setX(200);
-    setHeartOpacity(1);
-    setHeartX(-200);
-    setHeartY(-200);
-
     setTimeout(() => {
       setX(0);
-      setHeartOpacity(0);
-      setHeartX(0);
-      setHeartY(0);
     }, spacing);
-    // setTimeout(() => setX(50), spacing * 2);
-    // setTimeout(() => setX(0), spacing * 3);
   }
 
   useEffect(() => {
     if (shake) shakeCard();
   }, [shake]);
-
-  const [heartX, setHeartX] = useState(0);
-  const [heartY, setHeartY] = useState(0);
-  const [heartOpacity, setHeartOpacity] = useState(0);
 
   return (
     <Reorder.Item
@@ -67,9 +55,6 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, shake }) => {
       className="p-0 m-0 relative"
       style={{ listStyleType: "none" }}
     >
-      {/* <motion.div className="absolute" animate={{ x: heartX, y: heartY, opacity:heartOpacity }}>
-        <LifeIcon />
-      </motion.div> */}
       <motion.div
         animate={{ x }}
         transition={{ type: "spring" }}
@@ -86,7 +71,11 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, shake }) => {
           )}
           <Typography className=" text-slate-100 ">{player.name}</Typography>
         </div>
-        <div className="flex flex-row pl-2 w-full px-2 bg-blue-600 py-1 relative">
+        <div className="flex flex-row pl-2 w-full px-2 bg-blue-600 py-1 relative items-center">
+          <FundsIcon small></FundsIcon>
+          <Typography className=" text-slate-100 text-sm" style={{ marginRight: "6px", marginLeft:"2px" }}>{player.money}</Typography>
+          <Typography className=" text-slate-100 text-sm" style={{ marginRight: "6px", marginLeft:"2px", paddingBottom:"2px" }}>|</Typography>
+
           {getLivesIcons(player.lives)}
         </div>
       </motion.div>
