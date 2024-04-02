@@ -6,6 +6,7 @@ import JoinLobby from "./pages/join-lobby";
 import { StateWrapper } from "./pages/state-wrapper";
 import { TestDoubleStateWrapper } from "./pages/test-double-state-wrapper";
 
+//https://stackoverflow.com/questions/35352638/how-to-get-parameter-value-from-query-string
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -17,7 +18,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/lobby/:lobbyId",
-    element: <Lobby />,
+    element: <StateWrapper useURLParams />,
   },
   {
     path: "/join",

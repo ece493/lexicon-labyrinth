@@ -5,7 +5,7 @@ import Button from "@mui/material/Button";
 
 const JoinLobbyComponent: React.FC = () => {
     const ctx = useContext(GameContext);
-    const [code, setCode] = useState("");
+    const [code, setCode] = useState(ctx.defaultLobbyCode);
     const isDisabled = !code.length || !ctx.sock || ctx.sock.readyState !== WebSocket.OPEN;
     return (
         <DefaultLayout>

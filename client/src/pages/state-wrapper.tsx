@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { GameContext } from "../context/ctx";
 import { Lobby, ScreenState } from "../data/model";
 import { TransitionManager } from "../ws-client/server/transitions";
@@ -25,6 +25,7 @@ import { ErrorComponent } from "../components/error/error-component";
 interface StateWrapperProps {
   initScreen?: ScreenState;
   bypassLobby?: boolean;
+  useURLParams?: boolean;
   bypassLobbyRole?: string;
   lobbyCode?: string;
   setLobbyCode?: any;
@@ -32,11 +33,13 @@ interface StateWrapperProps {
 
 export const StateWrapper: React.FC<StateWrapperProps> = ({
   initScreen = ScreenState.TEST_HOME,
+  useURLParams = false,
   bypassLobby,
   bypassLobbyRole,
   lobbyCode,
   setLobbyCode,
 }) => {
+  const { lobbyId } = useParams();
   const [screen, setScreen] = useState<ScreenState>(initScreen);
   const [lobby, setLobby] = useState<Lobby | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(null);
@@ -81,6 +84,7 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
         setPlayerId,
         sock,
         screen,
+        defaultLobbyCode: lobbyId ? lobbyId : "",
         setScreen,
         lobby,
         setLobby,
