@@ -57,29 +57,27 @@ const Game: React.FC = () => {
       path: number[][],
       newLobby: Lobby
     ) => {
-      ctx.pauseMessages.pause = true
-      console.log("DOING WORD ACCEPT", newLobby,path)
+      ctx.pauseMessages.pause = true;
       setPowerup(null);
       setWord(reconstructWord(path, newLobby.state.board));
       setWordPath(path);
       selectGridRef.current?.fadePath(1200, () => {
         ctx.setLobby(newLobby);
-        setTimeout(() => ctx.pauseMessages.pause = false, 100);
+        setTimeout(() => (ctx.pauseMessages.pause = false), 100);
       });
     };
     ctx.receiveCallBacks.handleNewTurn = (newLobby: Lobby) => {
-      console.log("DOING TURN CALLBACK", newLobby)
       setPowerup(null);
       ctx.setLobby(newLobby);
-      console.log("Checkpoint")
+      console.log("Checkpoint");
       turnRef.current?.resetTimer();
       setTimeout(() => ctx.setFreezeInputs(false), 500);
-      
     };
     ctx.receiveCallBacks.handleLoseLife = (
       newLobby: Lobby,
       playerId: string
     ) => {
+      ctx.pauseMessages.pause = true;
       setPowerup(null);
       let player = newLobby.players.find((p) => p.id === playerId);
       if (playerId === ctx.playerId) {
@@ -89,12 +87,17 @@ const Game: React.FC = () => {
       }
       playersRef.current?.loseLife(
         playerId,
-        () => ctx.setLobby(newLobby),
-        () => {//ctx.setFreezeInputs(false)
+        () => {
+          ctx.setLobby(newLobby);
+          setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+        },
+        () => {
+          //ctx.setFreezeInputs(false)
         }
       );
     };
     ctx.receiveCallBacks.handleDeath = (newLobby: Lobby, playerId: string) => {
+      ctx.pauseMessages.pause = true;
       setPowerup(null);
       let player = newLobby.players.find((p) => p.id === playerId);
       if (playerId === ctx.playerId) {
@@ -104,8 +107,12 @@ const Game: React.FC = () => {
       }
       playersRef.current?.endPlayer(
         playerId,
-        () => ctx.setLobby(newLobby),
-        () => {//ctx.setFreezeInputs(false)
+        () => {
+          ctx.setLobby(newLobby);
+          setTimeout(() => (ctx.pauseMessages.pause = false), 800);
+        },
+        () => {
+          //ctx.setFreezeInputs(false)
         }
       );
     };
@@ -119,31 +126,39 @@ const Game: React.FC = () => {
       index: number,
       rotations: number
     ) => {
+      ctx.pauseMessages.pause = true;
       setPowerup(null);
       ctx.setLobby(newLobby);
       setTimeout(() => ctx.setFreezeInputs(false), 500);
+      setTimeout(() => (ctx.pauseMessages.pause = false), 100);
     };
     ctx.receiveCallBacks.handleTransformAccept = (
       newLobby: Lobby,
       tile: number[],
       newChar: string
     ) => {
+      ctx.pauseMessages.pause = true;
       setPowerup(null);
       ctx.setLobby(newLobby);
       setTimeout(() => ctx.setFreezeInputs(false), 500);
+      setTimeout(() => (ctx.pauseMessages.pause = false), 100);
     };
     ctx.receiveCallBacks.handleScrambleAccept = (newLobby: Lobby) => {
+      ctx.pauseMessages.pause = true;
       setPowerup(null);
       ctx.setLobby(newLobby);
       setTimeout(() => ctx.setFreezeInputs(false), 500);
+      setTimeout(() => (ctx.pauseMessages.pause = false), 100);
     };
     ctx.receiveCallBacks.handleSwapAccept = (
       newLobby: Lobby,
       tiles: number[][]
     ) => {
+      ctx.pauseMessages.pause = true;
       setPowerup(null);
       ctx.setLobby(newLobby);
       setTimeout(() => ctx.setFreezeInputs(false), 500);
+      setTimeout(() => (ctx.pauseMessages.pause = false), 100);
     };
   }
 
@@ -235,6 +250,12 @@ const Game: React.FC = () => {
     }
   }
 
+  function getPlayerName() {
+    const player = ctx.lobby?.players.find((p) => p.id === ctx.lobby?.state.curr_turn)
+    if (!player) return "player"
+    return player.id === ctx.playerId? "Your": player?.name
+  }
+
   function renderGame() {
     return (
       <div>
@@ -264,13 +285,9 @@ const Game: React.FC = () => {
                   word={word}
                   disabled={isSpectator() || ctx.freezeInputs}
                   error={error}
-                  player={
-                    ctx.lobby?.players.find(
-                      (p) => p.id === ctx.lobby?.state.curr_turn
-                    )?.name ?? "player"
-                  }
+                  player={getPlayerName()}
                   powerup={powerup}
-                  maxTime={60}
+                  maxTime={5}
                   resetWord={resetWordSelection}
                 />
                 <div className="flex flex-row items-start justify-center">
