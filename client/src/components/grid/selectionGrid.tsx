@@ -29,7 +29,7 @@ function getRandomCharacter() {
 
 type TilePos = { x: number; y: number };
 const shiftVal = 64;
-function getDefaultPosGrid(grid: Board): TilePos[][] {  
+function getDefaultPosGrid(grid: Board): TilePos[][] {
   const tilePos: TilePos[][] = [];
 
   for (let i = 0; i < grid.length; i++) {
@@ -73,8 +73,7 @@ export const SelectionGridComponent = forwardRef<
 
     const displayGrid = animating ? animationGrid : grid;
 
-    useEffect(() => {
-    }, []);
+    useEffect(() => {}, []);
 
     useEffect(() => {
       setTilePositions(getDefaultPosGrid(grid));
@@ -283,6 +282,9 @@ export const SelectionGridComponent = forwardRef<
 
     return (
       <div
+        style={{
+          opacity: disabled ? "0.5" : "",
+        }}
         draggable="false"
         onDragStart={(e) => {
           e.preventDefault();

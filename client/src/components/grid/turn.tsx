@@ -23,6 +23,7 @@ interface TurnComponentProp {
   error: string | null;
   disabled?: boolean;
   maxTime: number;
+  resetWord: any;
 }
 
 export interface TurnRef {
@@ -31,10 +32,10 @@ export interface TurnRef {
 }
 
 const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
-  ({ word, player, powerup, handleSubmit, error, disabled, maxTime }, ref) => {
+  ({ word, player, powerup, handleSubmit, error, disabled, maxTime, resetWord }, ref) => {
     const [wordX, setWordX] = React.useState(0);
     const [timerComp, setTimerComp] = React.useState(
-      <TimerComponent maxTime={maxTime} />
+      <TimerComponent onTimeUp={resetWord} maxTime={maxTime} />
     );
 
     useImperativeHandle(ref, () => ({
@@ -45,7 +46,7 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
       },
       resetTimer() {
         setTimerComp(<div style={{ width: "54px" }} />);
-        setTimeout(() => setTimerComp(<TimerComponent maxTime={maxTime} />), 0);
+        setTimeout(() => setTimerComp(<TimerComponent onTimeUp={resetWord} maxTime={maxTime} />), 0);
       },
     }));
 
