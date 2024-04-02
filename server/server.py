@@ -27,10 +27,18 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     def broadcast_to_lobby(cls, lobby_id: str, message: Action) -> None:
         # Broadcast a message to all connections in a specific lobby
         # TODO: Perhaps more efficient way would be to maintain a mapping from lobby IDs to a set of connection, but this is fine for now
-        for connection in cls.connections:
-            if connection.lobby_id is not None and connection.lobby_id == lobby_id:  # Make sure to set conn.lobby_id when joining a lobby
-                message.player_id = connection.id # Overwrite the player ID to be the ID of the player we're sending this to
-                connection.send_message(message)
+        # for connection in cls.connections:
+        #     if connection.lobby_id is not None and connection.lobby_id == lobby_id:  # Make sure to set conn.lobby_id when joining a lobby
+        #         message.player_id = connection.id # Overwrite the player ID to be the ID of the player we're sending this to
+        #         connection.send_message(message)
+
+        for lobby in cls.lobbies.values():
+            if lobby.lobby_id == lobby_id:
+                for player in lobby.players:
+                    message.player_id = player.player_id  # Overwrite the player ID to be the ID of the player we're sending this to
+                    player.send_message(message)
+                return
+        raise Exception("Lobby to broadcast to is not in the list of lobbies!")
 
     @classmethod
     def send_to_player_func(cls, player_id: str, message: Action) -> None:
@@ -39,6 +47,8 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
             if connection.id is not None and connection.id == player_id:
                 message.player_id = player_id # Overwrite the player ID to be the ID of the player we're sending this to
                 connection.send_message(message)
+                return
+        raise Exception("Player to send to is not in the list of connections!")
 
     def open(self) -> None:
         # Assign a unique ID to the connection

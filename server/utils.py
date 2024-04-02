@@ -36,6 +36,6 @@ def load_words_from_scowl(dictionary_path: str) -> list[str]:
 
 def get_player_from_id_dicts(player_list: list[dict[str, Any]], player_id: str) -> Any | None:
     for player in player_list:
-        if player['player_id'] == player_id:
+        if player['id'] == player_id:
             return player
     return None
