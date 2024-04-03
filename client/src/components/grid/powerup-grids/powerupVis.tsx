@@ -37,12 +37,14 @@ function getSingleRotatedTilePos(
                 x: tilePositions[i][j].x,
                 y: -1 * i * shiftVal,
                 o: 0,
+                s: true,
               });
             } else {
               newTilePos[i].push({
                 x: tilePositions[i][j].x,
                 y: tilePositions[i][j].y + shiftVal,
                 o: 1,
+                s: true,
               });
             }
           } else {
@@ -51,12 +53,14 @@ function getSingleRotatedTilePos(
                 x: tilePositions[i][j].x,
                 y: (tilePositions.length - i - 1) * shiftVal,
                 o: 0,
+                s: true,
               });
             } else {
               newTilePos[i].push({
                 x: tilePositions[i][j].x,
                 y: tilePositions[i][j].y + -1 * shiftVal,
                 o: 1,
+                s: true,
               });
             }
           }
@@ -65,6 +69,7 @@ function getSingleRotatedTilePos(
             x: tilePositions[i][j].x,
             y: tilePositions[i][j].y,
             o: 1,
+            s: false,
           });
         }
       }
@@ -83,12 +88,14 @@ function getSingleRotatedTilePos(
                 x: -1 * j * shiftVal,
                 y: tilePositions[i][j].y,
                 o: 0,
+                s: true,
               });
             } else {
               newTilePos[i].push({
                 x: tilePositions[i][j].x + shiftVal,
                 y: tilePositions[i][j].y,
                 o: 1,
+                s: true,
               });
             }
           } else {
@@ -97,12 +104,14 @@ function getSingleRotatedTilePos(
                 x: (tilePositions.length - j - 1) * shiftVal,
                 y: tilePositions[i][j].y,
                 o: 0,
+                s: true,
               });
             } else {
               newTilePos[i].push({
                 x: tilePositions[i][j].x + -1 * shiftVal,
                 y: tilePositions[i][j].y,
                 o: 1,
+                s: true,
               });
             }
           }
@@ -111,6 +120,7 @@ function getSingleRotatedTilePos(
             x: tilePositions[i][j].x,
             y: tilePositions[i][j].y,
             o: 1,
+            s: false,
           });
         }
       }
@@ -120,7 +130,7 @@ function getSingleRotatedTilePos(
   return newTilePos;
 }
 
-type TilePos = { x: number; y: number; o: number };
+type TilePos = { x: number; y: number; o: number; s: boolean };
 const shiftVal = 64;
 function getDefaultPosGrid(grid: Board): TilePos[][] {
   const tilePos: TilePos[][] = [];
@@ -128,10 +138,27 @@ function getDefaultPosGrid(grid: Board): TilePos[][] {
   for (let i = 0; i < grid.length; i++) {
     tilePos.push([]);
     for (let j = 0; j < grid.length; j++) {
-      tilePos[i].push({ x: 0, y: 0, o: 1 });
+      tilePos[i].push({ x: 0, y: 0, o: 1, s: false });
     }
   }
   return tilePos;
+}
+
+function getShowAllGrid(tilePos: TilePos[][]): TilePos[][] {
+  const newTilePos: TilePos[][] = [];
+
+  for (let i = 0; i < tilePos.length; i++) {
+    newTilePos.push([]);
+    for (let j = 0; j < tilePos.length; j++) {
+      newTilePos[i].push({
+        x: tilePos[i][j].x,
+        y: tilePos[i][j].y,
+        o: 1,
+        s: tilePos[i][j].s,
+      });
+    }
+  }
+  return newTilePos;
 }
 
 export interface PowerupVisComponentRef {
@@ -163,17 +190,25 @@ export const PowerupVisComponent = forwardRef<
       const xDif = t1[0] - t2[0];
       const yDif = t1[1] - t2[1];
 
-      tilePositions[t1[1]][t1[0]].x = -1 * shiftVal * xDif;
-      tilePositions[t1[1]][t1[0]].y = -1 * shiftVal * yDif;
-      tilePositions[t2[1]][t2[0]].x = shiftVal * xDif;
-      tilePositions[t2[1]][t2[0]].y = shiftVal * yDif;
-
       setTimeout(() => {
-        setWord("");
-        setShowSelf(false);
-        onComplete();
-        setTilePositions(getDefaultPosGrid(grid));
-      }, 1000);
+        const tilePositionsCopy = [...tilePositions]
+        tilePositionsCopy[t1[1]][t1[0]].x = -1 * shiftVal * xDif;
+        tilePositionsCopy[t1[1]][t1[0]].y = -1 * shiftVal * yDif;
+        tilePositionsCopy[t1[1]][t1[0]].s = true;
+
+        tilePositionsCopy[t2[1]][t2[0]].x = shiftVal * xDif;
+        tilePositionsCopy[t2[1]][t2[0]].y = shiftVal * yDif;
+        tilePositionsCopy[t2[1]][t2[0]].s = true;
+
+        setTilePositions(tilePositionsCopy)
+
+        setTimeout(() => {
+          setWord("");
+          setShowSelf(false);
+          onComplete();
+          setTilePositions(getDefaultPosGrid(grid));
+        }, 400);
+      }, 100);
     },
     async rotate(
       type: string,
@@ -191,9 +226,12 @@ export const PowerupVisComponent = forwardRef<
         rotations > 0 ? "regular" : "reverse"
       );
       setTilePositions(newTilePos);
+      await timeout(300);
+      newTilePos = getShowAllGrid(newTilePos);
+      setTilePositions(newTilePos);
 
       for (let i = 1; i < Math.abs(rotations); i++) {
-        await timeout(200);
+        await timeout(350);
         newTilePos = getSingleRotatedTilePos(
           type,
           index,
@@ -201,24 +239,28 @@ export const PowerupVisComponent = forwardRef<
           rotations > 0 ? "regular" : "reverse"
         );
         setTilePositions(newTilePos);
+        await timeout(300);
+        newTilePos = getShowAllGrid(newTilePos);
+        setTilePositions(newTilePos);
       }
-
       setTimeout(() => {
         setWord("");
         setShowSelf(false);
         onComplete();
         setTilePositions(getDefaultPosGrid(grid));
-      }, 1000);
+      }, 600);
     },
     transform(tile: number[], char: string, onComplete: () => void) {
       setShowSelf(true);
       setWord("Transforming...");
 
       tilePositions[tile[1]][tile[0]].y = -30;
+      tilePositions[tile[1]][tile[0]].s = true;
 
       setTimeout(() => {
         const tilePositionsCopy = [...tilePositions];
         tilePositionsCopy[tile[1]][tile[0]].y = 0;
+
         setTilePositions(tilePositionsCopy);
 
         setTimeout(() => {
@@ -227,7 +269,7 @@ export const PowerupVisComponent = forwardRef<
           onComplete();
           setTilePositions(getDefaultPosGrid(grid));
         }, 240);
-      }, 200);
+      }, 600);
     },
   }));
 
@@ -243,14 +285,13 @@ export const PowerupVisComponent = forwardRef<
         animate={{
           x: tilePositions[y][x]?.x ?? 0,
           y: tilePositions[y][x]?.y ?? 0,
-        }}
-        style={{
-          
+
           opacity: tilePositions[y][x]?.o,
         }}
+        style={{}}
       >
         <div draggable="false" className={`z-20`}>
-          <TileComponent value={v} />
+          <TileComponent value={v} selected={tilePositions[y][x]?.s} />
         </div>
       </motion.div>
     );

@@ -157,6 +157,11 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
     }
   }
 
+  // TODO
+  // Select affected tiles in all powerups (light them up!)
+  // disable rotation while animating here
+  // delay on turn changes "Your is playing... showing"
+
   function buildTile(x: number, y: number, v: string) {
     switch (v) {
       case ":v":
@@ -196,10 +201,12 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
         return (
           <TileComponent
             onClick={() => {
-              setSelectedCol(-1);
-              rotateRow(y - 1, selectedRow - 1, true);
-              setSelectedRow(y);
-              incrementRotCount("row");
+              powerupVisRef?.current?.rotate("row", y - 1, 1, () => {
+                setSelectedCol(-1);
+                rotateRow(y - 1, selectedRow - 1, true);
+                setSelectedRow(y);
+                incrementRotCount("row");
+              });
             }}
             dark
           >
@@ -210,10 +217,12 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
         return (
           <TileComponent
             onClick={() => {
-              setSelectedCol(-1);
-              rotateRow(y - 1, selectedRow - 1);
-              setSelectedRow(y);
-              decrementRotCount("row");
+              powerupVisRef?.current?.rotate("row", y - 1, -1, () => {
+                setSelectedCol(-1);
+                rotateRow(y - 1, selectedRow - 1);
+                setSelectedRow(y);
+                decrementRotCount("row");
+              });
             }}
             dark
           >
