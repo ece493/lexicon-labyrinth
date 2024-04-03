@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 
 import { Player } from "../../data/model";
 import ButtonComponent from "./button";
@@ -9,6 +9,7 @@ import TransformIcon from "../icons/transformIcon";
 import SwapIcon from "../icons/swapIcon";
 import ScrambleIcon from "../icons/scrambleIcon";
 import { motion } from "framer-motion";
+import { GameContext } from "../../context/ctx";
 
 
 interface PowerupsComponentProp {
@@ -16,6 +17,7 @@ interface PowerupsComponentProp {
   setPowerup: any;
   powerup: string | null;
   disabled?: boolean;
+  resetWordSelection: any
 }
 
 const prices = {
@@ -30,7 +32,10 @@ const PowerupsComponent: React.FC<PowerupsComponentProp> = ({
   powerup,
   setPowerup,
   disabled,
+  resetWordSelection,
 }) => {
+  const gameContext = useContext(GameContext)
+
   return (
     <motion.div
       className="flex flex-col mt-2 p-2 box-border justify-start bg-blue-500 rounded-sm w-40 relative"
@@ -70,7 +75,10 @@ const PowerupsComponent: React.FC<PowerupsComponentProp> = ({
             disabled={prices.scramble > funds || !!powerup}
             label={`Scramble`}
             onClick={() => {
-              setPowerup("SCRAMBLE");
+              if (gameContext.sock !== null) {
+                gameContext.transitions.pickScramblePowerup(gameContext);
+                resetWordSelection();
+              }
             }}
             flourish
           >

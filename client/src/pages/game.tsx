@@ -45,6 +45,7 @@ const Game: React.FC = () => {
       ctx.transitions.pickWord(wordPath, ctx);
     }
   }
+
   function loadReceiveCallBacks() {
     ctx.receiveCallBacks.handleWordDeny = (path: number[][], tiles: Board) => {
       setPowerup(null);
@@ -88,16 +89,10 @@ const Game: React.FC = () => {
       } else {
         setWord(`${player?.name ?? player} lost a life!`);
       }
-      playersRef.current?.loseLife(
-        playerId,
-        () => {
-          ctx.setLobby(newLobby);
-          setTimeout(() => (ctx.pauseMessages.pause = false), 100);
-        },
-        () => {
-          //ctx.setFreezeInputs(false)
-        }
-      );
+      playersRef.current?.loseLife(playerId, () => {
+        ctx.setLobby(newLobby);
+        setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      });
     };
     ctx.receiveCallBacks.handleDeath = (newLobby: Lobby, playerId: string) => {
       ctx.pauseMessages.pause = true;
@@ -109,16 +104,10 @@ const Game: React.FC = () => {
       } else {
         setWord(`${player?.name ?? player} is out!`);
       }
-      playersRef.current?.endPlayer(
-        playerId,
-        () => {
-          ctx.setLobby(newLobby);
-          setTimeout(() => (ctx.pauseMessages.pause = false), 800);
-        },
-        () => {
-          //ctx.setFreezeInputs(false)
-        }
-      );
+      playersRef.current?.endPlayer(playerId, () => {
+        ctx.setLobby(newLobby);
+        setTimeout(() => (ctx.pauseMessages.pause = false), 800);
+      });
     };
     ctx.receiveCallBacks.handleGameEnd = (newLobby: Lobby) => {
       setPowerup(null);
@@ -154,9 +143,13 @@ const Game: React.FC = () => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
       setError(null);
-      ctx.setLobby(newLobby);
-      setTimeout(() => ctx.setFreezeInputs(false), 500);
-      setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      setPowerup("SCRAMBLE");
+      setTimeout(() => {
+        ctx.setLobby(newLobby);
+        ctx.setFreezeInputs(false);
+        setPowerup(null);
+        setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      }, 1120);
     };
     ctx.receiveCallBacks.handleSwapAccept = (
       newLobby: Lobby,
@@ -310,6 +303,7 @@ const Game: React.FC = () => {
                     powerup={powerup}
                     setPowerup={setPowerup}
                     disabled={isSpectator() || ctx.freezeInputs}
+                    resetWordSelection={resetWordSelection}
                   ></PowerupsComponent>
                   <div style={{ opacity: powerup ? "0.2" : "" }}>
                     <SelectionGridComponent

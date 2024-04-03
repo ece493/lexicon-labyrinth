@@ -62,6 +62,7 @@ export const SelectionGridComponent = forwardRef<
     const [firstTile, setFirstTile] = useState(nullTile);
     const [selecting, setSelecting] = useState(false);
 
+
     const [fadeOutSelected, setFadeOutSelected] = useState(false);
     const [fadeOutSelectedLines, setFadeOutSelectedLines] = useState(false);
 

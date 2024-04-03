@@ -12,6 +12,7 @@ interface ScrambleGridComponentProps {
   help: string;
   setHelp: any;
   resetWordSelection: () => void;
+  visOnly?: boolean
 }
 
 export const ScrambleGridComponent: React.FC<ScrambleGridComponentProps> = ({
@@ -21,6 +22,7 @@ export const ScrambleGridComponent: React.FC<ScrambleGridComponentProps> = ({
   setHelp,
   resetWordSelection,
   setPowerup,
+  visOnly
 }) => {
   const gameContext = useContext(GameContext);
   const [showGrid, setShowGrid] = useState(true);
@@ -30,13 +32,6 @@ export const ScrambleGridComponent: React.FC<ScrambleGridComponentProps> = ({
     setTimeout(() => {
       setShowGrid(false);
     }, 1100);
-    setTimeout(() => {
-      if (gameContext.sock !== null) {
-        gameContext.transitions.pickScramblePowerup(gameContext);
-        resetWordSelection();
-        setPowerup(null);
-      }
-    }, 1200);
   }, []);
 
   function buildTile(x: number, y: number, v: string) {
