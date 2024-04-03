@@ -21,26 +21,6 @@ export interface SelectGridRef {
   fadePath: (t: number, setNewLobby: () => void) => void;
 }
 
-function getRandomCharacter() {
-  const characters = "abcdefghijklmnopqrstuvwxyz";
-  const randomIndex = Math.floor(Math.random() * characters.length);
-  return characters.charAt(randomIndex);
-}
-
-type TilePos = { x: number; y: number };
-const shiftVal = 64;
-function getDefaultPosGrid(grid: Board): TilePos[][] {
-  const tilePos: TilePos[][] = [];
-
-  for (let i = 0; i < grid.length; i++) {
-    tilePos.push([]);
-    for (let j = 0; j < grid.length; j++) {
-      tilePos[i].push({ x: 0, y: 0 });
-    }
-  }
-  return tilePos;
-}
-
 export const SelectionGridComponent = forwardRef<
   SelectGridRef,
   GridComponentProps
@@ -64,97 +44,7 @@ export const SelectionGridComponent = forwardRef<
 
     const [fadeOutSelected, setFadeOutSelected] = useState(false);
     const [fadeOutSelectedLines, setFadeOutSelectedLines] = useState(false);
-
-    const [animating, setAnimating] = useState(false);
-    const [animationGrid, setAnimatingGrid] = useState(grid);
-    const [tilePositions, setTilePositions] = useState<TilePos[][]>(
-      getDefaultPosGrid(grid)
-    );
-
-    const displayGrid = animating ? animationGrid : grid;
-
-    useEffect(() => {
-      setTilePositions(getDefaultPosGrid(grid));
-    }, [grid]);
-
-    function animateTransform(coords: number[], newVal: string) {
-      const setRandomChar = () => {
-        const animationGridCopy = [...animationGrid];
-        animationGridCopy[coords[0]][coords[1]] = getRandomCharacter();
-      };
-      setAnimating(true);
-      setAnimatingGrid(displayGrid);
-
-      setRandomChar();
-      setTimeout(setRandomChar, 50);
-      setTimeout(setRandomChar, 150);
-      setTimeout(setRandomChar, 300);
-      setTimeout(() => {
-        const animationGridCopy = [...animationGrid];
-        animationGridCopy[coords[0]][coords[1]] = newVal;
-        setAnimating(false);
-      }, 900);
-    }
-
-    function rotateTilesOne(
-      type: string,
-      index: number,
-      rotations: number
-    ): TilePos[][] {
-      const newTilePos: TilePos[][] = [];
-      if (type === "col") {
-        for (let i = 0; i < tilePositions.length; i++) {
-          newTilePos.push([]);
-          for (let j = 0; j < tilePositions.length; j++) {
-            if (j === index) {
-              if (i >= tilePositions.length - rotations) {
-                newTilePos[i].push({
-                  x: tilePositions[i][j].x,
-                  y:
-                    tilePositions[i][j].y +
-                    -1 * (tilePositions.length - rotations) * shiftVal,
-                });
-              } else {
-                newTilePos[i].push({
-                  x: tilePositions[i][j].x,
-                  y: tilePositions[i][j].y + rotations * shiftVal,
-                });
-              }
-            } else {
-              newTilePos[i].push({
-                x: tilePositions[i][j].x,
-                y: tilePositions[i][j].y,
-              });
-            }
-          }
-        }
-      } else {
-        for (let i = 0; i < newTilePos.length; i++) {
-          newTilePos.push([]);
-          for (let j = 0; j < newTilePos.length; j++) {
-            if (i === index) {
-              newTilePos[i].push({ x: rotations * shiftVal, y: 0 });
-            } else {
-              newTilePos[i].push({ x: 0, y: 0 });
-            }
-          }
-        }
-      }
-      return newTilePos;
-    }
-    function animateRotate(type: string, index: number, rotations: number) {
-      setAnimating(true);
-      setAnimatingGrid(displayGrid);
-      setTilePositions(rotateTilesOne(type, index, 1));
-
-      for (let i = 1; i <= rotations; i++) {
-        setTimeout(
-          () => setTilePositions(rotateTilesOne(type, index, 1)),
-          200 * i
-        );
-      }
-    }
-
+   
     useImperativeHandle(ref, () => ({
       fadePath(time: number, setNewLobby: () => void) {
         setTimeout(() => {
@@ -203,7 +93,7 @@ export const SelectionGridComponent = forwardRef<
 
     function handleSelectStart(x: number, y: number) {
       setFirstTile([x, y]);
-      setWord(displayGrid[y][x]);
+      setWord(grid[y][x]);
       setError(null);
       setWordPath([[x, y]]);
       setSelecting(true);
@@ -211,7 +101,7 @@ export const SelectionGridComponent = forwardRef<
 
     function handleSelectNonFirstTile(x: number, y: number) {
       if (selecting && isSelectableNonFirstTile(x, y)) {
-        setWord(word + displayGrid[y][x]);
+        setWord(word + grid[y][x]);
         setWordPath([...wordPath, [x, y]]);
       }
     }
@@ -239,8 +129,6 @@ export const SelectionGridComponent = forwardRef<
           key={`${fadeOutSelected}`}
           animate={{
             opacity: fadeOutSelected ? (selected ? 0 : 1) : 1,
-            x: tilePositions[y][x]?.x ?? 0,
-            y: tilePositions[y][x]?.y ?? 0,
           }}
         >
           <div
@@ -300,7 +188,7 @@ export const SelectionGridComponent = forwardRef<
           <div className="bg-transparent w-full h-full absolute z-40" />
         ) : null}
           <GridComponent
-            grid={displayGrid}
+            grid={grid}
             board_size={board_size}
             buildChild={buildTile}
           />

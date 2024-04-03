@@ -21,24 +21,22 @@ interface PlayersComponentProp {
 }
 
 export interface PlayersRef {
-  endPlayer: (pId: string, setLobbyState: () => void, setFreezeInputs: ()=> void) => void;
-  loseLife: (pId: string, setLobbyState: () => void,  setFreezeInputs: ()=> void) => void;
+  endPlayer: (pId: string, setLobbyState: () => void) => void;
+  loseLife: (pId: string, setLobbyState: () => void) => void;
 }
 
 const PlayersComponent = forwardRef<PlayersRef, PlayersComponentProp>(
   ({ players, powerup, currentTurn }, ref) => {
     useImperativeHandle(ref, () => ({
-      endPlayer(pId: string, setLobbyState: () => void, setFreezeInputs: ()=> void) {
+      endPlayer(pId: string, setLobbyState: () => void) {
         setShake(pId);
         setTimeout(() => setShake(null), 0);
         setTimeout(() => setLobbyState(), 100);
-        setTimeout(() => setFreezeInputs(), 500);
       },
-      loseLife(pId: string, setLobbyState: () => void, setFreezeInputs: ()=> void) {
+      loseLife(pId: string, setLobbyState: () => void) {
         setShake(pId);
         setTimeout(() => setShake(null), 0);
         setTimeout(() => setLobbyState(), 100);
-        setTimeout(() => setFreezeInputs(), 500);
       },
     }));
 

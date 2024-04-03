@@ -8,7 +8,7 @@ import RightIcon from "../../icons/rightIcon";
 import LeftIcon from "../../icons/leftIcon";
 import { GridComponent } from "../grid";
 import { GameContext } from "../../../context/ctx";
-
+import { PowerupVisComponent, PowerupVisComponentRef } from "./powerupVis";
 
 interface RotateGridComponentProps {
   ogGrid: Board;
@@ -31,7 +31,10 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
   const [selectedRow, setSelectedRow] = useState(-1);
   const [selectedCol, setSelectedCol] = useState(-1);
   const [rotations, setRotations] = useState(0);
+  const [animating, setAnimating] = useState(false);
+
   const gameContext = useContext(GameContext);
+  const powerupVisRef = useRef<PowerupVisComponentRef>(null);
 
   useEffect(() => {
     setHelp("Rotate a row or column by clicking an arrow");
@@ -93,7 +96,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
         selectedRow === -1 ? "col" : "row",
         selectedRow === -1 ? selectedCol - 1 : selectedRow - 1,
         rotations,
-        gameContext,
+        gameContext
       );
 
       resetWordSelection();
@@ -121,40 +124,69 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
     downArrows.push("");
     tileCopy.push(downArrows);
 
-    return tileCopy ;
+    return tileCopy;
   }
 
-  function incrementRotCount(type: string) {
+  function incrementRotCount(
+    type: string,
+    newIndex: number,
+    currentIndex: number
+  ) {
     if (type === "row") {
-      if (selectedRow !== -1) {
-        setRotations(rotations + 1);
+      if (selectedRow !== -1 && newIndex === currentIndex) {
+        if (Math.abs(rotations) + 1 >= board_size[0]) {
+          console.log("zeroing")
+          setRotations(0);
+        } else {
+          setRotations(rotations + 1);
+        }
       } else {
         setRotations(1);
       }
     } else {
-      if (selectedCol !== -1) {
-        setRotations(rotations + 1);
+      if (selectedCol !== -1 && newIndex === currentIndex) {
+        if (Math.abs(rotations) + 1 >= board_size[0]) {
+          setRotations(0);
+        } else {
+          setRotations(rotations + 1);
+        }
       } else {
         setRotations(1);
       }
     }
   }
 
-  function decrementRotCount(type: string) {
+  function decrementRotCount(
+    type: string,
+    newIndex: number,
+    currentIndex: number
+  ) {
     if (type === "row") {
-      if (selectedRow !== -1) {
-        setRotations(rotations - 1);
+      if (selectedRow !== -1 && newIndex === currentIndex) {
+        if (Math.abs(rotations) + 1 >= board_size[0]) {
+          setRotations(0);
+        } else {
+          setRotations(rotations - 1);
+        }
       } else {
         setRotations(-1);
       }
     } else {
-      if (selectedCol !== -1) {
-        setRotations(rotations - 1);
+      if (selectedCol !== -1 && newIndex === currentIndex) {
+        if (Math.abs(rotations) + 1 >= board_size[0]) {
+          setRotations(0);
+        } else {
+          setRotations(rotations - 1);
+        }
       } else {
         setRotations(-1);
       }
     }
   }
+
+  // TODO
+  // delay on turn changes "Your is playing... showing"
+  // powerup bugs
 
   function buildTile(x: number, y: number, v: string) {
     switch (v) {
@@ -163,11 +195,16 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
           <TileComponent
             dark
             onClick={() => {
-              setSelectedRow(-1);
-              rotateCol(x - 1, selectedCol - 1, true);
-              setSelectedCol(x);
-              decrementRotCount("col");
+              setAnimating(true);
+              powerupVisRef?.current?.rotate("col", x - 1, 1, () => {
+                setSelectedRow(-1);
+                rotateCol(x - 1, selectedCol - 1, true);
+                setSelectedCol(x);
+                incrementRotCount("col", x, selectedCol);
+                setAnimating(false);
+              });
             }}
+            disabled={animating}
             value=""
           >
             <DownIcon />
@@ -178,11 +215,17 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
           <TileComponent
             dark
             onClick={() => {
-              setSelectedRow(-1);
-              rotateCol(x - 1, selectedCol - 1);
-              setSelectedCol(x);
-              incrementRotCount("col");
+              setAnimating(true);
+
+              powerupVisRef?.current?.rotate("col", x - 1, -1, () => {
+                setSelectedRow(-1);
+                rotateCol(x - 1, selectedCol - 1);
+                setSelectedCol(x);
+                decrementRotCount("col", x, selectedCol);
+                setAnimating(false);
+              });
             }}
+            disabled={animating}
           >
             <UpIcon />
           </TileComponent>
@@ -191,12 +234,18 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
         return (
           <TileComponent
             onClick={() => {
-              setSelectedCol(-1);
-              rotateRow(y - 1, selectedRow - 1, true);
-              setSelectedRow(y);
-              incrementRotCount("row");
+              setAnimating(true);
+
+              powerupVisRef?.current?.rotate("row", y - 1, 1, () => {
+                setSelectedCol(-1);
+                rotateRow(y - 1, selectedRow - 1, true);
+                setSelectedRow(y);
+                incrementRotCount("row", y, selectedRow);
+                setAnimating(false);
+              });
             }}
             dark
+            disabled={animating}
           >
             <RightIcon />
           </TileComponent>
@@ -205,12 +254,18 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
         return (
           <TileComponent
             onClick={() => {
-              setSelectedCol(-1);
-              rotateRow(y - 1, selectedRow - 1);
-              setSelectedRow(y);
-              decrementRotCount("row");
+              setAnimating(true);
+
+              powerupVisRef?.current?.rotate("row", y - 1, -1, () => {
+                setSelectedCol(-1);
+                rotateRow(y - 1, selectedRow - 1);
+                setSelectedRow(y);
+                decrementRotCount("row", y, selectedRow);
+                setAnimating(false);
+              });
             }}
             dark
+            disabled={animating}
           >
             <LeftIcon />
           </TileComponent>
@@ -223,6 +278,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
             selected={selectedCol === x || selectedRow === y}
             readonly
             value={v}
+            snapSelectAnim
           />
         );
     }
@@ -233,11 +289,29 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
       <div className="flex flex-row px-2">
         <ButtonComponent label="Confirm" onClick={handleConfirm} />
       </div>
-      <GridComponent
-        grid={buildFullGrid()}
-        buildChild={buildTile}
-        board_size={[board_size[0] + 2, board_size[1] + 2]}
-      />
+      <div className="relative">
+        <GridComponent
+          grid={buildFullGrid()}
+          buildChild={buildTile}
+          board_size={[board_size[0] + 2, board_size[1] + 2]}
+        />
+        <div
+          className="absolute z-20"
+          style={{
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <PowerupVisComponent
+            setWord={() => {}}
+            board_size={[tiles.length, tiles.length]}
+            grid={tiles}
+            ref={powerupVisRef}
+            disabled={false}
+          />
+        </div>
+      </div>
     </div>
   );
 };

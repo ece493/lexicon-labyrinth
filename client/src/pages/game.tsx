@@ -17,6 +17,10 @@ import { isJSDocNullableType } from "typescript";
 import { Fade, Zoom, CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
 import { lobby1, lobby2, lobby3 } from "../mocks/lobbyMocks";
+import {
+  PowerupVisComponent,
+  PowerupVisComponentRef,
+} from "../components/grid/powerup-grids/powerupVis";
 
 const Game: React.FC = () => {
   const ctx = useContext(GameContext);
@@ -34,6 +38,7 @@ const Game: React.FC = () => {
   const turnRef = useRef<TurnRef>(null);
   const selectGridRef = useRef<SelectGridRef>(null);
   const playersRef = useRef<PlayersRef>(null);
+  const powerupVisRef = useRef<PowerupVisComponentRef>(null);
 
   function resetWordSelection() {
     setWord("");
@@ -45,6 +50,7 @@ const Game: React.FC = () => {
       ctx.transitions.pickWord(wordPath, ctx);
     }
   }
+
   function loadReceiveCallBacks() {
     ctx.receiveCallBacks.handleWordDeny = (path: number[][], tiles: Board) => {
       setPowerup(null);
@@ -58,7 +64,7 @@ const Game: React.FC = () => {
       newLobby: Lobby
     ) => {
       ctx.pauseMessages.pause = true;
-      setError(null)
+      setError(null);
       setPowerup(null);
       setWord(reconstructWord(path, newLobby.state.board));
       setWordPath(path);
@@ -69,7 +75,7 @@ const Game: React.FC = () => {
     };
     ctx.receiveCallBacks.handleNewTurn = (newLobby: Lobby) => {
       setPowerup(null);
-      setError(null)
+      setError(null);
       ctx.setLobby(newLobby);
       console.log("Checkpoint");
       turnRef.current?.resetTimer();
@@ -81,48 +87,36 @@ const Game: React.FC = () => {
     ) => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
-      setError(null)
+      setError(null);
       let player = newLobby.players.find((p) => p.id === playerId);
       if (playerId === ctx.playerId) {
         setWord(`You lost a life!`);
       } else {
         setWord(`${player?.name ?? player} lost a life!`);
       }
-      playersRef.current?.loseLife(
-        playerId,
-        () => {
-          ctx.setLobby(newLobby);
-          setTimeout(() => (ctx.pauseMessages.pause = false), 100);
-        },
-        () => {
-          //ctx.setFreezeInputs(false)
-        }
-      );
+      playersRef.current?.loseLife(playerId, () => {
+        ctx.setLobby(newLobby);
+        setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      });
     };
     ctx.receiveCallBacks.handleDeath = (newLobby: Lobby, playerId: string) => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
-      setError(null)
+      setError(null);
       let player = newLobby.players.find((p) => p.id === playerId);
       if (playerId === ctx.playerId) {
         setWord(`You are out!`);
       } else {
         setWord(`${player?.name ?? player} is out!`);
       }
-      playersRef.current?.endPlayer(
-        playerId,
-        () => {
-          ctx.setLobby(newLobby);
-          setTimeout(() => (ctx.pauseMessages.pause = false), 800);
-        },
-        () => {
-          //ctx.setFreezeInputs(false)
-        }
-      );
+      playersRef.current?.endPlayer(playerId, () => {
+        ctx.setLobby(newLobby);
+        setTimeout(() => (ctx.pauseMessages.pause = false), 800);
+      });
     };
     ctx.receiveCallBacks.handleGameEnd = (newLobby: Lobby) => {
       setPowerup(null);
-      setError(null)
+      setError(null);
       setTimeout(() => ctx.setFreezeInputs(false), 500);
     };
     ctx.receiveCallBacks.handleRotateAccept = (
@@ -132,11 +126,18 @@ const Game: React.FC = () => {
       rotations: number
     ) => {
       ctx.pauseMessages.pause = true;
-      setError(null)
+      setError(null);
       setPowerup(null);
-      ctx.setLobby(newLobby);
-      setTimeout(() => ctx.setFreezeInputs(false), 500);
-      setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      powerupVisRef.current?.rotate(
+        type,
+        index,
+        rotations,
+        () => {
+          ctx.setLobby(newLobby);
+          ctx.setFreezeInputs(false);
+          setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+        }
+      );
     };
     ctx.receiveCallBacks.handleTransformAccept = (
       newLobby: Lobby,
@@ -145,18 +146,28 @@ const Game: React.FC = () => {
     ) => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
-      setError(null)
-      ctx.setLobby(newLobby);
-      setTimeout(() => ctx.setFreezeInputs(false), 500);
-      setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      setError(null);
+      powerupVisRef.current?.transform(
+        tile,
+        newChar,
+        () => {
+          ctx.setLobby(newLobby);
+          ctx.setFreezeInputs(false);
+          setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+        }
+      );
     };
     ctx.receiveCallBacks.handleScrambleAccept = (newLobby: Lobby) => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
-      setError(null)
-      ctx.setLobby(newLobby);
-      setTimeout(() => ctx.setFreezeInputs(false), 500);
-      setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      setError(null);
+      setPowerup("SCRAMBLE");
+      setTimeout(() => {
+        ctx.setLobby(newLobby);
+        ctx.setFreezeInputs(false);
+        setPowerup(null);
+        setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      }, 1120);
     };
     ctx.receiveCallBacks.handleSwapAccept = (
       newLobby: Lobby,
@@ -164,10 +175,15 @@ const Game: React.FC = () => {
     ) => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
-      setError(null)
-      ctx.setLobby(newLobby);
-      setTimeout(() => ctx.setFreezeInputs(false), 500);
-      setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      setError(null);
+      powerupVisRef.current?.swap(
+        tiles,
+        () => {
+          ctx.setLobby(newLobby);
+          ctx.setFreezeInputs(false);
+          setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+        }
+      );
     };
   }
 
@@ -260,9 +276,11 @@ const Game: React.FC = () => {
   }
 
   function getPlayerName() {
-    const player = ctx.lobby?.players.find((p) => p.id === ctx.lobby?.state.curr_turn)
-    if (!player) return "player"
-    return player.id === ctx.playerId? "Your": player?.name
+    const player = ctx.lobby?.players.find(
+      (p) => p.id === ctx.lobby?.state.curr_turn
+    );
+    if (!player) return "player";
+    return player.id === ctx.playerId ? "Your" : player?.name;
   }
 
   function renderGame() {
@@ -282,7 +300,7 @@ const Game: React.FC = () => {
             <Fade in={ctx.freezeInputs}>
               <div>
                 {ctx.freezeInputs ? (
-                  <div className="bg-black opacity-20 w-full h-full absolute z-40" />
+                  <div className="bg-transparent opacity-20 w-full h-full absolute z-40" />
                 ) : null}
               </div>
             </Fade>
@@ -296,7 +314,7 @@ const Game: React.FC = () => {
                   error={error}
                   player={getPlayerName()}
                   powerup={powerup}
-                  maxTime={5}
+                  maxTime={ctx?.lobby?.timer_setting?? 22}
                   resetWord={resetWordSelection}
                 />
                 <div className="flex flex-row items-start justify-center">
@@ -308,6 +326,7 @@ const Game: React.FC = () => {
                     powerup={powerup}
                     setPowerup={setPowerup}
                     disabled={isSpectator() || ctx.freezeInputs}
+                    resetWordSelection={resetWordSelection}
                   ></PowerupsComponent>
                   <div style={{ opacity: powerup ? "0.2" : "" }}>
                     <SelectionGridComponent
@@ -327,6 +346,18 @@ const Game: React.FC = () => {
                     />
                   </div>
                   <div className="absolute z-20">{getPowerupGrid()}</div>
+                  <div className="absolute z-20">
+                    <PowerupVisComponent
+                      setWord={setWord}
+                      board_size={[
+                        ctx.lobby?.board_size ?? 0,
+                        ctx.lobby?.board_size ?? 0,
+                      ]}
+                      grid={ctx.lobby?.state?.board ?? []}
+                      ref={powerupVisRef}
+                      disabled={isSpectator() || ctx.freezeInputs}
+                    />
+                  </div>
                   <PlayersComponent
                     currentTurn={ctx.lobby?.state?.curr_turn ?? ""}
                     players={ctx.lobby?.players ?? []}
@@ -344,8 +375,14 @@ const Game: React.FC = () => {
   return ctx.screen === ScreenState.GAME ? (
     <div>
       <Fade in={!ctx.lobby?.state?.board?.[0].length} timeout={400}>
-        <div className="flex pt-20">
-          <CircularProgress className="m-auto" />
+        <div>
+          {!ctx.lobby?.state?.board?.[0].length ? (
+            <div className="flex pt-20">
+              <CircularProgress className="m-auto" />
+            </div>
+          ) : (
+            <></>
+          )}
         </div>
       </Fade>
       <Fade
