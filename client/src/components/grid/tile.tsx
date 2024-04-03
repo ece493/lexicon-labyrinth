@@ -68,7 +68,7 @@ const TileComponent: React.FC<TileComponentProps> = ({
   return (
     <motion.div
       draggable="false"
-      className="relative"
+      className="relative w-12 h-12 "
       animate={{ x, y }}
       transition={{ type: "spring" }}
       style={{ opacity: transparent ? 0 : "" }}

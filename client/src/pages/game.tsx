@@ -17,6 +17,10 @@ import { isJSDocNullableType } from "typescript";
 import { Fade, Zoom, CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
 import { lobby1, lobby2, lobby3 } from "../mocks/lobbyMocks";
+import {
+  PowerupVisComponent,
+  PowerupVisComponentRef,
+} from "../components/grid/powerup-grids/powerupVis";
 
 const Game: React.FC = () => {
   const ctx = useContext(GameContext);
@@ -34,6 +38,7 @@ const Game: React.FC = () => {
   const turnRef = useRef<TurnRef>(null);
   const selectGridRef = useRef<SelectGridRef>(null);
   const playersRef = useRef<PlayersRef>(null);
+  const powerupVisRef = useRef<PowerupVisComponentRef>(null);
 
   function resetWordSelection() {
     setWord("");
@@ -158,9 +163,14 @@ const Game: React.FC = () => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
       setError(null);
-      ctx.setLobby(newLobby);
-      setTimeout(() => ctx.setFreezeInputs(false), 500);
-      setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      powerupVisRef.current?.swap(
+        tiles,
+        () => {
+          ctx.setLobby(newLobby);
+          ctx.setFreezeInputs(false);
+          setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+        }
+      );
     };
   }
 
@@ -323,6 +333,18 @@ const Game: React.FC = () => {
                     />
                   </div>
                   <div className="absolute z-20">{getPowerupGrid()}</div>
+                  <div className="absolute z-20">
+                    <PowerupVisComponent
+                      setWord={setWord}
+                      board_size={[
+                        ctx.lobby?.board_size ?? 0,
+                        ctx.lobby?.board_size ?? 0,
+                      ]}
+                      grid={ctx.lobby?.state?.board ?? []}
+                      ref={powerupVisRef}
+                      disabled={isSpectator() || ctx.freezeInputs}
+                    />
+                  </div>
                   <PlayersComponent
                     currentTurn={ctx.lobby?.state?.curr_turn ?? ""}
                     players={ctx.lobby?.players ?? []}

@@ -78,24 +78,7 @@ export const SelectionGridComponent = forwardRef<
       setTilePositions(getDefaultPosGrid(grid));
     }, [grid]);
 
-    function animateTransform(coords: number[], newVal: string) {
-      const setRandomChar = () => {
-        const animationGridCopy = [...animationGrid];
-        animationGridCopy[coords[0]][coords[1]] = getRandomCharacter();
-      };
-      setAnimating(true);
-      setAnimatingGrid(displayGrid);
 
-      setRandomChar();
-      setTimeout(setRandomChar, 50);
-      setTimeout(setRandomChar, 150);
-      setTimeout(setRandomChar, 300);
-      setTimeout(() => {
-        const animationGridCopy = [...animationGrid];
-        animationGridCopy[coords[0]][coords[1]] = newVal;
-        setAnimating(false);
-      }, 900);
-    }
 
     function rotateTilesOne(
       type: string,
