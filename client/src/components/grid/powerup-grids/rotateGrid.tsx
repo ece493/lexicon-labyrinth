@@ -8,7 +8,7 @@ import RightIcon from "../../icons/rightIcon";
 import LeftIcon from "../../icons/leftIcon";
 import { GridComponent } from "../grid";
 import { GameContext } from "../../../context/ctx";
-
+import { PowerupVisComponent, PowerupVisComponentRef } from "./powerupVis";
 
 interface RotateGridComponentProps {
   ogGrid: Board;
@@ -32,6 +32,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
   const [selectedCol, setSelectedCol] = useState(-1);
   const [rotations, setRotations] = useState(0);
   const gameContext = useContext(GameContext);
+  const powerupVisRef = useRef<PowerupVisComponentRef>(null);
 
   useEffect(() => {
     setHelp("Rotate a row or column by clicking an arrow");
@@ -93,7 +94,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
         selectedRow === -1 ? "col" : "row",
         selectedRow === -1 ? selectedCol - 1 : selectedRow - 1,
         rotations,
-        gameContext,
+        gameContext
       );
 
       resetWordSelection();
@@ -121,7 +122,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
     downArrows.push("");
     tileCopy.push(downArrows);
 
-    return tileCopy ;
+    return tileCopy;
   }
 
   function incrementRotCount(type: string) {
@@ -163,10 +164,12 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
           <TileComponent
             dark
             onClick={() => {
-              setSelectedRow(-1);
-              rotateCol(x - 1, selectedCol - 1, true);
-              setSelectedCol(x);
-              decrementRotCount("col");
+              powerupVisRef?.current?.rotate("col", x - 1, 1, () => {
+                setSelectedRow(-1);
+                rotateCol(x - 1, selectedCol - 1, true);
+                setSelectedCol(x);
+                incrementRotCount("col");
+              });
             }}
             value=""
           >
@@ -178,10 +181,12 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
           <TileComponent
             dark
             onClick={() => {
-              setSelectedRow(-1);
-              rotateCol(x - 1, selectedCol - 1);
-              setSelectedCol(x);
-              incrementRotCount("col");
+              powerupVisRef?.current?.rotate("col", x - 1, -1, () => {
+                setSelectedRow(-1);
+                rotateCol(x - 1, selectedCol - 1);
+                setSelectedCol(x);
+                decrementRotCount("col");
+              });
             }}
           >
             <UpIcon />
@@ -233,11 +238,29 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
       <div className="flex flex-row px-2">
         <ButtonComponent label="Confirm" onClick={handleConfirm} />
       </div>
-      <GridComponent
-        grid={buildFullGrid()}
-        buildChild={buildTile}
-        board_size={[board_size[0] + 2, board_size[1] + 2]}
-      />
+      <div className="relative">
+        <GridComponent
+          grid={buildFullGrid()}
+          buildChild={buildTile}
+          board_size={[board_size[0] + 2, board_size[1] + 2]}
+        />
+        <div
+          className="absolute z-20"
+          style={{
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <PowerupVisComponent
+            setWord={() => {}}
+            board_size={[tiles.length, tiles.length]}
+            grid={tiles}
+            ref={powerupVisRef}
+            disabled={false}
+          />
+        </div>
+      </div>
     </div>
   );
 };

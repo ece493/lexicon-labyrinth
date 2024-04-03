@@ -2,7 +2,6 @@ import { Board } from "../../../data/model";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { GridComponent } from "../grid";
 import { TileComponent, nullTile, isTileEqual } from "../tile";
-import { Fade } from "@mui/material";
 import { motion } from "framer-motion";
 import React from "react";
 
@@ -10,16 +9,118 @@ interface PowerupVisComponentProps {
   grid: Board;
   board_size: [number, number];
   setWord: any;
-  disabled: boolean
+  disabled: boolean;
 }
 
-function getRandomCharacter() {
-  const characters = "abcdefghijklmnopqrstuvwxyz";
-  const randomIndex = Math.floor(Math.random() * characters.length);
-  return characters.charAt(randomIndex);
+function timeout(delay: number) {
+  return new Promise((res) => setTimeout(res, delay));
 }
 
-type TilePos = { x: number; y: number };
+function getSingleRotatedTilePos(
+  type: string,
+  index: number,
+  tilePositions: TilePos[][],
+  direction: string
+): TilePos[][] {
+  const newTilePos: TilePos[][] = [];
+  if (type === "col") {
+    for (let i = 0; i < tilePositions.length; i++) {
+      newTilePos.push([]);
+      for (let j = 0; j < tilePositions.length; j++) {
+        if (j === index) {
+          if (direction === "regular") {
+            if (
+              tilePositions[i][j].y ===
+              (tilePositions.length - i - 1) * shiftVal
+            ) {
+              newTilePos[i].push({
+                x: tilePositions[i][j].x,
+                y: -1 * i * shiftVal,
+                o: 0,
+              });
+            } else {
+              newTilePos[i].push({
+                x: tilePositions[i][j].x,
+                y: tilePositions[i][j].y + shiftVal,
+                o: 1,
+              });
+            }
+          } else {
+            if (tilePositions[i][j].y === -1 * i * shiftVal) {
+              newTilePos[i].push({
+                x: tilePositions[i][j].x,
+                y: (tilePositions.length - i - 1) * shiftVal,
+                o: 0,
+              });
+            } else {
+              newTilePos[i].push({
+                x: tilePositions[i][j].x,
+                y: tilePositions[i][j].y + -1 * shiftVal,
+                o: 1,
+              });
+            }
+          }
+        } else {
+          newTilePos[i].push({
+            x: tilePositions[i][j].x,
+            y: tilePositions[i][j].y,
+            o: 1,
+          });
+        }
+      }
+    }
+  } else {
+    for (let i = 0; i < tilePositions.length; i++) {
+      newTilePos.push([]);
+      for (let j = 0; j < tilePositions.length; j++) {
+        if (i === index) {
+          if (direction === "regular") {
+            if (
+              tilePositions[i][j].x ===
+              (tilePositions.length - j - 1) * shiftVal
+            ) {
+              newTilePos[i].push({
+                x: -1 * j * shiftVal,
+                y: tilePositions[i][j].y,
+                o: 0,
+              });
+            } else {
+              newTilePos[i].push({
+                x: tilePositions[i][j].x + shiftVal,
+                y: tilePositions[i][j].y,
+                o: 1,
+              });
+            }
+          } else {
+            if (tilePositions[i][j].x === -1 * j * shiftVal) {
+              newTilePos[i].push({
+                x: (tilePositions.length - j - 1) * shiftVal,
+                y: tilePositions[i][j].y,
+                o: 0,
+              });
+            } else {
+              newTilePos[i].push({
+                x: tilePositions[i][j].x + -1 * shiftVal,
+                y: tilePositions[i][j].y,
+                o: 1,
+              });
+            }
+          }
+        } else {
+          newTilePos[i].push({
+            x: tilePositions[i][j].x,
+            y: tilePositions[i][j].y,
+            o: 1,
+          });
+        }
+      }
+    }
+  }
+  console.log(newTilePos);
+  return newTilePos;
+}
+
+type TilePos = { x: number; y: number; o: number };
 const shiftVal = 64;
 function getDefaultPosGrid(grid: Board): TilePos[][] {
   const tilePos: TilePos[][] = [];
@@ -27,7 +128,7 @@ function getDefaultPosGrid(grid: Board): TilePos[][] {
   for (let i = 0; i < grid.length; i++) {
     tilePos.push([]);
     for (let j = 0; j < grid.length; j++) {
-      tilePos[i].push({ x: 0, y: 0 });
+      tilePos[i].push({ x: 0, y: 0, o: 1 });
     }
   }
   return tilePos;
@@ -55,108 +156,84 @@ export const PowerupVisComponent = forwardRef<
 
   useImperativeHandle(ref, () => ({
     swap(tiles: number[][], onComplete: () => void) {
-      setShowSelf(true)
+      setShowSelf(true);
+      setWord("Swapping...");
       const t1 = tiles[0];
       const t2 = tiles[1];
       const xDif = t1[0] - t2[0];
       const yDif = t1[1] - t2[1];
 
-      tilePositions[t1[1]][t1[0]].x = -1*shiftVal * xDif;
-      tilePositions[t1[1]][t1[0]].y = -1*shiftVal * yDif;
-      tilePositions[t2[1]][t2[0]].x =  shiftVal * xDif;
-      tilePositions[t2[1]][t2[0]].y =  shiftVal * yDif;
+      tilePositions[t1[1]][t1[0]].x = -1 * shiftVal * xDif;
+      tilePositions[t1[1]][t1[0]].y = -1 * shiftVal * yDif;
+      tilePositions[t2[1]][t2[0]].x = shiftVal * xDif;
+      tilePositions[t2[1]][t2[0]].y = shiftVal * yDif;
 
       setTimeout(() => {
-        setShowSelf(false)
+        setWord("");
+        setShowSelf(false);
         onComplete();
         setTilePositions(getDefaultPosGrid(grid));
       }, 1000);
     },
-    rotate(
+    async rotate(
       type: string,
       index: number,
       rotations: number,
       onComplete: () => void
-    ) {},
-    transform(tile: number[], char: string, onComplete: () => void) {
-      setShowSelf(true)
+    ) {
+      setShowSelf(true);
+      setWord("Rotating...");
 
-      tilePositions[tile[1]][tile[0]].y = -30
-      
-      setTimeout(()=>{
-        const tilePositionsCopy = [...tilePositions]
-        tilePositionsCopy[tile[1]][tile[0]].y = 0
-        setTilePositions(tilePositionsCopy)
+      let newTilePos = getSingleRotatedTilePos(
+        type,
+        index,
+        tilePositions,
+        rotations > 0 ? "regular" : "reverse"
+      );
+      setTilePositions(newTilePos);
+
+      for (let i = 1; i < Math.abs(rotations); i++) {
+        await timeout(200);
+        newTilePos = getSingleRotatedTilePos(
+          type,
+          index,
+          newTilePos,
+          rotations > 0 ? "regular" : "reverse"
+        );
+        setTilePositions(newTilePos);
+      }
+
+      setTimeout(() => {
+        setWord("");
+        setShowSelf(false);
+        onComplete();
+        setTilePositions(getDefaultPosGrid(grid));
+      }, 1000);
+    },
+    transform(tile: number[], char: string, onComplete: () => void) {
+      setShowSelf(true);
+      setWord("Transforming...");
+
+      tilePositions[tile[1]][tile[0]].y = -30;
+
+      setTimeout(() => {
+        const tilePositionsCopy = [...tilePositions];
+        tilePositionsCopy[tile[1]][tile[0]].y = 0;
+        setTilePositions(tilePositionsCopy);
 
         setTimeout(() => {
-          setShowSelf(false)
+          setWord("");
+          setShowSelf(false);
           onComplete();
           setTilePositions(getDefaultPosGrid(grid));
         }, 240);
-      },200)
+      }, 200);
     },
   }));
 
   useEffect(() => {
     setTilePositions(getDefaultPosGrid(grid));
   }, [grid]);
-
-  function rotateTilesOne(
-    type: string,
-    index: number,
-    rotations: number
-  ): TilePos[][] {
-    const newTilePos: TilePos[][] = [];
-    if (type === "col") {
-      for (let i = 0; i < tilePositions.length; i++) {
-        newTilePos.push([]);
-        for (let j = 0; j < tilePositions.length; j++) {
-          if (j === index) {
-            if (i >= tilePositions.length - rotations) {
-              newTilePos[i].push({
-                x: tilePositions[i][j].x,
-                y:
-                  tilePositions[i][j].y +
-                  -1 * (tilePositions.length - rotations) * shiftVal,
-              });
-            } else {
-              newTilePos[i].push({
-                x: tilePositions[i][j].x,
-                y: tilePositions[i][j].y + rotations * shiftVal,
-              });
-            }
-          } else {
-            newTilePos[i].push({
-              x: tilePositions[i][j].x,
-              y: tilePositions[i][j].y,
-            });
-          }
-        }
-      }
-    } else {
-      for (let i = 0; i < newTilePos.length; i++) {
-        newTilePos.push([]);
-        for (let j = 0; j < newTilePos.length; j++) {
-          if (i === index) {
-            newTilePos[i].push({ x: rotations * shiftVal, y: 0 });
-          } else {
-            newTilePos[i].push({ x: 0, y: 0 });
-          }
-        }
-      }
-    }
-    return newTilePos;
-  }
-  function animateRotate(type: string, index: number, rotations: number) {
-    setTilePositions(rotateTilesOne(type, index, 1));
-
-    for (let i = 1; i <= rotations; i++) {
-      setTimeout(
-        () => setTilePositions(rotateTilesOne(type, index, 1)),
-        200 * i
-      );
-    }
-  }
 
   function buildTile(x: number, y: number, v: string) {
     return (
@@ -166,6 +243,10 @@ export const PowerupVisComponent = forwardRef<
         animate={{
           x: tilePositions[y][x]?.x ?? 0,
           y: tilePositions[y][x]?.y ?? 0,
+        }}
+        style={{
+          
+          opacity: tilePositions[y][x]?.o,
         }}
       >
         <div draggable="false" className={`z-20`}>

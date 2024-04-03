@@ -128,9 +128,16 @@ const Game: React.FC = () => {
       ctx.pauseMessages.pause = true;
       setError(null);
       setPowerup(null);
-      ctx.setLobby(newLobby);
-      setTimeout(() => ctx.setFreezeInputs(false), 500);
-      setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      powerupVisRef.current?.rotate(
+        type,
+        index,
+        rotations,
+        () => {
+          ctx.setLobby(newLobby);
+          ctx.setFreezeInputs(false);
+          setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+        }
+      );
     };
     ctx.receiveCallBacks.handleTransformAccept = (
       newLobby: Lobby,
