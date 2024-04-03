@@ -78,7 +78,23 @@ export const PowerupVisComponent = forwardRef<
       rotations: number,
       onComplete: () => void
     ) {},
-    transform(tile: number[], char: string, onComplete: () => void) {},
+    transform(tile: number[], char: string, onComplete: () => void) {
+      setShowSelf(true)
+
+      tilePositions[tile[1]][tile[0]].y = -30
+      
+      setTimeout(()=>{
+        const tilePositionsCopy = [...tilePositions]
+        tilePositionsCopy[tile[1]][tile[0]].y = 0
+        setTilePositions(tilePositionsCopy)
+
+        setTimeout(() => {
+          setShowSelf(false)
+          onComplete();
+          setTilePositions(getDefaultPosGrid(grid));
+        }, 240);
+      },200)
+    },
   }));
 
   useEffect(() => {

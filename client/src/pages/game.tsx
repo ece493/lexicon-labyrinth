@@ -140,9 +140,15 @@ const Game: React.FC = () => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
       setError(null);
-      ctx.setLobby(newLobby);
-      setTimeout(() => ctx.setFreezeInputs(false), 500);
-      setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      powerupVisRef.current?.transform(
+        tile,
+        newChar,
+        () => {
+          ctx.setLobby(newLobby);
+          ctx.setFreezeInputs(false);
+          setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+        }
+      );
     };
     ctx.receiveCallBacks.handleScrambleAccept = (newLobby: Lobby) => {
       ctx.pauseMessages.pause = true;

@@ -31,6 +31,7 @@ export const ScrambleGridComponent: React.FC<ScrambleGridComponentProps> = ({
     setHelp("Scrambling...")
     setTimeout(() => {
       setShowGrid(false);
+      setHelp("")
     }, 1100);
   }, []);
 
