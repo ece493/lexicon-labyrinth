@@ -127,6 +127,8 @@ class Lobby(object):
                     value = int(value)
                 elif key == 'timer_setting':
                     value = int(value)
+                elif key == 'max_lives':
+                    value = int(value)
                 setattr(self, key, value)
 
         # After updating settings, broadcast the new settings to all players
@@ -249,6 +251,10 @@ class Lobby(object):
         # Ensure broadcast_func is set before starting the game
         print(f"Starting the game in lobby {self.lobby_id}")
         assert self.broadcast_func is not None, "Broadcast function wasn't set before starting the game!"
+        # Set everyone's lives to the correct amount before starting the game
+        for player in self.players:
+            player.set_lives(self.max_lives)
+        # Start the game!
         self.game = Game(self.lobby_id, self.players, self.broadcast_func, self.send_to_player_func,
                          self.board_size, self.max_lives, self.host, self.timer_setting)
         self.game.start_game()
@@ -257,6 +263,13 @@ class Lobby(object):
     @property
     def is_full(self) -> bool:
         return len(self.players) >= PLAYER_LIMIT
+    
+    @property
+    def game_complete(self) -> bool:
+        if self.game is None:
+            return False
+        else:
+            return self.game.game_complete()
 
 
 class Game:
@@ -276,6 +289,7 @@ class Game:
         self.turn_modulus: int = len(players)
         self.dictionary = GameDictionary()
         self.used_words: set[str] = set()
+        self.game_complete = False
 
     # def initialize_random_board(self) -> None:
 
@@ -508,6 +522,7 @@ class Game:
             # Last player standing
             print(f"Only one last player standing. The game has ended!")
             self.winner_determined(remaining_players[0])
+            self.game_complete = True
         else:
             print(
                 f"A player got removed, but there's still players left to fight it out. The game goes on!")
@@ -635,16 +650,19 @@ class Game:
 
 
 class Player(object):
-    def __init__(self, player_id, name) -> None:
+    def __init__(self, player_id, name: str, lives: int = 3) -> None:
         self.player_id = player_id
         self.name = name
         self.is_bot = False
         self.is_spectator = False
-        self.lives = 3
+        self.lives: int = lives
         self.score = 0
         self.currency = 10  # Start with 10 monies
         # Callback function to send a message
         self.send_func: Optional[Callable] = None
+
+    def set_lives(self, lives: int) -> None:
+        self.lives = lives
 
     def set_send_message_func(self, func) -> None:
         self.send_func = func
