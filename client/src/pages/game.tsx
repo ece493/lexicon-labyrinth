@@ -314,7 +314,7 @@ const Game: React.FC = () => {
                   error={error}
                   player={getPlayerName()}
                   powerup={powerup}
-                  maxTime={60}
+                  maxTime={ctx?.lobby?.timer_setting?? 22}
                   resetWord={resetWordSelection}
                 />
                 <div className="flex flex-row items-start justify-center">
