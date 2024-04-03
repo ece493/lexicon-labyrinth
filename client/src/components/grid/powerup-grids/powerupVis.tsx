@@ -191,7 +191,7 @@ export const PowerupVisComponent = forwardRef<
       const yDif = t1[1] - t2[1];
 
       setTimeout(() => {
-        const tilePositionsCopy = [...tilePositions]
+        const tilePositionsCopy = [...tilePositions];
         tilePositionsCopy[t1[1]][t1[0]].x = -1 * shiftVal * xDif;
         tilePositionsCopy[t1[1]][t1[0]].y = -1 * shiftVal * yDif;
         tilePositionsCopy[t1[1]][t1[0]].s = true;
@@ -200,7 +200,7 @@ export const PowerupVisComponent = forwardRef<
         tilePositionsCopy[t2[1]][t2[0]].y = shiftVal * yDif;
         tilePositionsCopy[t2[1]][t2[0]].s = true;
 
-        setTilePositions(tilePositionsCopy)
+        setTilePositions(tilePositionsCopy);
 
         setTimeout(() => {
           setWord("");
@@ -245,10 +245,10 @@ export const PowerupVisComponent = forwardRef<
       }
       setTimeout(() => {
         setWord("");
-        setShowSelf(false);
         onComplete();
         setTilePositions(getDefaultPosGrid(grid));
-      }, 600);
+        setShowSelf(false);
+      }, 200);
     },
     transform(tile: number[], char: string, onComplete: () => void) {
       setShowSelf(true);

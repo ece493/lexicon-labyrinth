@@ -300,7 +300,7 @@ const Game: React.FC = () => {
             <Fade in={ctx.freezeInputs}>
               <div>
                 {ctx.freezeInputs ? (
-                  <div className="bg-black opacity-20 w-full h-full absolute z-40" />
+                  <div className="bg-transparent opacity-20 w-full h-full absolute z-40" />
                 ) : null}
               </div>
             </Fade>
