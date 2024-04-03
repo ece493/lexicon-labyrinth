@@ -9,6 +9,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip3 install -r requirements.txt
 
 COPY . /app
+EXPOSE 8888
 
 ENTRYPOINT ["python3"]
-CMD ["py", "app.py"]
+CMD ["server.py"]
