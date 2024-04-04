@@ -32,7 +32,19 @@ export interface TurnRef {
 }
 
 const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
-  ({ word, player, powerup, handleSubmit, error, disabled, maxTime, resetWord }, ref) => {
+  (
+    {
+      word,
+      player,
+      powerup,
+      handleSubmit,
+      error,
+      disabled,
+      maxTime,
+      resetWord,
+    },
+    ref
+  ) => {
     const [wordX, setWordX] = React.useState(0);
     const [timerComp, setTimerComp] = React.useState(
       <TimerComponent onTimeUp={resetWord} maxTime={maxTime} />
@@ -46,7 +58,13 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
       },
       resetTimer() {
         setTimerComp(<div style={{ width: "54px" }} />);
-        setTimeout(() => setTimerComp(<TimerComponent onTimeUp={resetWord} maxTime={maxTime} />), 0);
+        setTimeout(
+          () =>
+            setTimerComp(
+              <TimerComponent onTimeUp={resetWord} maxTime={maxTime} />
+            ),
+          0
+        );
       },
     }));
 
@@ -63,7 +81,7 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
             className="text-slate-200 text-sm  px-3 py-1"
             style={{ opacity: powerup ? "0.1" : "" }}
           >
-            {`${player}${player === "Your"?"":"'s"} turn`}
+            {`${player}${player === "Your" ? "" : "'s"} turn`}
           </Typography>
         )}
         <Zoom key={word} in={true} appear timeout={300}>
@@ -72,7 +90,9 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
               {word
                 ? word
                 : disabled
-                ? `${player} is playing`
+                ? player === "Your"
+                  ? "Loading..."
+                  : `${player} is playing`
                 : "click and drag to select a word"}
             </Typography>
           </motion.div>

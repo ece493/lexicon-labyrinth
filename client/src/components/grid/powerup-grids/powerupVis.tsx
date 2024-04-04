@@ -10,6 +10,7 @@ interface PowerupVisComponentProps {
   board_size: [number, number];
   setWord: any;
   disabled: boolean;
+  speed?: number
 }
 
 function timeout(delay: number) {
@@ -20,7 +21,7 @@ function getSingleRotatedTilePos(
   type: string,
   index: number,
   tilePositions: TilePos[][],
-  direction: string
+  direction: string,
 ): TilePos[][] {
   const newTilePos: TilePos[][] = [];
   if (type === "col") {
@@ -126,7 +127,6 @@ function getSingleRotatedTilePos(
       }
     }
   }
-  console.log(newTilePos);
   return newTilePos;
 }
 
@@ -175,7 +175,7 @@ export interface PowerupVisComponentRef {
 export const PowerupVisComponent = forwardRef<
   PowerupVisComponentRef,
   PowerupVisComponentProps
->(({ grid, board_size, setWord }, ref) => {
+>(({ grid, board_size, setWord, speed }, ref) => {
   const [tilePositions, setTilePositions] = useState<TilePos[][]>(
     getDefaultPosGrid(grid)
   );
@@ -218,20 +218,10 @@ export const PowerupVisComponent = forwardRef<
     ) {
       setShowSelf(true);
       setWord("Rotating...");
-
-      let newTilePos = getSingleRotatedTilePos(
-        type,
-        index,
-        tilePositions,
-        rotations > 0 ? "regular" : "reverse"
-      );
-      setTilePositions(newTilePos);
-      await timeout(300);
-      newTilePos = getShowAllGrid(newTilePos);
-      setTilePositions(newTilePos);
-
-      for (let i = 1; i < Math.abs(rotations); i++) {
-        await timeout(350);
+      
+      let newTilePos:any = tilePositions
+      for (let i = 0; i < Math.abs(rotations); i++) {
+        if (i > 0) await timeout(350);
         newTilePos = getSingleRotatedTilePos(
           type,
           index,
@@ -239,7 +229,7 @@ export const PowerupVisComponent = forwardRef<
           rotations > 0 ? "regular" : "reverse"
         );
         setTilePositions(newTilePos);
-        await timeout(300);
+        await timeout(speed? speed*1000 : 300);
         newTilePos = getShowAllGrid(newTilePos);
         setTilePositions(newTilePos);
       }
@@ -248,7 +238,7 @@ export const PowerupVisComponent = forwardRef<
         onComplete();
         setTilePositions(getDefaultPosGrid(grid));
         setShowSelf(false);
-      }, 200);
+      }, speed? speed*1000/3 : 200);
     },
     transform(tile: number[], char: string, onComplete: () => void) {
       setShowSelf(true);
@@ -285,10 +275,9 @@ export const PowerupVisComponent = forwardRef<
         animate={{
           x: tilePositions[y][x]?.x ?? 0,
           y: tilePositions[y][x]?.y ?? 0,
-
           opacity: tilePositions[y][x]?.o,
         }}
-        style={{}}
+        transition={speed?{ duration: speed }:{}}
       >
         <div draggable="false" className={`z-20`}>
           <TileComponent value={v} selected={tilePositions[y][x]?.s} />
