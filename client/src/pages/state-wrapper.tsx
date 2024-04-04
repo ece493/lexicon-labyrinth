@@ -55,8 +55,6 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   const [sock, setSock] = useState<WebSocket | null>(null);
   const [playerName, setPlayerName] = useState("");
   const [freezeInputs, setFreezeInputs] = useState(false);
-  // const [messageQ, setMessageQ] = useState<(() => void)[]>([]);
-  // const [pauseMessages, setPauseMessages] = useState({ pause: false });
 
   function addToQ(f: () => void) {
     messageQ.push(f);
