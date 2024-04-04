@@ -112,7 +112,7 @@ const TileComponent: React.FC<TileComponentProps> = ({
         animate={
           dark || snapSelectAnim
             ? {
-                opacity: disabled ? 0.3 : 1,
+                
               }
             : {
                 opacity: disabled ? 0.3 : 1,
