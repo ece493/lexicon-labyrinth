@@ -124,6 +124,9 @@ export const wsReceiveHandler = (
         setScreen(ScreenState.BOOTED_FROM_LOBBY);
       setLobby(action.data.lobby);
       break;
+    case ActionsList.leave_game:
+      setLobby(action.data.lobby);
+      break;
     default:
       setLobby(action.data.lobby);
       break;
