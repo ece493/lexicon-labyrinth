@@ -15,6 +15,8 @@ from tempTestObjects import StaticTestObjects
 from utils import *
 # Define a WebSocketHandler
 
+# TODO: Delete finished lobbies/games from the list
+
 class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     connections: set['GameWebSocketHandler'] = set()
     lobbies: dict[str, Lobby] = {} # each lobby is assigned to a player UUID
@@ -50,6 +52,11 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 connection.send_message(message)
                 return
         raise Exception("Player to send to is not in the list of connections!")
+
+    @classmethod
+    def garbage_collect_lobbies(cls) -> None:
+        cls.lobbies = {lobby_code: lobby for lobby_code, lobby in cls.lobbies.items() if not lobby.game_complete}
+
 
     def open(self) -> None:
         # Assign a unique ID to the connection
@@ -126,6 +133,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         if actionEnum in [ActionEnum.INITIALIZE, ActionEnum.JOIN_LOBBY, ActionEnum.LEAVE_LOBBY, ActionEnum.REMOVE_PLAYER]:
             # These actions are handled outside of a lobby or game, so we just handle them right here
             if actionEnum == ActionEnum.INITIALIZE:
+                GameWebSocketHandler.garbage_collect_lobbies()
                 # Generate a unique 4-letter lobby code
                 while True:
                     lobby_code = ''.join(random.choices(string.ascii_uppercase, k=4))
