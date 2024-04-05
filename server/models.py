@@ -689,8 +689,8 @@ class Bot(Player, object):
             self.dict_trie.insert(word)
         self.fail_probability = 0.25 if difficulty == BotDifficulty.EASY else (0.1 if difficulty == BotDifficulty.MEDIUM else 0.05)
         self.time_limit_s: float = 1000.0
-        self.start_time_s: float = time.perf_counter()
-        self.min_time_to_submit_turn: float = random.uniform(0.0, self.time_limit_s)
+        self.start_time_s: float = 0.0
+        self.min_time_to_submit_turn: float = 0.0
         self.send_to_game_func: Callable = send_to_game_func
 
     def check_whether_prefix_is_in_dictionary(self, prefix: str) -> bool:
@@ -734,6 +734,8 @@ class Bot(Player, object):
             # Update the time limit with the actual lobby's time limit
             self.time_limit_s = message.data['timer_setting']
             assert isinstance(self.time_limit_s, float)
+            self.min_time_to_submit_turn: float = random.uniform(0.0, self.time_limit_s)
+            print(f"Bot's time limit is {self.time_limit_s}")
         elif message.action == ActionEnum.START_TURN.value:
             print(message.data)
             if message.data['state']['curr_turn'] != self.player_id:
@@ -763,6 +765,7 @@ class Bot(Player, object):
         pass
 
     def do_turn(self, message: 'Action') -> None:
+        self.start_time_s = time.perf_counter()
         game_board: list[list[str]] = message.data['state']['board']
         print(message.data)
         bot_representation_in_lobby: dict[str, Any] = get_player_from_id_dicts(message.data['players'], self.player_id)
@@ -801,14 +804,15 @@ class Bot(Player, object):
         
         # Check whether we just want the bot to fail to find a word on this turn
         if random.random() < self.fail_probability:
+            print(f"Bot purposely fails to find a word and is sleeping for {self.min_time_to_submit_turn} s")
             time.sleep(self.min_time_to_submit_turn)
-            print("Bot purposely fails to find a word")
             self.send_message_to_game(ActionEnum.END_TURN, {})
             return
 
         # The search algorithm is akin to how a player looks for words. Trace out a random path and see whether it spells out a known word
         # Try to find a word starting from a random position
-        for _ in range(2000000):  # Limit attempts
+        for i in range(2000000):  # Limit attempts
+            print(f"Bot search iteration {i}")
             if time.perf_counter() - self.start_time_s >= self.time_limit_s:
                 break
             start_x, start_y = random.randint(0, board_size - 1), random.randint(0, board_size - 1)
@@ -817,6 +821,7 @@ class Bot(Player, object):
             if word is not None and path is not None:
                 print(f"Found word: {word} at path {path}")
                 if time.perf_counter() - self.start_time_s < self.min_time_to_submit_turn:
+                    print(f"Sleeping for an additional {self.min_time_to_submit_turn - (time.perf_counter() - self.start_time_s)} s since min time is {self.min_time_to_submit_turn} s and we've only spent {time.perf_counter() - self.start_time_s} s")
                     time.sleep(self.min_time_to_submit_turn - (time.perf_counter() - self.start_time_s))
                 self.send_message_to_game(ActionEnum.PICK_WORD, path)
                 return
