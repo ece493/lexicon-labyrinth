@@ -15,6 +15,8 @@ import { motion } from "framer-motion";
 import Zoom from "@mui/material/Zoom";
 import TimerComponent from "./timer";
 
+
+
 interface TurnComponentProp {
   word: string;
   player: string;
@@ -22,31 +24,37 @@ interface TurnComponentProp {
   handleSubmit: () => void;
   error: string | null;
   disabled?: boolean;
-  maxTime: number;
+  time: number;
   resetWord: any;
+  potentialFunds: number;
 }
 
 export interface TurnRef {
   shakeWord: () => void;
-  resetTimer: () => void;
 }
 
 const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
-  ({ word, player, powerup, handleSubmit, error, disabled, maxTime, resetWord }, ref) => {
+  (
+    {
+      word,
+      player,
+      powerup,
+      handleSubmit,
+      error,
+      disabled,
+      time,
+      resetWord,
+      potentialFunds
+    },
+    ref
+  ) => {
     const [wordX, setWordX] = React.useState(0);
-    const [timerComp, setTimerComp] = React.useState(
-      <TimerComponent onTimeUp={resetWord} maxTime={maxTime} />
-    );
 
     useImperativeHandle(ref, () => ({
       shakeWord() {
         setWordX(20);
         setTimeout(() => setWordX(-20), 80);
         setTimeout(() => setWordX(0), 160);
-      },
-      resetTimer() {
-        setTimerComp(<div style={{ width: "54px" }} />);
-        setTimeout(() => setTimerComp(<TimerComponent onTimeUp={resetWord} maxTime={maxTime} />), 0);
       },
     }));
 
@@ -63,7 +71,7 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
             className="text-slate-200 text-sm  px-3 py-1"
             style={{ opacity: powerup ? "0.1" : "" }}
           >
-            {`${player}${player === "Your"?"":"'s"} turn`}
+            {`${player}${player === "Your" ? "" : "'s"} turn`}
           </Typography>
         )}
         <Zoom key={word} in={true} appear timeout={300}>
@@ -72,14 +80,16 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
               {word
                 ? word
                 : disabled
-                ? `${player} is playing`
+                ? player === "Your"
+                  ? "Loading..."
+                  : `${player} is playing`
                 : "click and drag to select a word"}
             </Typography>
           </motion.div>
         </Zoom>
 
         <div className="flex flex-row space-x-2 items-center p-1">
-          {timerComp}
+          <TimerComponent time={time} />
           <motion.div animate={{ opacity: powerup || disabled ? 0.4 : 1 }}>
             <ButtonComponent
               onClick={handleSubmit}
@@ -96,7 +106,7 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
             <AddIcon />
             <FundsIcon />
             <Typography className="text-slate-100">
-              {disabled ? 0 : word.length}
+              {disabled ? 0 : potentialFunds }
             </Typography>
           </div>
         </div>

@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import LobbyComponent from "../components/lobby/lobby-component";
 import { Bot, Lobby, Player } from "../data/model";
 import { GameContext } from "../context/ctx";
+import { CircularProgress } from "@mui/material";
 
 const LobbyPage: React.FC = () => {
   // const host: Player = { id: "0", name: "John Player", is_spectator: false, lives: 3, money: 100 };
@@ -32,7 +33,7 @@ const LobbyPage: React.FC = () => {
   return (
     <>
       { ctx.lobby && ctx.playerId && <LobbyComponent lobby={ctx.lobby} player_id={ctx.playerId} ctx={ctx} /> }
-      { !(ctx.lobby && ctx.playerId) && <h1>Something went wrong! {!ctx.lobby} {!ctx.playerId}</h1> }
+      { !(ctx.lobby && ctx.playerId) && <div className="flex items-center justify-center p-20"><CircularProgress/> </div>}
     </>
   );
 };
