@@ -22,10 +22,43 @@ import {
   PowerupVisComponentRef,
 } from "../components/grid/powerup-grids/powerupVis";
 
+let gameTime = { startTime: Date.now() };
 const Game: React.FC = () => {
   const ctx = useContext(GameContext);
   const [word, setWord] = useState("");
   const [error, setError] = useState<null | string>(null);
+
+  // Timing
+  const [time, setTime] = React.useState(ctx?.lobby?.timer_setting ?? 60);
+  const [startedTimer, setStartedTimer] = useState(false);
+  const [sentTurnEnd, setSentTurnEnd] = useState(false);
+
+  useEffect(() => {
+    if (
+      time <= 0 &&
+      ctx.playerId === ctx.lobby?.state?.curr_turn &&
+      !sentTurnEnd
+    ) {
+      resetWordSelection();
+      ctx.transitions.notifyTurnEnd(ctx);
+      setSentTurnEnd(true);
+    }
+  }, [time]);
+
+  useEffect(() => {
+    if (!startedTimer) {
+      setStartedTimer(true);
+      setInterval(() => {
+        let newTime = Math.ceil(
+          (ctx?.lobby?.timer_setting ?? 60) -
+            (Date.now() - gameTime.startTime) / 1000
+        );
+        if (newTime >= 0) {
+          setTime(newTime);
+        }
+      }, 1000);
+    }
+  }, [ctx?.lobby?.timer_setting]);
 
   function isSpectator() {
     return ctx.lobby?.state.curr_turn !== ctx.playerId;
@@ -77,8 +110,8 @@ const Game: React.FC = () => {
       setPowerup(null);
       setError(null);
       ctx.setLobby(newLobby);
-      console.log("Checkpoint");
-      turnRef.current?.resetTimer();
+      setSentTurnEnd(false);
+      gameTime.startTime = Date.now();
       setTimeout(() => ctx.setFreezeInputs(false), 500);
     };
     ctx.receiveCallBacks.handleLoseLife = (
@@ -128,16 +161,11 @@ const Game: React.FC = () => {
       ctx.pauseMessages.pause = true;
       setError(null);
       setPowerup(null);
-      powerupVisRef.current?.rotate(
-        type,
-        index,
-        rotations,
-        () => {
-          ctx.setLobby(newLobby);
-          ctx.setFreezeInputs(false);
-          setTimeout(() => (ctx.pauseMessages.pause = false), 100);
-        }
-      );
+      powerupVisRef.current?.rotate(type, index, rotations, () => {
+        ctx.setLobby(newLobby);
+        ctx.setFreezeInputs(false);
+        setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      });
     };
     ctx.receiveCallBacks.handleTransformAccept = (
       newLobby: Lobby,
@@ -147,15 +175,11 @@ const Game: React.FC = () => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
       setError(null);
-      powerupVisRef.current?.transform(
-        tile,
-        newChar,
-        () => {
-          ctx.setLobby(newLobby);
-          ctx.setFreezeInputs(false);
-          setTimeout(() => (ctx.pauseMessages.pause = false), 100);
-        }
-      );
+      powerupVisRef.current?.transform(tile, newChar, () => {
+        ctx.setLobby(newLobby);
+        ctx.setFreezeInputs(false);
+        setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      });
     };
     ctx.receiveCallBacks.handleScrambleAccept = (newLobby: Lobby) => {
       ctx.pauseMessages.pause = true;
@@ -176,14 +200,11 @@ const Game: React.FC = () => {
       ctx.pauseMessages.pause = true;
       setPowerup(null);
       setError(null);
-      powerupVisRef.current?.swap(
-        tiles,
-        () => {
-          ctx.setLobby(newLobby);
-          ctx.setFreezeInputs(false);
-          setTimeout(() => (ctx.pauseMessages.pause = false), 100);
-        }
-      );
+      powerupVisRef.current?.swap(tiles, () => {
+        ctx.setLobby(newLobby);
+        ctx.setFreezeInputs(false);
+        setTimeout(() => (ctx.pauseMessages.pause = false), 100);
+      });
     };
   }
 
@@ -314,7 +335,7 @@ const Game: React.FC = () => {
                   error={error}
                   player={getPlayerName()}
                   powerup={powerup}
-                  maxTime={ctx?.lobby?.timer_setting?? 22}
+                  time={time}
                   resetWord={resetWordSelection}
                 />
                 <div className="flex flex-row items-start justify-center">
