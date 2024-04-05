@@ -76,7 +76,9 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
               {word
                 ? word
                 : disabled
-                ? `${player} is playing`
+                ? player === "Your"
+                  ? "Loading..."
+                  : `${player} is playing`
                 : "click and drag to select a word"}
             </Typography>
           </motion.div>

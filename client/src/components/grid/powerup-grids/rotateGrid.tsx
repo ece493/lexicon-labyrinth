@@ -135,7 +135,6 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
     if (type === "row") {
       if (selectedRow !== -1 && newIndex === currentIndex) {
         if (Math.abs(rotations) + 1 >= board_size[0]) {
-          console.log("zeroing")
           setRotations(0);
         } else {
           setRotations(rotations + 1);
@@ -183,10 +182,6 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
       }
     }
   }
-
-  // TODO
-  // delay on turn changes "Your is playing... showing"
-  // powerup bugs
 
   function buildTile(x: number, y: number, v: string) {
     switch (v) {
@@ -309,6 +304,7 @@ export const RotateGridComponent: React.FC<RotateGridComponentProps> = ({
             grid={tiles}
             ref={powerupVisRef}
             disabled={false}
+            speed={0.1}
           />
         </div>
       </div>
