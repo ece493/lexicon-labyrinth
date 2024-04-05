@@ -689,6 +689,7 @@ class Bot(Player, object):
             self.dict_trie.insert(word)
         self.time_limit_s: float = 1000.0
         self.start_time_s: float = time.perf_counter()
+        self.min_time_to_submit_turn: float = random.uniform(0.0, self.time_limit_s)
         self.send_to_game_func: Callable = send_to_game_func
 
     def check_whether_prefix_is_in_dictionary(self, prefix: str) -> bool:
@@ -807,6 +808,8 @@ class Bot(Player, object):
             word, path = find_word(start_x, start_y, [(start_y, start_x)], start_letter)
             if word is not None and path is not None:
                 print(f"Found word: {word} at path {path}")
+                if time.perf_counter() - self.start_time_s < self.min_time_to_submit_turn:
+                    time.sleep(self.min_time_to_submit_turn - (time.perf_counter() - self.start_time_s))
                 self.send_message_to_game(ActionEnum.PICK_WORD, path)
                 return
         print("Failed to find a word this turn.")
