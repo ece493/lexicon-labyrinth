@@ -538,8 +538,7 @@ class Game:
         return False
 
     def add_funds(self, player_id: str, funds: int) -> bool:
-        player = next(
-            (p for p in self.players if p.player_id == player_id), None)
+        player = next((p for p in self.players if p.player_id == player_id), None)
         if player is not None:
             player.currency += funds
             return True
@@ -732,7 +731,7 @@ class Bot(Player, object):
         if message.action == ActionEnum.START_GAME.value:
             print(f"Bot {self.player_id} is ready to start game!")
             # Update the time limit with the actual lobby's time limit
-            self.time_limit_s = message.data['timer_setting']
+            self.time_limit_s = float(message.data['timer_setting'])
             assert isinstance(self.time_limit_s, float)
             self.min_time_to_submit_turn: float = random.uniform(0.0, self.time_limit_s)
             print(f"Bot's time limit is {self.time_limit_s}")
@@ -971,7 +970,7 @@ class GameDictionary(object):
         return word.lower() in self.words
 
     def get_word_score(self, word) -> int:
-        # Based on the letters used in the word and how long it is, give the player a score
+        # Based on the letters used in the word, give the player a score
         sum = 0
         for c in word:
             sum = sum + self.letter_values[c]
