@@ -15,6 +15,8 @@ import { motion } from "framer-motion";
 import Zoom from "@mui/material/Zoom";
 import TimerComponent from "./timer";
 
+
+
 interface TurnComponentProp {
   word: string;
   player: string;
@@ -24,6 +26,7 @@ interface TurnComponentProp {
   disabled?: boolean;
   time: number;
   resetWord: any;
+  potentialFunds: number;
 }
 
 export interface TurnRef {
@@ -41,6 +44,7 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
       disabled,
       time,
       resetWord,
+      potentialFunds
     },
     ref
   ) => {
@@ -102,7 +106,7 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
             <AddIcon />
             <FundsIcon />
             <Typography className="text-slate-100">
-              {disabled ? 0 : word.length}
+              {disabled ? 0 : potentialFunds }
             </Typography>
           </div>
         </div>
