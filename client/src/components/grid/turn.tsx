@@ -22,13 +22,12 @@ interface TurnComponentProp {
   handleSubmit: () => void;
   error: string | null;
   disabled?: boolean;
-  maxTime: number;
+  time: number;
   resetWord: any;
 }
 
 export interface TurnRef {
   shakeWord: () => void;
-  resetTimer: () => void;
 }
 
 const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
@@ -40,31 +39,18 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
       handleSubmit,
       error,
       disabled,
-      maxTime,
+      time,
       resetWord,
     },
     ref
   ) => {
     const [wordX, setWordX] = React.useState(0);
-    const [timerComp, setTimerComp] = React.useState(
-      <TimerComponent onTimeUp={resetWord} maxTime={maxTime} />
-    );
 
     useImperativeHandle(ref, () => ({
       shakeWord() {
         setWordX(20);
         setTimeout(() => setWordX(-20), 80);
         setTimeout(() => setWordX(0), 160);
-      },
-      resetTimer() {
-        setTimerComp(<div style={{ width: "54px" }} />);
-        setTimeout(
-          () =>
-            setTimerComp(
-              <TimerComponent onTimeUp={resetWord} maxTime={maxTime} />
-            ),
-          0
-        );
       },
     }));
 
@@ -99,7 +85,7 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
         </Zoom>
 
         <div className="flex flex-row space-x-2 items-center p-1">
-          {timerComp}
+          <TimerComponent time={time} />
           <motion.div animate={{ opacity: powerup || disabled ? 0.4 : 1 }}>
             <ButtonComponent
               onClick={handleSubmit}
