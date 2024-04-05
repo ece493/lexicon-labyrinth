@@ -687,6 +687,7 @@ class Bot(Player, object):
         self.dict_trie = Trie()
         for word in self.dictionary:
             self.dict_trie.insert(word)
+        self.fail_probability = 0.25 if difficulty == BotDifficulty.EASY else (0.1 if difficulty == BotDifficulty.MEDIUM else 0.05)
         self.time_limit_s: float = 1000.0
         self.start_time_s: float = time.perf_counter()
         self.min_time_to_submit_turn: float = random.uniform(0.0, self.time_limit_s)
@@ -798,6 +799,13 @@ class Bot(Player, object):
                             return result
             return None, None
         
+        # Check whether we just want the bot to fail to find a word on this turn
+        if random.random() < self.fail_probability:
+            time.sleep(self.min_time_to_submit_turn)
+            print("Bot purposely fails to find a word")
+            self.send_message_to_game(ActionEnum.END_TURN, {})
+            return
+
         # The search algorithm is akin to how a player looks for words. Trace out a random path and see whether it spells out a known word
         # Try to find a word starting from a random position
         for _ in range(2000000):  # Limit attempts
