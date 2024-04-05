@@ -333,11 +333,11 @@ class Game:
 
     def get_next_non_spectator_player(self) -> tuple[int, Optional['Player']]:
         """Returns the next non-spectator player's index and object."""
-        next_index = self.find_next_non_spectator_player_index(
-            self.current_player_index)
+        next_index = self.find_next_non_spectator_player_index(self.current_player_index)
         if next_index != -1:
             return next_index, self.players[next_index]
         else:
+            raise Exception("No next non-spectator player! The game should have ended when only one player was left")
             return -1, None  # No non-spectator player found
 
     def next_turn(self) -> None:
@@ -347,8 +347,7 @@ class Game:
             self.current_player_index = next_index  # Update to the next player's index
             self.state = GameState.WAITING_FOR_MOVE
             # Inform all players whose turn it is now
-            self.broadcast_func(self.lobby_id, Action(
-                ActionEnum.START_TURN.value, next_player.player_id, self.to_json()))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.START_TURN.value, next_player.player_id, self.to_json()))
         else:
             # Handle the scenario where no non-spectator players are found
             pass  # This could involve checking game end conditions or handling errors
@@ -401,25 +400,21 @@ class Game:
 
     def handle_player_elimination_or_time_out(self, player_id) -> None:
         """Handles the scenario where a player is eliminated or runs out of time."""
-        # Implement player elimination logic
-        # This is a placeholder for any additional logic
-        # TODO: Implement additional player elimination logic here if necessary
-
         # Remove the player or deduct life
-        player = None
+        player_to_kill = None
         for player in self.players:
             if player.player_id == player_id:
-                player = player
+                player_to_kill = player
                 break
 
-        if player.lives > 1:
-            player.lives -= 1
+        if player_to_kill.lives > 1:
+            player_to_kill.lives -= 1
             self.broadcast_func(self.lobby_id, Action(ActionEnum.LOSE_LIFE.value, player_id, {
                                 "player_id": player_id, "lobby": self.to_json()}))
             self.state = GameState.TURN_END
             self.transition_to_next_player()
-        elif player.lives > 0:
-            player.lives -= 1
+        elif player_to_kill.lives == 1:
+            player_to_kill.lives -= 1
             self.eliminate_player(player_id)
         else:
             print("Player is already dead")
@@ -504,17 +499,13 @@ class Game:
                 break
         if player_to_eliminate.is_bot:
             # Remove the bot after telling it that it died
-            self.broadcast_func(self.lobby_id, Action(
-                ActionEnum.YOU_DIED.value, player_to_eliminate.player_id, self.to_json()))
-            self.broadcast_func(self.lobby_id, Action(
-                ActionEnum.LEAVE_GAME.value, player_to_eliminate.player_id, self.to_json()))
-            self.players = [
-                player for player in self.players if player.player_id != player_id]
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED.value, player_to_eliminate.player_id, self.to_json()))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.LEAVE_GAME.value, player_to_eliminate.player_id, self.to_json()))
+            self.players = [player for player in self.players if player.player_id != player_id]
         else:
             # Let the player watch the rest of the game as a spectator
             player_to_eliminate.is_spectator = True
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED.value, player_to_eliminate.player_id, {
-                                "lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED.value, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
 
         remaining_players = [
             player for player in self.players if not player.is_spectator]
@@ -524,8 +515,7 @@ class Game:
             self.winner_determined(remaining_players[0])
             self.game_complete = True
         else:
-            print(
-                f"A player got removed, but there's still players left to fight it out. The game goes on!")
+            print(f"A player got removed, but there's still players left to fight it out. The game goes on!")
             # Move onto the next player's turn!
             self.transition_to_next_player()
 
@@ -739,13 +729,14 @@ class Bot(Player, object):
 
     def process_bot_action(self, message: 'Action') -> None:
         # Process the message and simulate a bot response/action
-        print(f"Bot is processing message of action {message}")
+        #print(f"Bot is processing message of action {message}")
         if message.action == ActionEnum.START_GAME.value:
             print(f"Bot {self.player_id} is ready to start game!")
         elif message.action == ActionEnum.START_TURN.value:
             print(message.data)
             if message.data['state']['curr_turn'] != self.player_id:
-                print(f"Next turn. It isn't bot {self.player_id}'s turn")
+                #print(f"Next turn. It isn't bot {self.player_id}'s turn")
+                pass
             else:
                 print(f"It's my turn! Bot: {self.player_id}")
                 self.do_turn(message)
@@ -757,11 +748,11 @@ class Bot(Player, object):
             for (col, row) in message.data['path']:
                 word += message.data['lobby']['state']['board'][row][col]
             print(f"Bot {self.player_id} is adding word '{word}' to its list of used up words.")
-            self.memory.add(word)
+            self.memory.add(word.lower())
         elif message.action == ActionEnum.WORD_DENIED.value:
             if message.data['lobby']['state']['curr_turn'] == self.player_id:
                 print(f"Crap, I'm bot {self.player_id} and my word got denied! Redoing the bot stuff and trying to submit a new action.")
-                #self.do_turn()
+                self.do_turn()
             else:
                 print(f"I'm bot {self.player_id} and phew, someone else's word got denied bwahaha")
                 pass
