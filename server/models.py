@@ -733,7 +733,7 @@ class Bot(Player, object):
             # Update the time limit with the actual lobby's time limit
             self.time_limit_s = float(message.data['timer_setting'])
             assert isinstance(self.time_limit_s, float)
-            self.min_time_to_submit_turn: float = random.uniform(0.0, self.time_limit_s)
+            self.min_time_to_submit_turn: float = random.triangular(0.0, self.time_limit_s, 0.0)
             print(f"Bot's time limit is {self.time_limit_s}")
         elif message.action == ActionEnum.START_TURN.value:
             print(message.data)
