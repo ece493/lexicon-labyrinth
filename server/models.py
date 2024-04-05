@@ -623,7 +623,7 @@ class Game:
             "timer": 123.4,
             "memory": [],
         }
-        game_stat_dict = {
+        game_state_dict = {
             "state": state,
             "max_lives": self.max_lives,
             "host": self.host,
@@ -632,7 +632,7 @@ class Game:
             "lobby_code": self.lobby_id,
             "players": [player.to_json() for player in self.players]
         }
-        return game_stat_dict
+        return game_state_dict
 
 
 class Player(object):
@@ -687,7 +687,8 @@ class Bot(Player, object):
         self.dict_trie = Trie()
         for word in self.dictionary:
             self.dict_trie.insert(word)
-
+        self.time_limit_s: float = 1000.0
+        self.start_time_s: float = time.perf_counter()
         self.send_to_game_func: Callable = send_to_game_func
 
     def check_whether_prefix_is_in_dictionary(self, prefix: str) -> bool:
@@ -728,6 +729,9 @@ class Bot(Player, object):
         #print(f"Bot is processing message of action {message}")
         if message.action == ActionEnum.START_GAME.value:
             print(f"Bot {self.player_id} is ready to start game!")
+            # Update the time limit with the actual lobby's time limit
+            self.time_limit_s = message.data['timer_setting']
+            assert isinstance(self.time_limit_s, float)
         elif message.action == ActionEnum.START_TURN.value:
             print(message.data)
             if message.data['state']['curr_turn'] != self.player_id:
@@ -796,6 +800,8 @@ class Bot(Player, object):
         # The search algorithm is akin to how a player looks for words. Trace out a random path and see whether it spells out a known word
         # Try to find a word starting from a random position
         for _ in range(2000000):  # Limit attempts
+            if time.perf_counter() - self.start_time_s >= self.time_limit_s:
+                break
             start_x, start_y = random.randint(0, board_size - 1), random.randint(0, board_size - 1)
             start_letter = game_board[start_x][start_y]
             word, path = find_word(start_x, start_y, [(start_y, start_x)], start_letter)
