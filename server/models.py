@@ -269,7 +269,7 @@ class Lobby(object):
         if self.game is None:
             return False
         else:
-            return self.game.game_complete()
+            return self.game.game_complete
 
 
 class Game:
