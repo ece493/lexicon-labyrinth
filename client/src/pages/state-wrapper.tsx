@@ -132,7 +132,7 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
           setLobbyCode={setLobbyCode}
         />
       )}
-      <div className="m-0 bg-blue-400 h-screen w-screen overflow-hidden relative">
+      <div className="m-0 bg-blue-400 h-screen w-screen relative">
         <AnimatePresence mode="wait">{stateToScreen(screen)}</AnimatePresence>
       </div>
     </GameContext.Provider>
