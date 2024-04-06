@@ -2,3 +2,5 @@ tornado
 asyncio
 aioconsole
 websockets
+pytest
+pytest-asyncio

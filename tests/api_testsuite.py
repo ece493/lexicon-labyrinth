@@ -1,6 +1,7 @@
 import asyncio
 import websockets
 import json
+import pytest
 import random
 
 URL = "ws://localhost:8888/websocket"
@@ -196,23 +197,70 @@ async def one_player_and_two_bots_play(url, time_out, wait_time, base_difficulty
         send_recv[2][0]["data"]["player_id"] = bot_a_id
         send_recv[3][0]["data"]["player_id"] = bot_b_id
         
-        for i in range(idx, len(send_recv)-idx):
+        for i in range(idx, len(send_recv)):
             assert await send_and_check_rcv(websocket, send_recv[i][0], player_id, send_recv[i][1], time_out, wait_time) is not None
         # send_and_check_rcv(websocket, None, player_id, ["word_accepted", ""], time_out, wait_time)
 
+# base_difficulty can be 0 or 1
+async def full_lobby(url, time_out, wait_time):
+    send_recv = [
+        ({"action": "initialize", "data": {"player_name": "Alice"}, "sequence_number": 0}, ["successfully_joined_lobby"]),
+        ({"action": "add_bot", "data": {}, "sequence_number": 0}, ["add_bot"]),
+        ({"action": "add_bot", "data": {}, "sequence_number": 0}, ["add_bot"]),
+        ({"action": "add_bot", "data": {}, "sequence_number": 0}, ["add_bot"]),
+        ({"action": "add_bot", "data": {}, "sequence_number": 0}, ["add_bot"]),
+        # ({"action": "add_bot", "data": {}, "sequence_number": 0}, ["add_bot"]),
+    ]
+    async with websockets.connect(url) as websocket, websockets.connect(url) as websocket1:
+        init = await asyncio.wait_for(websocket.recv(), timeout=5)
+        init = json.loads(init)
+        player_id = init["player_id"]
+        print(player_id)
+
+        init1 = await asyncio.wait_for(websocket1.recv(), timeout=5)
+        init1 = json.loads(init1)
+        player_id1 = init1["player_id"]
+        print(player_id1)
+
+        idx = 0
+        assert await send_and_check_rcv(websocket, send_recv[idx][0], player_id, send_recv[idx][1], time_out, wait_time) is not None
+        idx += 1
+        
+        lobbyResp = await send_and_check_rcv(websocket, send_recv[idx][0], player_id, send_recv[idx][1], 2*time_out, 2*wait_time)
+        lobbyResp = json.loads(lobbyResp)
+        lobbyCode = lobbyResp["data"]["lobby"]["lobby_code"]
+        idx += 1
+        
+        for i in range(idx, len(send_recv)):
+            assert await send_and_check_rcv(websocket, send_recv[i][0], player_id, send_recv[i][1], time_out, wait_time) is not None
+        bobJoinReq = {"action": "join_lobby", "data": {"player_name": "Bob", "lobby_code": lobbyCode}, "sequence_number": 0}
+        assert await send_and_check_rcv(websocket, bobJoinReq, player_id, ["lobby_full"], time_out, wait_time) is not None
+
+@pytest.mark.asyncio
 async def test_lobby_interaction():
     await asyncio.create_task(make_one_move(URL, TIME_OUT, WAIT_TIME))
 
+@pytest.mark.asyncio
 async def test_game_until_end():
     await asyncio.create_task(two_players_play_till_death(URL, TIME_OUT, WAIT_TIME))
 
+@pytest.mark.asyncio
 async def test_two_players_and_bot_play_till_death():
     await asyncio.create_task(two_players_and_bot_play_till_death(URL, TIME_OUT, WAIT_TIME))
 
+@pytest.mark.asyncio
+async def test_full_lobby():
+    await asyncio.create_task(full_lobby(URL, TIME_OUT, WAIT_TIME))
+
+@pytest.mark.asyncio
 async def test_one_player_and_two_bots_play_till_death():
     await asyncio.create_task(one_player_and_two_bots_play(URL, 2*TIME_OUT, 2*WAIT_TIME))
 
 # Run the test
+# py -m pytest api_testsuite.py
+
+# otherwise
 # asyncio.run(test_lobby_interaction())
 # asyncio.run(test_game_until_end())
-asyncio.run(test_one_player_and_two_bots_play_till_death())
+# asyncio.run(test_one_player_and_two_bots_play_till_death())
+# asyncio.run(test_full_lobby())
