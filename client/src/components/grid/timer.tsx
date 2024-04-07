@@ -15,7 +15,7 @@ const TimerComponent: React.FC<TimerComponentProp> = ({ time }) => {
   return (
     <div className=" flex flex-row space-x-1 justify-center items-center p-1 ">
       <TimerIcon />
-      <Typography className="text-slate-100">{time}</Typography>
+      <Typography className="text-slate-100">{time < 0? 0 : time}</Typography>
     </div>
   );
 };

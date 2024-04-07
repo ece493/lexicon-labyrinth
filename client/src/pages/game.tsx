@@ -58,7 +58,9 @@ const Game: React.FC = () => {
   const [error, setError] = useState<null | string>(null);
 
   // Timing
-  const [time, setTime] = React.useState(ctx?.lobby?.timer_setting ?? 60);
+  const [time, setTime] = React.useState(
+    ctx?.lobby?.timer_setting ?? 60
+  );
   const [startedTimer, setStartedTimer] = useState(false);
   const [sentTurnEnd, setSentTurnEnd] = useState(false);
   const [isAwaitingWord, setIsAwaitingWord] = useState(false);
@@ -84,9 +86,7 @@ const Game: React.FC = () => {
           (ctx?.lobby?.timer_setting ?? 60) -
             (Date.now() - gameTime.startTime) / 1000
         );
-        if (newTime >= 0) {
-          setTime(newTime);
-        }
+        setTime(newTime);
       }, 1000);
     }
   }, [ctx?.lobby?.timer_setting]);

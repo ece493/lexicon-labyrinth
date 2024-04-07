@@ -22,12 +22,20 @@ interface PlayerCardProps {
 
 function getLivesIcons(lives: number) {
   let icons = [];
-  for (let i = 0; i < lives; i += 1) {
+  for (let i = 0; i < lives && i < 4; i += 1) {
     icons.push(
       <div key={i} className="z-1 pt-1">
         <LifeIcon />
       </div>
     );
+  }
+  if (lives > 4){
+      icons.push(
+        <div key={"extra"} className="z-1 pt-1">
+          <Typography className="text-slate-200 text-xs" style={{paddingLeft:"2px", marginBottom:"2px"}}>+{lives-4}</Typography>
+        </div>
+      );
+    
   }
   return icons;
 }
