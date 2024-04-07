@@ -133,14 +133,13 @@ export const SelectionGridComponent = forwardRef<
         >
           <div
             draggable="false"
-            onMouseDown={(e) => handleSelectStart(x, y)}
-            onTouchStart={(e) => handleSelectStart(x, y)}
-            onMouseEnter={(e) => handleSelectNonFirstTile(x, y)}
+            onPointerDown={(e) => { (e.target as HTMLDivElement).releasePointerCapture(e.pointerId); handleSelectStart(x, y)}}
+            onPointerEnter={(e) => handleSelectNonFirstTile(x, y)}
             className={`z-20 ${
               !selecting || (selecting && isSelectableNonFirstTile(x, y))
                 ? "cursor-pointer"
                 : "cursor-default"
-            }`}
+            } touch-none`}
           >
             <TileComponent
               value={v}
@@ -176,10 +175,10 @@ export const SelectionGridComponent = forwardRef<
         onDragStart={(e) => {
           e.preventDefault();
         }}
-        onMouseUp={(e) => {
+        onPointerUp={(e) => {
           setSelecting(false);
         }}
-        onMouseLeave={(e) => {
+        onPointerLeave={(e) => {
           setSelecting(false);
         }}
         className="relative"
