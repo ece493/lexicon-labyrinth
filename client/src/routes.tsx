@@ -19,7 +19,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/lobby/:lobbyId",
-    element: <StateWrapper useURLParams />,
+    element: <StateWrapper useURLParams initScreen={ScreenState.START}/>,
   },
   {
     path: "/join",

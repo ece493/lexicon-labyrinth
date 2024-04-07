@@ -374,7 +374,7 @@ const Game: React.FC = () => {
                 ) : null}
               </div>
             </Fade>
-            <div className="flex align-top justify-center width w-full">
+            <div className="flex align-top justify-center width w-full ">
               <div className="flex flex-col items-center pt-5">
                 <TurnComponent
                   ref={turnRef}
@@ -390,7 +390,7 @@ const Game: React.FC = () => {
                     ctx?.lobby?.state?.board ?? [[]]
                   )}
                 />
-                <div className="flex flex-row items-start justify-center">
+                <div className="flex flex-col sm:flex-row sm:items-start items-center justify-center">
                   <PowerupsComponent
                     funds={
                       ctx.lobby?.players?.find((p) => p.id === ctx.playerId)
