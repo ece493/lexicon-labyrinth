@@ -199,7 +199,6 @@ async def one_player_and_two_bots_play(url, time_out, wait_time, base_difficulty
         
         for i in range(idx, len(send_recv)):
             assert await send_and_check_rcv(websocket, send_recv[i][0], player_id, send_recv[i][1], time_out, wait_time) is not None
-        # send_and_check_rcv(websocket, None, player_id, ["word_accepted", ""], time_out, wait_time)
 
 # base_difficulty can be 0 or 1
 async def full_lobby(url, time_out, wait_time):
