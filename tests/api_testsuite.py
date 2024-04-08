@@ -236,6 +236,113 @@ async def full_lobby(url, time_out, wait_time):
         bobJoinReq = {"action": "join_lobby", "data": {"player_name": "Bob", "lobby_code": lobbyCode}, "sequence_number": 0}
         assert await send_and_check_rcv(websocket, bobJoinReq, player_id, ["lobby_full"], time_out, wait_time) is not None
 
+
+async def use_rotate(url, time_out, wait_time):
+    send_recv_A = [
+        ({"action": "initialize", "data": {"player_name": "Alice"}, "sequence_number": 0}, ["successfully_joined_lobby"]),
+        ({"action": "ready_lobby", "sequence_number": 1}, ["start_game"]),
+        ({"action": "pick_rotate_powerup", "data": {"type": "row", "index": 0, "rotations": 1}, "sequence_number": 2}, ["rotate_powerup_accept"])
+    ]
+    
+    async with websockets.connect(url) as websocket_A:
+        init_A = await asyncio.wait_for(websocket_A.recv(), timeout=5)
+        init_A = json.loads(init_A)
+        player_id_A = init_A["player_id"]
+        print(player_id_A)
+
+        await send_and_check_rcv(websocket_A, send_recv_A[0][0], player_id_A, send_recv_A[0][1], time_out, wait_time) 
+        lobby_resp =  await send_and_check_rcv(websocket_A, send_recv_A[1][0], player_id_A, send_recv_A[1][1], time_out, wait_time)
+        original_row = json.loads(lobby_resp)["data"]["state"]["board"][0]
+        expected_row = [original_row [len(original_row) - 1]]
+        expected_row = expected_row + original_row[0:len(original_row) - 1]
+        
+        p_lobby_resp = await send_and_check_rcv(websocket_A, send_recv_A[2][0], player_id_A, send_recv_A[2][1], time_out, wait_time)
+
+        recv_row = json.loads(p_lobby_resp)["data"]["lobby"]["state"]["board"][0]
+        
+        assert recv_row == expected_row
+    
+async def use_scramble(url, time_out, wait_time):
+    send_recv_A = [
+        ({"action": "initialize", "data": {"player_name": "Alice"}, "sequence_number": 0}, ["successfully_joined_lobby"]),
+        ({"action": "ready_lobby", "sequence_number": 1}, ["start_game"]),
+        ({"action": "pick_scramble_powerup", "data": {"type": "row", "index": 0, "rotations": 1}, "sequence_number": 2}, ["scramble_powerup_accept"])
+    ]
+    
+    async with websockets.connect(url) as websocket_A:
+        init_A = await asyncio.wait_for(websocket_A.recv(), timeout=5)
+        init_A = json.loads(init_A)
+        player_id_A = init_A["player_id"]
+        print(player_id_A)
+
+        await send_and_check_rcv(websocket_A, send_recv_A[0][0], player_id_A, send_recv_A[0][1], time_out, wait_time) 
+        lobby_resp =  await send_and_check_rcv(websocket_A, send_recv_A[1][0], player_id_A, send_recv_A[1][1], time_out, wait_time)
+        original_board = json.loads(lobby_resp)["data"]["state"]["board"]
+        
+        p_lobby_resp = await send_and_check_rcv(websocket_A, send_recv_A[2][0], player_id_A, send_recv_A[2][1], time_out, wait_time)
+
+        recv_board = json.loads(p_lobby_resp)["data"]["lobby"]["state"]["board"]
+        
+        boards_equal = True
+        for i in range(len(original_board)):
+            for j in range(len(original_board[0])):
+                if not boards_equal:
+                    break
+                if original_board[i][j] != recv_board[i][j]:
+                    boards_equal = False
+                    break
+        
+        assert boards_equal == False
+
+
+async def use_swap(url, time_out, wait_time):
+    send_recv_A = [
+        ({"action": "initialize", "data": {"player_name": "Alice"}, "sequence_number": 0}, ["successfully_joined_lobby"]),
+        ({"action": "ready_lobby", "sequence_number": 1}, ["start_game"]),
+        ({"action": "pick_swap_powerup", "data": {"tiles": [[0, 0], [1, 0]]}, "sequence_number": 2}, ["swap_powerup_accept"])
+    ]
+    
+    async with websockets.connect(url) as websocket_A:
+        init_A = await asyncio.wait_for(websocket_A.recv(), timeout=5)
+        init_A = json.loads(init_A)
+        player_id_A = init_A["player_id"]
+        print(player_id_A)
+
+        await send_and_check_rcv(websocket_A, send_recv_A[0][0], player_id_A, send_recv_A[0][1], time_out, wait_time) 
+        lobby_resp =  await send_and_check_rcv(websocket_A, send_recv_A[1][0], player_id_A, send_recv_A[1][1], time_out, wait_time)
+        original_row = json.loads(lobby_resp)["data"]["state"]["board"][0]
+        expected_row = [original_row [1], original_row [0]]
+        expected_row = expected_row + original_row[2:len(original_row)]
+        
+        p_lobby_resp = await send_and_check_rcv(websocket_A, send_recv_A[2][0], player_id_A, send_recv_A[2][1], time_out, wait_time)
+
+        recv_row = json.loads(p_lobby_resp)["data"]["lobby"]["state"]["board"][0]
+        
+        assert recv_row == expected_row
+        
+async def use_transform(url, time_out, wait_time):
+    send_recv_A = [
+        ({"action": "initialize", "data": {"player_name": "Alice"}, "sequence_number": 0}, ["successfully_joined_lobby"]),
+        ({"action": "ready_lobby", "sequence_number": 1}, ["start_game"]),
+        ({"action": "pick_transform_powerup", "data": {"tile": [0, 0], "new_char": "X"}, "sequence_number": 2}, ["transform_powerup_accept"])
+    ]
+    
+    async with websockets.connect(url) as websocket_A:
+        init_A = await asyncio.wait_for(websocket_A.recv(), timeout=5)
+        init_A = json.loads(init_A)
+        player_id_A = init_A["player_id"]
+        print(player_id_A)
+
+        await send_and_check_rcv(websocket_A, send_recv_A[0][0], player_id_A, send_recv_A[0][1], time_out, wait_time) 
+        await send_and_check_rcv(websocket_A, send_recv_A[1][0], player_id_A, send_recv_A[1][1], time_out, wait_time)
+    
+        expected_val = "X"
+
+        p_lobby_resp = await send_and_check_rcv(websocket_A, send_recv_A[2][0], player_id_A, send_recv_A[2][1], time_out, wait_time)
+        recv_val = json.loads(p_lobby_resp)["data"]["lobby"]["state"]["board"][0][0]
+        
+        assert expected_val == recv_val
+
 @pytest.mark.asyncio
 async def test_lobby_interaction():
     await asyncio.create_task(make_one_move(URL, TIME_OUT, WAIT_TIME))
@@ -255,6 +362,22 @@ async def test_full_lobby():
 @pytest.mark.asyncio
 async def test_one_player_and_two_bots_play_till_death():
     await asyncio.create_task(one_player_and_two_bots_play(URL, 2*TIME_OUT, 2*WAIT_TIME))
+    
+@pytest.mark.asyncio
+async def test_use_rotate():
+    await asyncio.create_task(use_rotate(URL, 2*TIME_OUT, 2*WAIT_TIME))
+    
+@pytest.mark.asyncio
+async def test_use_scramble():
+    await asyncio.create_task(use_scramble(URL, 2*TIME_OUT, 2*WAIT_TIME))
+
+@pytest.mark.asyncio
+async def test_use_transform():
+    await asyncio.create_task(use_transform(URL, 2*TIME_OUT, 2*WAIT_TIME))
+    
+@pytest.mark.asyncio
+async def test_use_swap():
+    await asyncio.create_task(use_swap(URL, 2*TIME_OUT, 2*WAIT_TIME))
 
 # Run the test
 # py -m pytest api_testsuite.py
