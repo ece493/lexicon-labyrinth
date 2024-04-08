@@ -333,11 +333,11 @@ class Game:
 
     def get_next_non_spectator_player(self) -> tuple[int, Optional['Player']]:
         """Returns the next non-spectator player's index and object."""
-        next_index = self.find_next_non_spectator_player_index(
-            self.current_player_index)
+        next_index = self.find_next_non_spectator_player_index(self.current_player_index)
         if next_index != -1:
             return next_index, self.players[next_index]
         else:
+            raise Exception("No next non-spectator player! The game should have ended when only one player was left")
             return -1, None  # No non-spectator player found
 
     def next_turn(self) -> None:
@@ -347,8 +347,7 @@ class Game:
             self.current_player_index = next_index  # Update to the next player's index
             self.state = GameState.WAITING_FOR_MOVE
             # Inform all players whose turn it is now
-            self.broadcast_func(self.lobby_id, Action(
-                ActionEnum.START_TURN.value, next_player.player_id, self.to_json()))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.START_TURN.value, next_player.player_id, self.to_json()))
         else:
             # Handle the scenario where no non-spectator players are found
             pass  # This could involve checking game end conditions or handling errors
@@ -401,25 +400,21 @@ class Game:
 
     def handle_player_elimination_or_time_out(self, player_id) -> None:
         """Handles the scenario where a player is eliminated or runs out of time."""
-        # Implement player elimination logic
-        # This is a placeholder for any additional logic
-        # TODO: Implement additional player elimination logic here if necessary
-
         # Remove the player or deduct life
-        player = None
+        player_to_kill = None
         for player in self.players:
             if player.player_id == player_id:
-                player = player
+                player_to_kill = player
                 break
 
-        if player.lives > 1:
-            player.lives -= 1
+        if player_to_kill.lives > 1:
+            player_to_kill.lives -= 1
             self.broadcast_func(self.lobby_id, Action(ActionEnum.LOSE_LIFE.value, player_id, {
                                 "player_id": player_id, "lobby": self.to_json()}))
             self.state = GameState.TURN_END
             self.transition_to_next_player()
-        elif player.lives > 0:
-            player.lives -= 1
+        elif player_to_kill.lives == 1:
+            player_to_kill.lives -= 1
             self.eliminate_player(player_id)
         else:
             print("Player is already dead")
@@ -500,17 +495,13 @@ class Game:
                 break
         if player_to_eliminate.is_bot:
             # Remove the bot after telling it that it died
-            self.broadcast_func(self.lobby_id, Action(
-                ActionEnum.YOU_DIED.value, player_to_eliminate.player_id, self.to_json()))
-            self.broadcast_func(self.lobby_id, Action(
-                ActionEnum.LEAVE_GAME.value, player_to_eliminate.player_id, self.to_json()))
-            self.players = [
-                player for player in self.players if player.player_id != player_id]
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED.value, player_to_eliminate.player_id, self.to_json()))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.LEAVE_GAME.value, player_to_eliminate.player_id, self.to_json()))
+            self.players = [player for player in self.players if player.player_id != player_id]
         else:
             # Let the player watch the rest of the game as a spectator
             player_to_eliminate.is_spectator = True
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED.value, player_to_eliminate.player_id, {
-                                "lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED.value, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
 
         remaining_players = [
             player for player in self.players if not player.is_spectator]
@@ -520,8 +511,7 @@ class Game:
             self.winner_determined(remaining_players[0])
             self.game_complete = True
         else:
-            print(
-                f"A player got removed, but there's still players left to fight it out. The game goes on!")
+            print(f"A player got removed, but there's still players left to fight it out. The game goes on!")
             # Move onto the next player's turn!
             self.transition_to_next_player()
 
@@ -548,8 +538,7 @@ class Game:
         return False
 
     def add_funds(self, player_id: str, funds: int) -> bool:
-        player = next(
-            (p for p in self.players if p.player_id == player_id), None)
+        player = next((p for p in self.players if p.player_id == player_id), None)
         if player is not None:
             player.currency += funds
             return True
@@ -633,7 +622,7 @@ class Game:
             "timer": 123.4,
             "memory": [],
         }
-        game_stat_dict = {
+        game_state_dict = {
             "state": state,
             "max_lives": self.max_lives,
             "host": self.host,
@@ -642,7 +631,7 @@ class Game:
             "lobby_code": self.lobby_id,
             "players": [player.to_json() for player in self.players]
         }
-        return game_stat_dict
+        return game_state_dict
 
 
 class Player(object):
@@ -697,7 +686,10 @@ class Bot(Player, object):
         self.dict_trie = Trie()
         for word in self.dictionary:
             self.dict_trie.insert(word)
-
+        self.fail_probability = 0.25 if difficulty == BotDifficulty.EASY else (0.1 if difficulty == BotDifficulty.MEDIUM else 0.05)
+        self.time_limit_s: float = 1000.0
+        self.start_time_s: float = 0.0
+        self.min_time_to_submit_turn: float = 0.0
         self.send_to_game_func: Callable = send_to_game_func
 
     def check_whether_prefix_is_in_dictionary(self, prefix: str) -> bool:
@@ -735,13 +727,19 @@ class Bot(Player, object):
 
     def process_bot_action(self, message: 'Action') -> None:
         # Process the message and simulate a bot response/action
-        print(f"Bot is processing message of action {message}")
+        #print(f"Bot is processing message of action {message}")
         if message.action == ActionEnum.START_GAME.value:
             print(f"Bot {self.player_id} is ready to start game!")
+            # Update the time limit with the actual lobby's time limit
+            self.time_limit_s = float(message.data['timer_setting'])
+            assert isinstance(self.time_limit_s, float)
+            self.min_time_to_submit_turn: float = random.triangular(0.0, self.time_limit_s, 0.0)
+            print(f"Bot's time limit is {self.time_limit_s}")
         elif message.action == ActionEnum.START_TURN.value:
             print(message.data)
             if message.data['state']['curr_turn'] != self.player_id:
-                print(f"Next turn. It isn't bot {self.player_id}'s turn")
+                #print(f"Next turn. It isn't bot {self.player_id}'s turn")
+                pass
             else:
                 print(f"It's my turn! Bot: {self.player_id}")
                 self.do_turn(message)
@@ -753,11 +751,11 @@ class Bot(Player, object):
             for (col, row) in message.data['path']:
                 word += message.data['lobby']['state']['board'][row][col]
             print(f"Bot {self.player_id} is adding word '{word}' to its list of used up words.")
-            self.memory.add(word)
+            self.memory.add(word.lower())
         elif message.action == ActionEnum.WORD_DENIED.value:
             if message.data['lobby']['state']['curr_turn'] == self.player_id:
                 print(f"Crap, I'm bot {self.player_id} and my word got denied! Redoing the bot stuff and trying to submit a new action.")
-                #self.do_turn()
+                self.do_turn()
             else:
                 print(f"I'm bot {self.player_id} and phew, someone else's word got denied bwahaha")
                 pass
@@ -766,6 +764,7 @@ class Bot(Player, object):
         pass
 
     def do_turn(self, message: 'Action') -> None:
+        self.start_time_s = time.perf_counter()
         game_board: list[list[str]] = message.data['state']['board']
         print(message.data)
         bot_representation_in_lobby: dict[str, Any] = get_player_from_id_dicts(message.data['players'], self.player_id)
@@ -802,14 +801,27 @@ class Bot(Player, object):
                             return result
             return None, None
         
+        # Check whether we just want the bot to fail to find a word on this turn
+        if random.random() < self.fail_probability:
+            print(f"Bot purposely fails to find a word and is sleeping for {self.min_time_to_submit_turn} s")
+            time.sleep(self.min_time_to_submit_turn)
+            self.send_message_to_game(ActionEnum.END_TURN, {})
+            return
+
         # The search algorithm is akin to how a player looks for words. Trace out a random path and see whether it spells out a known word
         # Try to find a word starting from a random position
-        for _ in range(2000000):  # Limit attempts
+        for i in range(2000000):  # Limit attempts
+            print(f"Bot search iteration {i}")
+            if time.perf_counter() - self.start_time_s >= self.time_limit_s:
+                break
             start_x, start_y = random.randint(0, board_size - 1), random.randint(0, board_size - 1)
             start_letter = game_board[start_x][start_y]
             word, path = find_word(start_x, start_y, [(start_y, start_x)], start_letter)
             if word is not None and path is not None:
                 print(f"Found word: {word} at path {path}")
+                if time.perf_counter() - self.start_time_s < self.min_time_to_submit_turn:
+                    print(f"Sleeping for an additional {self.min_time_to_submit_turn - (time.perf_counter() - self.start_time_s)} s since min time is {self.min_time_to_submit_turn} s and we've only spent {time.perf_counter() - self.start_time_s} s")
+                    time.sleep(self.min_time_to_submit_turn - (time.perf_counter() - self.start_time_s))
                 self.send_message_to_game(ActionEnum.PICK_WORD, path)
                 return
         print("Failed to find a word this turn.")
@@ -958,7 +970,7 @@ class GameDictionary(object):
         return word.lower() in self.words
 
     def get_word_score(self, word) -> int:
-        # Based on the letters used in the word and how long it is, give the player a score
+        # Based on the letters used in the word, give the player a score
         sum = 0
         for c in word:
             sum = sum + self.letter_values[c]
