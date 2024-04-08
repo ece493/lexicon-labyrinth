@@ -19,7 +19,7 @@ import {
 import StartPage from "./start";
 import { StateWrapper } from "./state-wrapper";
 
-
+// No FR - For Tests
 export const TestDoubleStateWrapper: React.FC = (
 ) => {
   const [lobbyCode, setLobbyCode ] = useState<string>("");

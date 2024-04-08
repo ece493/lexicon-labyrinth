@@ -3,8 +3,8 @@ import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { GridComponent } from "../grid";
 import { TileComponent, nullTile, isTileEqual } from "../tile";
 import { motion } from "framer-motion";
-import React from "react";
 
+// FR33 - Powerup.Rotate, FR35 - Powerup.Swap ,FR36 - Powerup.Transform
 interface PowerupVisComponentProps {
   grid: Board;
   board_size: [number, number];
@@ -13,10 +13,12 @@ interface PowerupVisComponentProps {
   speed?: number
 }
 
+// FR33 - Powerup.Rotate, FR35 - Powerup.Swap ,FR36 - Powerup.Transform
 function timeout(delay: number) {
   return new Promise((res) => setTimeout(res, delay));
 }
 
+// FR33 - Powerup.Rotate
 function getSingleRotatedTilePos(
   type: string,
   index: number,
@@ -130,6 +132,7 @@ function getSingleRotatedTilePos(
   return newTilePos;
 }
 
+// FR33 - Powerup.Rotate, FR35 - Powerup.Swap ,FR36 - Powerup.Transform
 type TilePos = { x: number; y: number; o: number; s: boolean };
 const shiftVal = 64;
 function getDefaultPosGrid(grid: Board): TilePos[][] {
@@ -144,6 +147,7 @@ function getDefaultPosGrid(grid: Board): TilePos[][] {
   return tilePos;
 }
 
+// FR33 - Powerup.Rotate
 function getShowAllGrid(tilePos: TilePos[][]): TilePos[][] {
   const newTilePos: TilePos[][] = [];
 
@@ -161,6 +165,7 @@ function getShowAllGrid(tilePos: TilePos[][]): TilePos[][] {
   return newTilePos;
 }
 
+// FR33 - Powerup.Rotate, FR35 - Powerup.Swap ,FR36 - Powerup.Transform
 export interface PowerupVisComponentRef {
   swap: (t: number[][], onComplete: () => void) => void;
   rotate: (
@@ -172,6 +177,7 @@ export interface PowerupVisComponentRef {
   transform: (tile: number[], char: string, onComplete: () => void) => void;
 }
 
+// FR33 - Powerup.Rotate, FR35 - Powerup.Swap ,FR36 - Powerup.Transform
 export const PowerupVisComponent = forwardRef<
   PowerupVisComponentRef,
   PowerupVisComponentProps
@@ -182,6 +188,7 @@ export const PowerupVisComponent = forwardRef<
   const [showSelf, setShowSelf] = useState(false);
 
   useImperativeHandle(ref, () => ({
+    // FR35 - Powerup.Swap
     swap(tiles: number[][], onComplete: () => void) {
       setShowSelf(true);
       setWord("Swapping...");
@@ -210,6 +217,7 @@ export const PowerupVisComponent = forwardRef<
         }, 400);
       }, 100);
     },
+    // FR33 - Powerup.Rotate
     async rotate(
       type: string,
       index: number,
@@ -240,6 +248,7 @@ export const PowerupVisComponent = forwardRef<
         setShowSelf(false);
       }, speed? speed*1000/3 : 200);
     },
+    // FR36 - Powerup.Transform
     transform(tile: number[], char: string, onComplete: () => void) {
       setShowSelf(true);
       setWord("Transforming...");
@@ -267,6 +276,7 @@ export const PowerupVisComponent = forwardRef<
     setTilePositions(getDefaultPosGrid(grid));
   }, [grid]);
 
+  // FR33 - Powerup.Rotate, FR35 - Powerup.Swap ,FR36 - Powerup.Transform
   function buildTile(x: number, y: number, v: string) {
     return (
       <motion.div

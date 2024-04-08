@@ -4,6 +4,7 @@ import { Player } from "../../data/model";
 
 interface LifeIconComponentProps {}
 
+// FR22 - Game.Lives.Show
 const LifeIcon: React.FC<LifeIconComponentProps> = ({}) => {
   return (
     <svg

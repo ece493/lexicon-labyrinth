@@ -1,5 +1,6 @@
 import React from "react";
 
+// FR34 - Powerup.Refresh
 const ScrambleIcon: React.FC = () => {
   return (
     <svg

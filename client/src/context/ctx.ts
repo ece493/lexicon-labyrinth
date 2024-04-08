@@ -9,6 +9,7 @@ import {
   GetReceiveCallbacksDefault,
 } from "../ws-client/receive-callbacks";
 
+// FR18 - Game.Valid.Word, FR19 - Game.Reused.Word
 export type GameContextData = {
   playerName: String;
   setPlayerName: (s: string) => void;
@@ -28,6 +29,7 @@ export type GameContextData = {
   pauseMessages: { pause: boolean };
 };
 
+// FR18 - Game.Valid.Word, FR19 - Game.Reused.Word
 export const GameContext = createContext<GameContextData>({
   playerName: "",
   setPlayerName: (s: string) => {},

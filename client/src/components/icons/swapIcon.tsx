@@ -1,5 +1,6 @@
 import React from "react";
 
+// FR35 - Powerup.Swap
 const SwapIcon: React.FC = () => {
   return (
     <svg

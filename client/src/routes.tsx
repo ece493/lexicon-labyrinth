@@ -7,6 +7,7 @@ import { StateWrapper } from "./pages/state-wrapper";
 import { TestDoubleStateWrapper } from "./pages/test-double-state-wrapper";
 import { ScreenState } from "./data/model";
 
+/* No FR-Foundational App file */
 //https://stackoverflow.com/questions/35352638/how-to-get-parameter-value-from-query-string
 export const router = createBrowserRouter([
   {

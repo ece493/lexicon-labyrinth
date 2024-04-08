@@ -5,6 +5,7 @@ import { TileComponent, nullTile, isTileEqual } from "../tile";
 import { GridComponent } from "../grid";
 import { GameContext } from "../../../context/ctx";
 
+// FR36 - Powerup.Transform
 const alphabetTiles = [
   ["A", "B", "C", "D", "E"],
   ["F", "G", "H", "I", "J"],
@@ -14,6 +15,7 @@ const alphabetTiles = [
   ["Z"],
 ];
 
+// FR36 - Powerup.Transform
 interface TransformGridComponentProps {
   grid: Board;
   board_size: [number, number];

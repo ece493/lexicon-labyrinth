@@ -6,6 +6,7 @@ interface FundsIconComponentProps {
   small?: boolean;
 }
 
+// FR29 - Powerup.Display
 const FundsIcon: React.FC<FundsIconComponentProps> = ({ small }) => {
   return (
     <svg

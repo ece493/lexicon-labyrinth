@@ -27,6 +27,7 @@ const prices = {
   swap: 8,
 };
 
+// FR33 - Powerup.Rotate, FR35 - Powerup.Swap ,FR36 - Powerup.Transform, FR34 - Powerup.Refresh, FR29 - Powerup.Display
 const PowerupsComponent: React.FC<PowerupsComponentProp> = ({
   funds,
   powerup,
