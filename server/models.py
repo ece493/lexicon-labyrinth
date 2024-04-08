@@ -811,7 +811,7 @@ class Bot(Player, object):
         # The search algorithm is akin to how a player looks for words. Trace out a random path and see whether it spells out a known word
         # Try to find a word starting from a random position
         for i in range(2000000):  # Limit attempts
-            print(f"Bot search iteration {i}")
+            # print(f"Bot search iteration {i}")
             if time.perf_counter() - self.start_time_s >= self.time_limit_s:
                 break
             start_x, start_y = random.randint(0, board_size - 1), random.randint(0, board_size - 1)
@@ -821,7 +821,8 @@ class Bot(Player, object):
                 print(f"Found word: {word} at path {path}")
                 if time.perf_counter() - self.start_time_s < self.min_time_to_submit_turn:
                     print(f"Sleeping for an additional {self.min_time_to_submit_turn - (time.perf_counter() - self.start_time_s)} s since min time is {self.min_time_to_submit_turn} s and we've only spent {time.perf_counter() - self.start_time_s} s")
-                    time.sleep(self.min_time_to_submit_turn - (time.perf_counter() - self.start_time_s))
+                    sleep_time = self.min_time_to_submit_turn - (time.perf_counter() - self.start_time_s)
+                    time.sleep(max(sleep_time, 0))
                 self.send_message_to_game(ActionEnum.PICK_WORD, path)
                 return
         print("Failed to find a word this turn.")

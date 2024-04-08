@@ -1,7 +1,7 @@
 # Lexicon Labyrinth
 
 ## Setup/Deployment Instructions
-1. Deployment has been automated using Docker! Ensure that you have Docker Compose or Docker Desktop installed. To learn how to do so, please visit: https://docs.docker.com/compose/install/
+1. Deployment has been automated using Docker! Ensure that you have Docker Compose or Docker Desktop installed. To learn how to do so, please visit: [https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/).
 2. After installing Docker, from your cli run:
 ```
 docker compose up
