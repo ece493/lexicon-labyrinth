@@ -24,7 +24,7 @@ async def get_bot_failure_rate(difficulty: BotDifficulty):
     await asyncio.gather(*tasks)
     cnt_found_words = len([log.value for log in bot_msg_log if log==ActionEnum.PICK_WORD])
     # cnt_failed = len([log.value for log in bot_msg_log if log==ActionEnum.END_TURN])
-    print(f"bot has {cnt_found_words/len(bot_msg_log)}% success rate")
+    print(f"bot has {100*cnt_found_words/len(bot_msg_log)}% success rate")
     return 100*cnt_found_words/len(bot_msg_log)
 
 @pytest.mark.asyncio
