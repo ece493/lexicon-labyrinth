@@ -14,17 +14,20 @@ import LifeIcon from "../icons/lifeIcon";
 import DeadIcon from "../icons/deadIcon";
 import PlayerCard from "./playerCard";
 
+// FR22 - Game.Lives.Show
 interface PlayersComponentProp {
   players: Player[];
   powerup: string | null;
   currentTurn: string;
 }
 
+// FR22 - Game.Lives.Show
 export interface PlayersRef {
   endPlayer: (pId: string, setLobbyState: () => void) => void;
   loseLife: (pId: string, setLobbyState: () => void) => void;
 }
 
+// FR22 - Game.Lives.Show
 const PlayersComponent = forwardRef<PlayersRef, PlayersComponentProp>(
   ({ players, powerup, currentTurn }, ref) => {
     useImperativeHandle(ref, () => ({

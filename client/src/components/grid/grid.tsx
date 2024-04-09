@@ -7,6 +7,7 @@ interface GridComponentProps {
   buildChild: (x: number, y: number, value: string) => ReactNode;
 }
 
+// FR33 - Powerup.Rotate, FR35 - Powerup.Swap ,FR36 - Powerup.Transform, FR34 - Powerup.Refresh, FR17 - Tile.Drag
 export const GridComponent: React.FC<GridComponentProps> = ({
   grid,
   board_size,

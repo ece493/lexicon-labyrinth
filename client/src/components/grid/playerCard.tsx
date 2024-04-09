@@ -20,6 +20,7 @@ interface PlayerCardProps {
   shake?: boolean;
 }
 
+// FR22 - Game.Lives.Show
 function getLivesIcons(lives: number) {
   let icons = [];
   for (let i = 0; i < lives && i < 4; i += 1) {

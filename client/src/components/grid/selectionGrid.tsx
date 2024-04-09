@@ -5,6 +5,7 @@ import { TileComponent, nullTile, isTileEqual } from "./tile";
 import { Fade } from "@mui/material";
 import { motion } from "framer-motion";
 
+// FR17 - Tile.Drag
 interface GridComponentProps {
   grid: Board;
   board_size: [number, number];
@@ -17,10 +18,12 @@ interface GridComponentProps {
   disabled?: boolean;
 }
 
+// FR17 - Tile.Drag
 export interface SelectGridRef {
   fadePath: (t: number, setNewLobby: () => void) => void;
 }
 
+// FR17 - Tile.Drag
 export const SelectionGridComponent = forwardRef<
   SelectGridRef,
   GridComponentProps

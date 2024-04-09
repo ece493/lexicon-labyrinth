@@ -1,5 +1,6 @@
 import React from "react";
 
+// FR33 - Powerup.Rotate
 const UpIcon: React.FC = () => {
   return (
     <svg

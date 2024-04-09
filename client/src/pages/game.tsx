@@ -16,7 +16,6 @@ import { GameContext } from "../context/ctx";
 import { isJSDocNullableType } from "typescript";
 import { Fade, Zoom, CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
-import { lobby1, lobby2, lobby3 } from "../mocks/lobbyMocks";
 import {
   PowerupVisComponent,
   PowerupVisComponentRef,

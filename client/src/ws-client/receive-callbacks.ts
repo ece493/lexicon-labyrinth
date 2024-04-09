@@ -1,5 +1,6 @@
 import { Board, Lobby } from "../data/model";
 
+// FR33 - Powerup.Rotate, FR35 - Powerup.Swap ,FR36 - Powerup.Transform, FR34 - Powerup.Refresh, FR17 - Tile.Drag
 export type ReceiveCallbacks = {
   handleWordAccept: (path: number[][], lobby: Lobby) => void;
   handleWordDeny: (path: number[][], tiles: Board) => void;
@@ -19,6 +20,7 @@ export type ReceiveCallbacks = {
   handleSwapAccept: (lobby: Lobby, tiles: number[][]) => void;
 };
 
+// FR33 - Powerup.Rotate, FR35 - Powerup.Swap ,FR36 - Powerup.Transform, FR34 - Powerup.Refresh, FR17 - Tile.Drag
 export const GetReceiveCallbacksDefault = () => {
   return {
     handleWordAccept: (path: number[][], lobby: Lobby) =>

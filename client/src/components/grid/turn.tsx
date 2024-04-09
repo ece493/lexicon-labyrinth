@@ -33,6 +33,7 @@ export interface TurnRef {
   shakeWord: () => void;
 }
 
+// FR17 - Tile.Drag 
 const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
   (
     {

@@ -1,3 +1,4 @@
+// FR33 - Powerup.Rotate, FR35 - Powerup.Swap ,FR36 - Powerup.Transform, FR34 - Powerup.Refresh, FR17 - Tile.Drag
 export enum ActionsList {
     // Client Actions
     initialize = "initialize",

@@ -4,6 +4,7 @@ import { TileComponent, isTileEqual, nullTile } from "../tile";
 import { GridComponent } from "../grid";
 import { GameContext } from "../../../context/ctx";
 
+// FR35 - Powerup.Swap
 interface SwapGridComponentProps {
   grid: Board;
   board_size: [number, number];
@@ -12,7 +13,7 @@ interface SwapGridComponentProps {
   setHelp: any;
   resetWordSelection: () => void;
 }
-
+// FR35 - Powerup.Swap
 export const SwapGridComponent: React.FC<SwapGridComponentProps> = ({
   grid,
   board_size,
