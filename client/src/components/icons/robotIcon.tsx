@@ -4,6 +4,7 @@ import { Player } from "../../data/model";
 
 interface RobotIconComponentProps {}
 
+// FR23 - Game.Lives.Die
 const RobotIcon: React.FC<RobotIconComponentProps> = ({}) => {
   return (
     <svg

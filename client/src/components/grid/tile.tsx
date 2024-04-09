@@ -51,6 +51,7 @@ const letterPoints: { [key: string]: number } = {
   Z: 10,
 };
 
+// FR16 - Tile.Letter
 const TileComponent: React.FC<TileComponentProps> = ({
   value,
   transparent,

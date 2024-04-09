@@ -114,6 +114,7 @@ const readyLobby = (ctx: GameContextData) => {
   ctx.sequenceNumber += 1;
 };
 
+// FR18 - Game.Valid.Word
 const pickWord = (path: number[][], ctx: GameContextData) => {
   ctx.setFreezeInputs(true)
   console.log(
@@ -132,6 +133,7 @@ const pickWord = (path: number[][], ctx: GameContextData) => {
   ctx.sequenceNumber += 1;
 };
 
+// FR33 - Powerup.Rotate
 const pickRotatePowerup = (
   type: string,
   index: number,
@@ -150,6 +152,7 @@ const pickRotatePowerup = (
   ctx.sequenceNumber += 1;
 };
 
+// FR34 - Powerup.Refresh
 const pickScramblePowerup = (ctx: GameContextData) => {
   ctx.setFreezeInputs(true)
   console.log("sending scramble request");
@@ -163,6 +166,7 @@ const pickScramblePowerup = (ctx: GameContextData) => {
   ctx.sequenceNumber += 1;
 };
 
+// FR35 - Powerup.Swap
 const pickSwapPowerup = (tiles: number[][], ctx: GameContextData) => {
   ctx.setFreezeInputs(true)
   console.log("sending swap request with: ", tiles);
@@ -176,6 +180,7 @@ const pickSwapPowerup = (tiles: number[][], ctx: GameContextData) => {
   ctx.sequenceNumber += 1;
 };
 
+// FR36 - Powerup.Transform
 const pickTransformPowerup = (
   tile: number[],
   newChar: string,
@@ -193,6 +198,7 @@ const pickTransformPowerup = (
   ctx.sequenceNumber += 1;
 };
 
+// FR20 - Game.Turns
 const leaveGame = (ctx: GameContextData) => {
   console.log("sending leave request");
   const msg: Action = {
@@ -205,6 +211,7 @@ const leaveGame = (ctx: GameContextData) => {
   ctx.sequenceNumber += 1;
 };
 
+// FR20 - Game.Turns
 const notifyTurnEnd = (ctx: GameContextData) => {
   ctx.setFreezeInputs(true)
   console.log("sending turn end request");

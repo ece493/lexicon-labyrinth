@@ -5,6 +5,7 @@ import ButtonComponent from "../components/grid/button";
 import { ScreenState } from "../data/model";
 import { Fade } from "@mui/material";
 
+// FR26 - Game.Winner
 const EndPage: React.FC = () => {
   const ctx = useContext(GameContext);
   const winner = ctx.lobby?.players.find((p) => p.lives > 0);

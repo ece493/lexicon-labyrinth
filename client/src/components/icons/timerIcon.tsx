@@ -4,6 +4,7 @@ import { Player } from "../../data/model";
 
 interface TimerIconComponentProps {}
 
+// FR21 - Game.Timer
 const TimerIcon: React.FC<TimerIconComponentProps> = ({}) => {
   return (
     <svg

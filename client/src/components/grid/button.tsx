@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Button } from "@mui/material";
 import { motion } from "framer-motion";
 
@@ -12,6 +12,7 @@ interface ButtonComponentProps {
   flourish?: boolean;
 }
 
+// FR33 - Powerup.Rotate, FR35 - Powerup.Swap ,FR36 - Powerup.Transform, FR34 - Powerup.Refresh
 const ButtonComponent: React.FC<ButtonComponentProps> = ({
   label,
   onClick,

@@ -10,6 +10,7 @@ import { GridComponent } from "../grid";
 import { GameContext } from "../../../context/ctx";
 import { PowerupVisComponent, PowerupVisComponentRef } from "./powerupVis";
 
+// FR33 - Powerup.Rotate
 interface RotateGridComponentProps {
   ogGrid: Board;
   board_size: [number, number];

@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* No FR-Foundational App file */
 body {
   margin: 0;
   background-color: #60A5FA;
