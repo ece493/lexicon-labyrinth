@@ -49,7 +49,7 @@ const LobbySettingsAdminComponent: React.FC<LobbyProps> = ({ ...p }) => {
                 <p className="m-0 text-slate-100">Lobby Code</p>
                 <div className="m-0 flex flex-row w-full">
                     <h1 className="m-0 text-slate-100 text-3xl mr-2">{p.lobby.lobby_code}</h1>
-                    <IconButton className="my-auto"
+                    <IconButton className="my-auto" disabled={!navigator.clipboard}
                         onClick={() => navigator.clipboard.writeText(`http://localhost:3000/lobby/${p.lobby.lobby_code}`)}>
                         <ContentCopyIcon className="invert" />
                     </IconButton>
