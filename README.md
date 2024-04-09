@@ -1,7 +1,8 @@
-Please view this document on github for the best experience.
+# Lexicon Labyrinth
 
-# Setup/Deployment Instructions
-1. Deployment has been automated using Docker! Ensure that you have Docker Compose or Docker Desktop installed. To learn how to do so, please visit: https://docs.docker.com/compose/install/
+## Setup/Deployment Instructions
+1. Deployment has been automated using Docker! Ensure that you have Docker Compose or Docker Desktop installed. To learn how to do so, please visit: [https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/).
+Please view this document on github for the best experience.
 2. After installing Docker, from your cli run:
 ```
 docker compose up
@@ -142,8 +143,4 @@ The swap powerup will allow you to swap any two tiles on the board. Clicking the
 Click the continue button to return to the start screen
 
 ![image](https://github.com/ece493/lexicon-labyrinth/assets/74114171/fe16cabd-7651-43b6-87eb-e5915619619b)
-
-
-
-
 
