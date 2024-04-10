@@ -53,6 +53,24 @@ def test_dictionary():
         assert s.isalpha()
     assert set(scowl).issuperset(set(dictionary))
 
+def test_bots_vocab():
+    dictionary = load_dict(DICT_DIR_PATH+EASY_DICT_PATH)
+    scowl = load_dict(DICT_DIR_PATH+"scowl.txt")
+    for s in dictionary:
+        assert s.isalpha()
+    assert set(scowl).issuperset(set(dictionary))
+
+def test_easy_med_bot_vocab_comparison():
+    easy_dict = load_dict(DICT_DIR_PATH+EASY_DICT_PATH)
+    med_dict = load_dict(DICT_DIR_PATH+MED_DICT_PATH)
+    assert len(med_dict)>len(easy_dict)
+
+def test_med_hard_bot_vocab_comparison():
+    med_dict = load_dict(DICT_DIR_PATH+MED_DICT_PATH)
+    hard_dict = load_dict(DICT_DIR_PATH+HARD_DICT_PATH)
+    assert len(hard_dict)>len(med_dict)
+
+
 @pytest.mark.asyncio
 async def test_easy_bot():
     success_rate = await get_bot_failure_rate(BotDifficulty.EASY)
