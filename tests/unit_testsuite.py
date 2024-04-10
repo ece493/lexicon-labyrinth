@@ -10,7 +10,7 @@ import random
 
 NUM_BOT_RUNS = 175
 TIMER_SETTING = 3
-BOARD_SIZE = 7
+BOARD_SIZE = 10
 
 # here we generate the boards the same way we do in-game
 # https://www3.nd.edu/~busiforc/handouts/cryptography/letterfrequencies.html
@@ -73,12 +73,12 @@ def test_med_hard_bot_vocab_comparison():
 @pytest.mark.asyncio
 async def test_easy_bot():
     success_rate = await get_bot_failure_rate(BotDifficulty.EASY)
-    assert 65<=success_rate<=85
+    assert 70<=success_rate<=80
 
 @pytest.mark.asyncio
 async def test_medium_bot():
     success_rate = await get_bot_failure_rate(BotDifficulty.MEDIUM)
-    assert 75<=success_rate<=100
+    assert 80<=success_rate<=100
 
 @pytest.mark.asyncio
 async def test_hard_bot():
