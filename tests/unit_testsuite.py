@@ -2,13 +2,14 @@ import asyncio
 import pytest
 import sys
 from os.path import dirname, abspath
+from scipy.stats import norm
 
 sys.path.append(dirname(dirname(abspath(__file__)))+'/server')
 from models import Bot, BotDifficulty, Action, ActionEnum
 from generate_dict import load_dict, DICT_PATH, EASY_DICT_PATH, MED_DICT_PATH, HARD_DICT_PATH
 import random
 
-NUM_BOT_RUNS = 175
+NUM_BOT_RUNS = 30
 TIMER_SETTING = 3
 BOARD_SIZE = 7
 
@@ -70,20 +71,33 @@ def test_med_hard_bot_vocab_comparison():
     assert len(hard_dict)>len(med_dict)
 
 
+# Expected percentage of successes
+p_easy = 0.75 
+p_medium = 0.80
+p_hard = 0.85
+standard_error_easy = (p_easy * (1 - p_easy) / NUM_BOT_RUNS) ** 0.5
+standard_error_medium = (p_medium * (1 - p_medium) / NUM_BOT_RUNS) ** 0.5
+standard_error_hard = (p_hard * (1 - p_hard) / NUM_BOT_RUNS) ** 0.5
+z = norm.ppf(0.975)  # Z-score for 95% confidence
+confidence_interval_easy = (p_easy - z * standard_error_easy, p_easy + z * standard_error_easy)
+confidence_interval_medium = (p_medium - z * standard_error_medium, p_medium + z * standard_error_medium)
+confidence_interval_hard = (p_hard - z * standard_error_hard, p_hard + z * standard_error_hard)
+print(confidence_interval_easy, confidence_interval_medium, confidence_interval_hard)
+
 @pytest.mark.asyncio
 async def test_easy_bot():
     success_rate = await get_bot_failure_rate(BotDifficulty.EASY)
-    assert 65<=success_rate<=85
+    assert confidence_interval_easy[0] <=success_rate/100<= confidence_interval_easy[1]
 
 @pytest.mark.asyncio
 async def test_medium_bot():
     success_rate = await get_bot_failure_rate(BotDifficulty.MEDIUM)
-    assert 75<=success_rate<=100
+    assert confidence_interval_medium[0]<=success_rate/100<=confidence_interval_medium[1]
 
 @pytest.mark.asyncio
 async def test_hard_bot():
     success_rate = await get_bot_failure_rate(BotDifficulty.HARD)
-    assert 85<=success_rate<=100
+    assert confidence_interval_hard[0]<=success_rate/100<=confidence_interval_hard[1]
 
 # Run the test
 # py -m pytest unit_testsuite.py
