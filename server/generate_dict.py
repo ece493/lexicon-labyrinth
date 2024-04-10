@@ -5,10 +5,10 @@ EASY_DICT_PATH = 'easy_bot_dictionary.txt'
 MED_DICT_PATH = 'medium_bot_dictionary.txt'
 HARD_DICT_PATH = 'hard_bot_dictionary.txt'
 
-def load_dict():
+def load_dict(path):
     start_processing = False
     words = []
-    with open(DICT_PATH, 'r', encoding='utf8') as file:
+    with open(path, 'r', encoding='utf8') as file:
         for line in file:
             # Strip newline and other trailing whitespace characters
             line = line.strip()
@@ -28,7 +28,7 @@ def write_pd(dictionary: pd.DataFrame, path: str):
             file.write("\n")
 
 if __name__ == "__main__":
-    dictionary = pd.DataFrame(load_dict())
+    dictionary = pd.DataFrame(load_dict(DICT_PATH))
 
     mask = (dictionary[0].str.len() <= 5)
     easy = dictionary.loc[mask].sample(frac=0.3)
