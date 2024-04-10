@@ -6,6 +6,7 @@ from scipy.stats import norm
 
 sys.path.append(dirname(dirname(abspath(__file__)))+'/server')
 from models import Bot, BotDifficulty, Action, ActionEnum
+from generate_dict import load_dict, DICT_PATH, EASY_DICT_PATH, MED_DICT_PATH, HARD_DICT_PATH
 import random
 
 NUM_BOT_RUNS = 30
@@ -45,6 +46,31 @@ async def get_bot_failure_rate(difficulty: BotDifficulty):
     print(f"bot has {100*cnt_found_words/len(bot_msg_log)}% success rate")
     return 100*cnt_found_words/len(bot_msg_log)
 
+def test_dictionary():
+    dictionary = load_dict(DICT_PATH)
+    scowl = load_dict("scowl.txt")
+    for s in dictionary:
+        assert s.isalpha()
+    assert set(scowl).issuperset(set(dictionary))
+
+def test_bots_vocab():
+    dictionary = load_dict(EASY_DICT_PATH)
+    scowl = load_dict("scowl.txt")
+    for s in dictionary:
+        assert s.isalpha()
+    assert set(scowl).issuperset(set(dictionary))
+
+def test_easy_med_bot_vocab_comparison():
+    easy_dict = load_dict(EASY_DICT_PATH)
+    med_dict = load_dict(MED_DICT_PATH)
+    assert len(med_dict)>len(easy_dict)
+
+def test_med_hard_bot_vocab_comparison():
+    med_dict = load_dict(MED_DICT_PATH)
+    hard_dict = load_dict(HARD_DICT_PATH)
+    assert len(hard_dict)>len(med_dict)
+
+
 # Expected percentage of successes
 p_easy = 0.75 
 p_medium = 0.80
@@ -57,6 +83,7 @@ confidence_interval_easy = (p_easy - z * standard_error_easy, p_easy + z * stand
 confidence_interval_medium = (p_medium - z * standard_error_medium, p_medium + z * standard_error_medium)
 confidence_interval_hard = (p_hard - z * standard_error_hard, p_hard + z * standard_error_hard)
 print(confidence_interval_easy, confidence_interval_medium, confidence_interval_hard)
+
 @pytest.mark.asyncio
 async def test_easy_bot():
     success_rate = await get_bot_failure_rate(BotDifficulty.EASY)
