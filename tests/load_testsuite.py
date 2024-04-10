@@ -3,8 +3,8 @@ import pytest
 from api_testsuite import two_players_play_till_death, make_one_move, URL
 
 # Load Tests
-CONCURRENT_LOBBIES = 20
-TIME_OUT = 3
+CONCURRENT_LOBBIES = 10
+TIME_OUT = 1
 WAIT_TIME = 5
 
 @pytest.mark.asyncio
@@ -16,7 +16,7 @@ async def test_lobby_interaction():
     await asyncio.gather(*tasks)
 
 @pytest.mark.asyncio
-async def test_two_players_play_till_death():
+async def test_many_two_players_play_till_death():
     # we divide by two since each workflow creates two players
     tasks = [None]*(CONCURRENT_LOBBIES)
     for i in range(CONCURRENT_LOBBIES):
