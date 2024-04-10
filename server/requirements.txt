@@ -4,3 +4,4 @@ aioconsole
 websockets
 pytest
 pytest-asyncio
+pandas
