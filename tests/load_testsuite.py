@@ -24,7 +24,7 @@ async def test_two_players_play_till_death():
     await asyncio.gather(*tasks)
 
 # Run the test
-# py -m pytest api_testsuite.py
+# py -m pytest load_testsuite.py
 
 # otherwise
 # asyncio.run(test_lobby_interaction())
