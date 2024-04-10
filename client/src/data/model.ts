@@ -1,5 +1,6 @@
 import { ActionsList } from "../ws-client/model";
 
+// FR18 - Game.Valid.Word, FR19 - Game.Reused.Word
 export type Lobby = {
     state: GameState;
     max_lives: number;
@@ -10,6 +11,7 @@ export type Lobby = {
     players: (Player|Bot)[];
 };
 
+// FR18 - Game.Valid.Word, FR19 - Game.Reused.Word
 export type GameState = {
     curr_turn: string;
     board: Board;
@@ -17,9 +19,10 @@ export type GameState = {
     memory: string[];
 };
 
+// FR18 - Game.Valid.Word, FR19 - Game.Reused.Word
 export type Board =  string[][];
 
-
+// FR22 - Game.Lives.Show
 export type Player = {
     id: string;
     name: string;
@@ -28,11 +31,13 @@ export type Player = {
     money: number;
 };
 
+// FR22 - Game.Lives.Show
 export type Bot = Player & {
     difficulty: number;
     memory: string[];
 };
 
+// FR18 - Game.Valid.Word, FR19 - Game.Reused.Word
 export type Action = {
   action: ActionsList,
   player_id: string,
@@ -40,6 +45,7 @@ export type Action = {
   sequence_number: number
 }
 
+// FR27 - Game.Restart
 export enum ScreenState {
     START = 0,
     LOBBY_CODE_ENTRY = 1,
@@ -53,8 +59,10 @@ export enum ScreenState {
     TEST_HOME = -1,
 };
 
+// FR18 - Game.Valid.Word, FR19 - Game.Reused.Word
 export const isAction = (d: any): d is Action => d?.action && d?.player_id;;
 
+// FR22 - Game.Lives.Show
 export const isPlayerABot = (p: Player | Bot): p is Bot => {
     return ((p as Bot).difficulty) ? true : false;
 }

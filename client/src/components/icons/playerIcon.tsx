@@ -4,6 +4,7 @@ import { Player } from "../../data/model";
 
 interface PlayerIconComponentProps {}
 
+// FR23 - Game.Lives.Die
 const PlayerIcon: React.FC<PlayerIconComponentProps> = ({}) => {
   return (
     <svg

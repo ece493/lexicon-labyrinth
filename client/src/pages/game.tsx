@@ -16,7 +16,6 @@ import { GameContext } from "../context/ctx";
 import { isJSDocNullableType } from "typescript";
 import { Fade, Zoom, CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
-import { lobby1, lobby2, lobby3 } from "../mocks/lobbyMocks";
 import {
   PowerupVisComponent,
   PowerupVisComponentRef,
@@ -58,14 +57,18 @@ const Game: React.FC = () => {
   const [error, setError] = useState<null | string>(null);
 
   // Timing
-  const [time, setTime] = React.useState(ctx?.lobby?.timer_setting ?? 60);
+  const [time, setTime] = React.useState(
+    ctx?.lobby?.timer_setting ?? 60
+  );
   const [startedTimer, setStartedTimer] = useState(false);
   const [sentTurnEnd, setSentTurnEnd] = useState(false);
+  const [isAwaitingWord, setIsAwaitingWord] = useState(false);
 
   useEffect(() => {
     if (
       time <= 0 &&
       ctx.playerId === ctx.lobby?.state?.curr_turn &&
+      !isAwaitingWord &&
       !sentTurnEnd
     ) {
       resetWordSelection();
@@ -82,9 +85,7 @@ const Game: React.FC = () => {
           (ctx?.lobby?.timer_setting ?? 60) -
             (Date.now() - gameTime.startTime) / 1000
         );
-        if (newTime >= 0) {
-          setTime(newTime);
-        }
+        setTime(newTime);
       }, 1000);
     }
   }, [ctx?.lobby?.timer_setting]);
@@ -109,6 +110,7 @@ const Game: React.FC = () => {
 
   function handleSubmit() {
     if (ctx.sock !== null) {
+      setIsAwaitingWord(true);
       ctx.transitions.pickWord(wordPath, ctx);
     }
   }
@@ -119,7 +121,12 @@ const Game: React.FC = () => {
       setError("Word has already been played or is invalid!");
       if (turnRef.current) turnRef.current.shakeWord();
       setWord(reconstructWord(path, tiles));
-      setTimeout(() => ctx.setFreezeInputs(false), 500);
+      setTimeout(() => {
+        setIsAwaitingWord(false);
+        setTimeout(() => {
+          ctx.setFreezeInputs(false);
+        }, 100);
+      }, 400);
     };
     ctx.receiveCallBacks.handleWordAccept = (
       path: number[][],
@@ -141,7 +148,11 @@ const Game: React.FC = () => {
       ctx.setLobby(newLobby);
       setSentTurnEnd(false);
       gameTime.startTime = Date.now();
-      setTimeout(() => ctx.setFreezeInputs(false), 500);
+
+      setTimeout(() => {
+        ctx.setFreezeInputs(false);
+        setIsAwaitingWord(false);
+      }, 500);
     };
     ctx.receiveCallBacks.handleLoseLife = (
       newLobby: Lobby,
@@ -333,12 +344,12 @@ const Game: React.FC = () => {
     return player.id === ctx.playerId ? "Your" : player?.name;
   }
 
-  function getPotentialFunds(tiles: Board){
-    let funds = 0
-    wordPath.forEach((e)=>{
-      funds += letterPoints[tiles[e[1]][e[0]]]
-    })
-    return funds
+  function getPotentialFunds(tiles: Board) {
+    let funds = 0;
+    wordPath.forEach((e) => {
+      funds += letterPoints[tiles[e[1]][e[0]]];
+    });
+    return funds;
   }
 
   function renderGame() {
@@ -362,7 +373,7 @@ const Game: React.FC = () => {
                 ) : null}
               </div>
             </Fade>
-            <div className="flex align-top justify-center width w-full">
+            <div className="flex align-top justify-center width w-full ">
               <div className="flex flex-col items-center pt-5">
                 <TurnComponent
                   ref={turnRef}
@@ -374,9 +385,11 @@ const Game: React.FC = () => {
                   powerup={powerup}
                   time={time}
                   resetWord={resetWordSelection}
-                  potentialFunds={getPotentialFunds(ctx?.lobby?.state?.board ?? [[]])}
+                  potentialFunds={getPotentialFunds(
+                    ctx?.lobby?.state?.board ?? [[]]
+                  )}
                 />
-                <div className="flex flex-row items-start justify-center">
+                <div className="flex flex-col sm:flex-row sm:items-start items-center justify-center">
                   <PowerupsComponent
                     funds={
                       ctx.lobby?.players?.find((p) => p.id === ctx.playerId)

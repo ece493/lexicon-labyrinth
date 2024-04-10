@@ -10,7 +10,7 @@ const JoinLobbyComponent: React.FC = () => {
     return (
         <DefaultLayout>
             <h1 className="m-0 text-slate-100">Enter Your Lobby Code Here</h1>
-            <input defaultValue={code} onChange={(e) => setCode(e.target.value)}
+            <input defaultValue={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
                 className="p-1 text-3xl"></input>
             <div className="flex flex-row gap-2">
                 <Button

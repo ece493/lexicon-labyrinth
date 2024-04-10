@@ -14,17 +14,20 @@ import LifeIcon from "../icons/lifeIcon";
 import DeadIcon from "../icons/deadIcon";
 import PlayerCard from "./playerCard";
 
+// FR22 - Game.Lives.Show
 interface PlayersComponentProp {
   players: Player[];
   powerup: string | null;
   currentTurn: string;
 }
 
+// FR22 - Game.Lives.Show
 export interface PlayersRef {
   endPlayer: (pId: string, setLobbyState: () => void) => void;
   loseLife: (pId: string, setLobbyState: () => void) => void;
 }
 
+// FR22 - Game.Lives.Show
 const PlayersComponent = forwardRef<PlayersRef, PlayersComponentProp>(
   ({ players, powerup, currentTurn }, ref) => {
     useImperativeHandle(ref, () => ({
@@ -72,10 +75,9 @@ const PlayersComponent = forwardRef<PlayersRef, PlayersComponentProp>(
 
     return (
       <div
-        className="flex flex-col w-40 my-2 space-y-2"
+        className="flex flex-col sm:w-40 w-11/12 my-2 space-y-2"
         style={{ opacity: powerup ? "0.1" : "", position: "relative" }}
       >
-        {/* <div className="absolute w-full h-full bg-transparent z-20"></div> */}
         <Reorder.Group
           axis="y"
           values={getOrderedPlayers().map((p) => p.id)}

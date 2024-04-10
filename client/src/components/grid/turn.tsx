@@ -33,6 +33,7 @@ export interface TurnRef {
   shakeWord: () => void;
 }
 
+// FR17 - Tile.Drag 
 const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
   (
     {
@@ -76,7 +77,7 @@ const TurnComponent = forwardRef<TurnRef, TurnComponentProp>(
         )}
         <Zoom key={word} in={true} appear timeout={300}>
           <motion.div animate={{ x: wordX }}>
-            <Typography className="text-slate-100 text-4xl p-2">
+            <Typography className="text-slate-100 text-4xl p-2" align="center">
               {word
                 ? word
                 : disabled

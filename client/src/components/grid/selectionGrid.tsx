@@ -5,6 +5,7 @@ import { TileComponent, nullTile, isTileEqual } from "./tile";
 import { Fade } from "@mui/material";
 import { motion } from "framer-motion";
 
+// FR17 - Tile.Drag
 interface GridComponentProps {
   grid: Board;
   board_size: [number, number];
@@ -17,10 +18,12 @@ interface GridComponentProps {
   disabled?: boolean;
 }
 
+// FR17 - Tile.Drag
 export interface SelectGridRef {
   fadePath: (t: number, setNewLobby: () => void) => void;
 }
 
+// FR17 - Tile.Drag
 export const SelectionGridComponent = forwardRef<
   SelectGridRef,
   GridComponentProps
@@ -71,6 +74,16 @@ export const SelectionGridComponent = forwardRef<
         !wordPath.some((n) => isTileEqual([x, y], n))
       );
     }
+    
+    function isDeselectableNonFirstTile(x: number, y: number) {
+      if (wordPath.length < 1) return false;
+      return (
+        Math.abs(wordPath[wordPath.length - 1][0] - x) <= 1 &&
+        Math.abs(wordPath[wordPath.length - 1][1] - y) <= 1 &&
+        wordPath.some((n) => isTileEqual([x, y], n)) &&
+        wordPath.length > 1
+      );
+    }
 
     function getPrevTileDirection(x: number, y: number, indexInPath: number) {
       const prevTile = wordPath[indexInPath - 1];
@@ -103,6 +116,9 @@ export const SelectionGridComponent = forwardRef<
       if (selecting && isSelectableNonFirstTile(x, y)) {
         setWord(word + grid[y][x]);
         setWordPath([...wordPath, [x, y]]);
+      }else if (selecting && isDeselectableNonFirstTile(x, y)){
+        setWord(word.slice(0, word.length - 1));
+        setWordPath(wordPath.slice(0, wordPath.length - 1));
       }
     }
 
@@ -133,14 +149,13 @@ export const SelectionGridComponent = forwardRef<
         >
           <div
             draggable="false"
-            onMouseDown={(e) => handleSelectStart(x, y)}
-            onTouchStart={(e) => handleSelectStart(x, y)}
-            onMouseEnter={(e) => handleSelectNonFirstTile(x, y)}
+            onPointerDown={(e) => { (e.target as HTMLDivElement).releasePointerCapture(e.pointerId); handleSelectStart(x, y)}}
+            onPointerEnter={(e) => handleSelectNonFirstTile(x, y)}
             className={`z-20 ${
               !selecting || (selecting && isSelectableNonFirstTile(x, y))
                 ? "cursor-pointer"
                 : "cursor-default"
-            }`}
+            } touch-none`}
           >
             <TileComponent
               value={v}
@@ -176,10 +191,10 @@ export const SelectionGridComponent = forwardRef<
         onDragStart={(e) => {
           e.preventDefault();
         }}
-        onMouseUp={(e) => {
+        onPointerUp={(e) => {
           setSelecting(false);
         }}
-        onMouseLeave={(e) => {
+        onPointerLeave={(e) => {
           setSelecting(false);
         }}
         className="relative"

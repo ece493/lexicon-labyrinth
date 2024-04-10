@@ -5,12 +5,14 @@ import { Lobby, Action, ScreenState } from "../data/model";
 import { ActionsList } from "../ws-client/model";
 import { Button } from "@mui/material";
 
+// No FR - For Tests 
 interface BypassProps {
   bypassLobbyRole?: string;
   lobbyCode?: string;
   setLobbyCode?: any;
 }
 
+// No FR - For Tests
 const BypassButton: React.FC<BypassProps> = ({
   bypassLobbyRole,
   lobbyCode,

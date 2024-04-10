@@ -5,6 +5,7 @@ import { Lobby, Action, ScreenState } from "../data/model";
 import { ActionsList } from "../ws-client/model";
 import { connect } from "../ws-client/client";
 
+// No FR - For Tests
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const ctx = useContext(GameContext);

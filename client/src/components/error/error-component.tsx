@@ -4,7 +4,7 @@ import { ScreenState } from "../../data/model";
 import DefaultLayout from "../layout/default-layout";
 import Button from "@mui/material/Button";
 
-
+// FR19 - Game.Reused.Word
 export const ErrorComponent: React.FC<{ msg: string; screen: ScreenState; }> = ({ msg, screen }) => {
     const ctx = useContext(GameContext);
     return (

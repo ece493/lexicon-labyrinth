@@ -5,6 +5,7 @@ import { TileComponent } from "../tile";
 import { GameContext } from "../../../context/ctx";
 import { Fade } from "@mui/material";
 
+// FR34 - Powerup.Refresh
 interface ScrambleGridComponentProps {
   grid: Board;
   board_size: [number, number];
@@ -15,6 +16,7 @@ interface ScrambleGridComponentProps {
   visOnly?: boolean
 }
 
+// FR34 - Powerup.Refresh
 export const ScrambleGridComponent: React.FC<ScrambleGridComponentProps> = ({
   grid,
   board_size,
@@ -24,7 +26,6 @@ export const ScrambleGridComponent: React.FC<ScrambleGridComponentProps> = ({
   setPowerup,
   visOnly
 }) => {
-  const gameContext = useContext(GameContext);
   const [showGrid, setShowGrid] = useState(true);
 
   useEffect(() => {

@@ -4,6 +4,7 @@ import { Player } from "../../data/model";
 
 interface AddIconComponentProps {}
 
+// FR29 - Powerup.Display
 const AddIcon: React.FC<AddIconComponentProps> = ({}) => {
   return (
     <svg

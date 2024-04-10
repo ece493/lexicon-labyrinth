@@ -27,6 +27,7 @@ const prices = {
   swap: 8,
 };
 
+// FR33 - Powerup.Rotate, FR35 - Powerup.Swap ,FR36 - Powerup.Transform, FR34 - Powerup.Refresh, FR29 - Powerup.Display
 const PowerupsComponent: React.FC<PowerupsComponentProp> = ({
   funds,
   powerup,
@@ -38,7 +39,7 @@ const PowerupsComponent: React.FC<PowerupsComponentProp> = ({
 
   return (
     <motion.div
-      className="flex flex-col mt-2 p-2 box-border justify-start bg-blue-500 rounded-sm w-40 relative"
+      className="flex flex-col mt-2 p-2 box-border justify-start bg-blue-500 rounded-sm sm:w-40 w-11/12 relative"
       animate={{ opacity: powerup || disabled ? 0.3 : 1 }}
     >
       {disabled ? (
