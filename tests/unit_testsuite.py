@@ -11,7 +11,6 @@ import random
 NUM_BOT_RUNS = 175
 TIMER_SETTING = 3
 BOARD_SIZE = 7
-DICT_DIR_PATH = "dictionaries/"
 
 # here we generate the boards the same way we do in-game
 # https://www3.nd.edu/~busiforc/handouts/cryptography/letterfrequencies.html
@@ -47,27 +46,27 @@ async def get_bot_failure_rate(difficulty: BotDifficulty):
     return 100*cnt_found_words/len(bot_msg_log)
 
 def test_dictionary():
-    dictionary = load_dict(DICT_DIR_PATH+DICT_PATH)
-    scowl = load_dict(DICT_DIR_PATH+"scowl.txt")
+    dictionary = load_dict(DICT_PATH)
+    scowl = load_dict("scowl.txt")
     for s in dictionary:
         assert s.isalpha()
     assert set(scowl).issuperset(set(dictionary))
 
 def test_bots_vocab():
-    dictionary = load_dict(DICT_DIR_PATH+EASY_DICT_PATH)
-    scowl = load_dict(DICT_DIR_PATH+"scowl.txt")
+    dictionary = load_dict(EASY_DICT_PATH)
+    scowl = load_dict("scowl.txt")
     for s in dictionary:
         assert s.isalpha()
     assert set(scowl).issuperset(set(dictionary))
 
 def test_easy_med_bot_vocab_comparison():
-    easy_dict = load_dict(DICT_DIR_PATH+EASY_DICT_PATH)
-    med_dict = load_dict(DICT_DIR_PATH+MED_DICT_PATH)
+    easy_dict = load_dict(EASY_DICT_PATH)
+    med_dict = load_dict(MED_DICT_PATH)
     assert len(med_dict)>len(easy_dict)
 
 def test_med_hard_bot_vocab_comparison():
-    med_dict = load_dict(DICT_DIR_PATH+MED_DICT_PATH)
-    hard_dict = load_dict(DICT_DIR_PATH+HARD_DICT_PATH)
+    med_dict = load_dict(MED_DICT_PATH)
+    hard_dict = load_dict(HARD_DICT_PATH)
     assert len(hard_dict)>len(med_dict)
 
 
