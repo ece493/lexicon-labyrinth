@@ -5,11 +5,13 @@ from os.path import dirname, abspath
 
 sys.path.append(dirname(dirname(abspath(__file__)))+'/server')
 from models import Bot, BotDifficulty, Action, ActionEnum
+from generate_dict import load_dict, DICT_PATH, EASY_DICT_PATH, MED_DICT_PATH, HARD_DICT_PATH
 import random
 
 NUM_BOT_RUNS = 175
 TIMER_SETTING = 3
 BOARD_SIZE = 7
+DICT_DIR_PATH = "dictionaries/"
 
 # here we generate the boards the same way we do in-game
 # https://www3.nd.edu/~busiforc/handouts/cryptography/letterfrequencies.html
@@ -43,6 +45,13 @@ async def get_bot_failure_rate(difficulty: BotDifficulty):
     # cnt_failed = len([log.value for log in bot_msg_log if log==ActionEnum.END_TURN])
     print(f"bot has {100*cnt_found_words/len(bot_msg_log)}% success rate")
     return 100*cnt_found_words/len(bot_msg_log)
+
+def test_dictionary():
+    dictionary = load_dict(DICT_DIR_PATH+DICT_PATH)
+    scowl = load_dict(DICT_DIR_PATH+"scowl.txt")
+    for s in dictionary:
+        assert s.isalpha()
+    assert set(scowl).issuperset(set(dictionary))
 
 @pytest.mark.asyncio
 async def test_easy_bot():

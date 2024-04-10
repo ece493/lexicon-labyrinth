@@ -5,7 +5,7 @@ EASY_DICT_PATH = 'easy_bot_dictionary.txt'
 MED_DICT_PATH = 'medium_bot_dictionary.txt'
 HARD_DICT_PATH = 'hard_bot_dictionary.txt'
 
-def load_dict(path):
+def load_dict(path) -> list[str]:
     start_processing = False
     words = []
     with open(path, 'r', encoding='utf8') as file:
