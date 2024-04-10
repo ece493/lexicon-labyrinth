@@ -9,7 +9,6 @@ WAIT_TIME = 5
 
 @pytest.mark.asyncio
 async def test_lobby_interaction():
-    # we divide by two since each workflow creates two players
     tasks = [None]*(CONCURRENT_LOBBIES)
     for i in range(CONCURRENT_LOBBIES):
         tasks[i]=asyncio.create_task(make_one_move(URL, TIME_OUT, WAIT_TIME))
@@ -17,7 +16,6 @@ async def test_lobby_interaction():
 
 @pytest.mark.asyncio
 async def test_many_two_players_play_till_death():
-    # we divide by two since each workflow creates two players
     tasks = [None]*(CONCURRENT_LOBBIES)
     for i in range(CONCURRENT_LOBBIES):
         tasks[i]=asyncio.create_task(two_players_play_till_death(URL, TIME_OUT, WAIT_TIME))
