@@ -2,6 +2,7 @@ import random
 import string
 import time
 import json
+import math
 
 from trie import *
 from enum import Enum, auto
@@ -40,6 +41,10 @@ class BotDifficulty(Enum):
 
     def __str__(self) -> str:
         return self.name
+
+BOT_TIME_LIMIT_FRAC_DELAY = (0.9, 0.5, 0.3)
+
+BOT_FAIL_PROBABILITY = (0.25, 0.18, 0.10)
 
 def get_player_from_id(player_list: list['Player'], player_id: str) -> 'Player':
     for player in player_list:
@@ -146,8 +151,7 @@ class Lobby(object):
     def add_player(self, player: 'Player') -> bool:
         if not self.is_full:
             self.players.append(player)
-            print(
-                f"Player of name {player.name} and id {player.player_id} added to lobby {self.lobby_id}.")
+            print(f"Player of name {player.name} and id {player.player_id} added to lobby {self.lobby_id}.")
 
             # Broadcast that a new player has joined the lobby
             '''
@@ -165,8 +169,7 @@ class Lobby(object):
             '''
             return True
         else:
-            print(
-                f"Lobby {self.lobby_id} is full. Cannot add player {player.name}.")
+            print(f"Lobby {self.lobby_id} is full. Cannot add player {player.name}.")
             return False
 
     def remove_player(self, player_id: str) -> bool:
@@ -231,6 +234,7 @@ class Lobby(object):
             raise Exception(f"Unknown bot difficulty number {difficulty}! Must be 0, 1, or 2")
         for player in self.players:
             if player.player_id == bot_id and player.is_bot:
+                assert isinstance(player, Bot), "Error! Updating difficulty of a non-bot player!"
                 player.update_difficulty(difficulty_enum)
                 return
         raise Exception(f"Bot to update difficulty of is not found in the list of bots in this lobby!")
@@ -406,7 +410,8 @@ class Game:
             if player.player_id == player_id:
                 player_to_kill = player
                 break
-
+        if player_to_kill is None:
+            raise Exception("Could not find the player_id which is to be eliminated!")
         if player_to_kill.lives > 1:
             player_to_kill.lives -= 1
             self.broadcast_func(self.lobby_id, Action(ActionEnum.LOSE_LIFE.value, player_id, {
@@ -480,8 +485,7 @@ class Game:
     def winner_determined(self, winner: 'Player') -> None:
         self.state = GameState.GAME_OVER
         winner_player_id = winner.player_id
-        self.broadcast_func(self.lobby_id, Action(
-            ActionEnum.YOU_WIN.value, winner_player_id, self.to_json()))
+        self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_WIN.value, winner_player_id, self.to_json()))
         # else:
         #    self.state = GameState.TURN_START
         #    self.current_player_index = (self.current_player_index + 1) % len(self.players)
@@ -495,7 +499,7 @@ class Game:
                 break
         if player_to_eliminate.is_bot:
             # Remove the bot after telling it that it died
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED.value, player_to_eliminate.player_id, self.to_json()))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED.value, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
             self.broadcast_func(self.lobby_id, Action(ActionEnum.LEAVE_GAME.value, player_to_eliminate.player_id, self.to_json()))
             self.players = [player for player in self.players if player.player_id != player_id]
         else:
@@ -508,6 +512,7 @@ class Game:
         if len(remaining_players) == 1:
             # Last player standing
             print(f"Only one last player standing. The game has ended!")
+            #self.transition_to_next_player()
             self.winner_determined(remaining_players[0])
             self.game_complete = True
         else:
@@ -570,8 +575,7 @@ class Game:
             # Apply transform logic here
             self.board.set_letter(tile[1], tile[0], new_char)
             # Broadcast success message
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.TRANSFORM_POWERUP_ACCEPTED.value, player_id, {
-                                'lobby': self.to_json(), 'powerup_data': data}))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.TRANSFORM_POWERUP_ACCEPTED.value, player_id, {'lobby': self.to_json(), 'powerup_data': data}))
             pass
         else:
             # Broadcast denial due to insufficient funds
@@ -616,6 +620,9 @@ class Game:
     #     }
 
     def to_json(self) -> dict[str, Any]:
+        if self.current_player_index >= len(self.players):
+            print("WARNING: The player index is beyond the bounds of the player array!")
+            self.current_player_index = 0
         state = {
             "curr_turn": self.players[self.current_player_index].player_id,
             "board": self.board.to_json() if self.board else None,
@@ -686,11 +693,12 @@ class Bot(Player, object):
         self.dict_trie = Trie()
         for word in self.dictionary:
             self.dict_trie.insert(word)
-        self.fail_probability = 0.25 if difficulty == BotDifficulty.EASY else (0.1 if difficulty == BotDifficulty.MEDIUM else 0.05)
+        self.fail_probability = BOT_FAIL_PROBABILITY[difficulty.value]
         self.time_limit_s: float = 1000.0
         self.start_time_s: float = 0.0
         self.min_time_to_submit_turn: float = 0.0
         self.send_to_game_func: Callable = send_to_game_func
+        self.pre_board_change_found_path = None
 
     def check_whether_prefix_is_in_dictionary(self, prefix: str) -> bool:
         # TODO: Optimize using lexicographical stuff
@@ -724,6 +732,8 @@ class Bot(Player, object):
 
     def update_difficulty(self, difficulty_enum: BotDifficulty) -> None:
         self.difficulty = difficulty_enum
+        self.dictionary = self.pull_dictionary(self.difficulty)
+        self.fail_probability = BOT_FAIL_PROBABILITY[self.difficulty.value]
 
     def process_bot_action(self, message: 'Action') -> None:
         # Process the message and simulate a bot response/action
@@ -733,7 +743,7 @@ class Bot(Player, object):
             # Update the time limit with the actual lobby's time limit
             self.time_limit_s = float(message.data['timer_setting'])
             assert isinstance(self.time_limit_s, float)
-            self.min_time_to_submit_turn: float = random.triangular(0.0, self.time_limit_s, 0.0)
+            self.min_time_to_submit_turn: float = random.triangular(0.0, self.time_limit_s*BOT_TIME_LIMIT_FRAC_DELAY[self.difficulty.value], 0.0) # FR38, FR43, FR46
             print(f"Bot's time limit is {self.time_limit_s}")
         elif message.action == ActionEnum.START_TURN.value:
             print(message.data)
@@ -743,6 +753,8 @@ class Bot(Player, object):
             else:
                 print(f"It's my turn! Bot: {self.player_id}")
                 self.do_turn(message)
+        elif message.action in [ActionEnum.TRANSFORM_POWERUP_ACCEPTED, ActionEnum.SWAP_POWERUP_ACCEPTED]:
+            self.finish_turn_after_powerup()
         elif message.action == ActionEnum.WORD_ACCEPTED.value:
             # We need to remember which words were used, so we don't repeat them
             # Follow the path to see what the word is
@@ -763,6 +775,36 @@ class Bot(Player, object):
             print(f"Bot is ignoring the action {message}")
         pass
 
+    def use_scramble_powerup(self) -> None:
+        # FR49
+        print("BOT IS USING SCRAMBLE!")
+        self.send_message_to_game(ActionEnum.PICK_SCRAMBLE_POWERUP, {})
+
+    def use_swap_powerup(self, a: list[int], b: list[int]) -> None:
+        # FR49
+        # a and b are [row, col]
+        print("BOT IS USING SWAP!")
+        self.send_message_to_game(ActionEnum.PICK_SWAP_POWERUP, {'tiles': [a, b]})
+
+    def use_rotate_powerup(self, type: str, index: int, rotations: int) -> None:
+        # FR49
+        print("BOT IS USING ROTATE!")
+        assert type in ['row', 'col'], f"Bot's rotate type {type} isn't either row or col!"
+        self.send_message_to_game(ActionEnum.PICK_ROTATE_POWERUP, {'type': type, 'index': index, 'rotations': rotations})
+
+    def use_transform_powerup(self, tile, new_char) -> None:
+        # FR49
+        print(f"BOT IS USING TRANSFORM! Converting to {new_char}")
+        self.send_message_to_game(ActionEnum.PICK_TRANSFORM_POWERUP, {'tile': tile, 'new_char': new_char})
+
+    def finish_turn_after_powerup(self) -> None:
+        # If we used a transform or swap powerup on the previous turn, then this variable will not be None, and we should send this move
+        if self.pre_board_change_found_path is not None:
+            time.sleep(1)
+            self.send_message_to_game(ActionEnum.PICK_WORD, self.pre_board_change_found_path)
+            self.pre_board_change_found_path = None
+            return
+
     def do_turn(self, message: 'Action') -> None:
         self.start_time_s = time.perf_counter()
         game_board: list[list[str]] = message.data['state']['board']
@@ -772,6 +814,11 @@ class Bot(Player, object):
         board_size = message.data['board_size']
         print(f"Bot {self.player_id} is doing turn where the game board is {game_board}, my own representation as a player is {bot_representation_in_lobby}, and I have this much money: {available_money}")
         
+        can_afford_rotate: bool = available_money >= POWERUP_COSTS['Rotate']
+        can_afford_scramble: bool = available_money >= POWERUP_COSTS['Scramble']
+        can_afford_swap: bool = available_money >= POWERUP_COSTS['Swap']
+        can_afford_transform: bool = available_money >= POWERUP_COSTS['Transform']
+
         def is_valid_move(x, y, path) -> bool:
             #print(x, y, path)
             return 0 <= x < board_size and 0 <= y < board_size and (y, x) not in path
@@ -780,7 +827,30 @@ class Bot(Player, object):
             assert path is not None
             #print(f"Bot in find word, path: {path}")
             if not self.check_whether_prefix_is_in_dictionary(prefix):
-                return None, None
+                if can_afford_swap and can_afford_transform:
+                    word_without_last_letter = prefix[:-1]
+                    assert self.check_whether_prefix_is_in_dictionary(word_without_last_letter), f'Why is this prefix {word_without_last_letter} not in the dict?!!?! I know {prefix} isnt but without the last letter it should be!'
+                    for letter in string.ascii_lowercase:
+                        if self.check_whether_prefix_is_in_dictionary(word_without_last_letter + letter):
+                            # Great, we can get a word with this.
+                            # Remember the path we should be submitting once it's our turn again after this powerup works
+                            self.pre_board_change_found_path = path
+
+                            # First, check if we could use a swap with another letter somewhere else on the board that doesn't intersect with our current path. If we can, then we'll do a swap so we can save on currency.
+                            for col in range(board_size):
+                                for row in range(board_size):
+                                    if game_board[row][col].lower() == letter and [col, row] not in path:
+                                        # We can do a swap instead of transform!
+                                        print(f"DOING SWAP INSTEAD OF TRANSFORM on (row, col) = ({row}, {col})")
+                                        self.use_swap_powerup(path[-1], [col, row])
+                                        return math.nan, math.nan # Nan signifies that we want to return and do nothing, since we already did an action from within the loop
+
+                            # No other letter exists to swap, so let's just transform this
+                            self.use_transform_powerup(path[-1], letter)
+                            return math.nan, math.nan # Nan signifies that we want to return and do nothing, since we already did an action from within the loop
+                    return None, None
+                else:
+                    return None, None
             for dx in [-1, 0, 1]:
                 for dy in [-1, 0, 1]:
                     if dx == 0 and dy == 0:
@@ -797,12 +867,16 @@ class Bot(Player, object):
                                 return new_prefix, new_path
                         # Continue searching
                         result = find_word(nx, ny, new_path, new_prefix)
+                        if isinstance(result[0], float) and math.isnan(result[0]):
+                            return math.nan, math.nan # Bubble up the nan return values so we know to stop this call
                         if result[0] is not None and result[1] is not None:
                             return result
             return None, None
-        
+
         # Check whether we just want the bot to fail to find a word on this turn
-        if random.random() < self.fail_probability:
+        random_number = random.random()
+        print(f"Random: {random_number}, fail prob: {self.fail_probability}")
+        if random_number < self.fail_probability:
             print(f"Bot purposely fails to find a word and is sleeping for {self.min_time_to_submit_turn} s")
             time.sleep(self.min_time_to_submit_turn)
             self.send_message_to_game(ActionEnum.END_TURN, {})
@@ -812,11 +886,22 @@ class Bot(Player, object):
         # Try to find a word starting from a random position
         for i in range(2000000):  # Limit attempts
             # print(f"Bot search iteration {i}")
+            if can_afford_scramble and i % 100 == 0:
+                # Every once in a while, randomly decide whether we want to try swapping the board
+                if random.random() < 0.1:
+                    self.use_scramble_powerup()
+                    return
+            if can_afford_rotate and i % 100 == 0:
+                if random.random() < 0.1:
+                    self.use_rotate_powerup(random.choice(['row', 'col']), random.randint(0, board_size), random.randint(1, board_size - 1))
+                    return
             if time.perf_counter() - self.start_time_s >= self.time_limit_s:
                 break
             start_x, start_y = random.randint(0, board_size - 1), random.randint(0, board_size - 1)
             start_letter = game_board[start_x][start_y]
             word, path = find_word(start_x, start_y, [(start_y, start_x)], start_letter)
+            if isinstance(word, float) and math.isnan(word):
+                return # We already sent the game a message from within, so don't send anything here and just return
             if word is not None and path is not None:
                 print(f"Found word: {word} at path {path}")
                 if time.perf_counter() - self.start_time_s < self.min_time_to_submit_turn:
@@ -874,8 +959,7 @@ class WordGrid:
 
     def swap_tiles(self, tile1, tile2) -> None:
         temp = self.get_letter(tile1[0], tile1[1])
-        self.set_letter(tile1[0], tile1[1],
-                        self.get_letter(tile2[0], tile2[1]))
+        self.set_letter(tile1[0], tile1[1], self.get_letter(tile2[0], tile2[1]))
         self.set_letter(tile2[0], tile2[1], temp)
 
     def scramble(self) -> None:
@@ -896,9 +980,8 @@ class WordGrid:
             self.rotate_column(index, rotations)
 
     def set_letter(self, row: int, col: int, new_letter: str) -> None:
-        assert len(
-            new_letter) == 1, f"New letter's length isn't 1! ({new_letter})"
-        self.grid[row][col] = new_letter
+        assert len(new_letter) == 1, f"New letter's length isn't 1! ({new_letter})"
+        self.grid[row][col] = new_letter.upper()
 
     def randomly_replace_letter(self, row: int, col: int) -> None:
         self.grid[row][col] = self.random_letter_with_weights()

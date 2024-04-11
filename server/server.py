@@ -151,7 +151,8 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                     raise Exception("Please specify the player_name field in the data!")
                 p = Player(self.id, action.data['player_name'])
                 p.set_send_message_func(GameWebSocketHandler.send_to_player_func)
-                self.lobbies[lobby_code].add_player(p)
+                success = self.lobbies[lobby_code].add_player(p)
+                assert success, f"How come failed to add the host of the lobby to the lobby they just created?!"
                 self.lobby_id = lobby_code
                 # Send them back the lobby code we created for them
                 resp = Action(ActionEnum.RETURN_LOBBY_CODE.value, self.id, lobby_code)
@@ -166,13 +167,16 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 if lobby_id in self.lobbies:
                     p = Player(self.id, player_name)
                     p.set_send_message_func(GameWebSocketHandler.send_to_player_func)
-                    self.lobbies[lobby_id].add_player(p)
-                    self.lobby_id = lobby_id
-                    resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id,
-                                  {"lobby_code": lobby_id,
-                                   "player_name": action.data['player_name'],
-                                   "lobby": self.lobbies[lobby_id].to_json()})
-                    GameWebSocketHandler.broadcast_to_lobby(self.lobby_id, resp)
+                    if self.lobbies[lobby_id].add_player(p):
+                        self.lobby_id = lobby_id
+                        resp = Action(ActionEnum.SUCCESSFULLY_JOINED_LOBBY.value, self.id,
+                                    {"lobby_code": lobby_id,
+                                    "player_name": action.data['player_name'],
+                                    "lobby": self.lobbies[lobby_id].to_json()})
+                        GameWebSocketHandler.broadcast_to_lobby(self.lobby_id, resp)
+                    else:
+                        resp = Action(ActionEnum.LOBBY_IS_FULL.value, self.id, {})
+                        self.send_message(resp)
                 else:
                     resp = Action(ActionEnum.LOBBY_DOES_NOT_EXIST.value, self.id, None)
                     self.send_message(resp)
