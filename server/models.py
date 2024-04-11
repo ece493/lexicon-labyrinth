@@ -3,6 +3,7 @@ import string
 import time
 import json
 import math
+import copy
 
 from trie import *
 from enum import Enum, auto
@@ -77,7 +78,10 @@ class Lobby(object):
         return
 
     def handle_action(self, player_id: str, actionEnum: 'ActionEnum', action: 'Action') -> None:
-        assert action.action == actionEnum, f"Actionenum not matching the action!"
+        assert isinstance(player_id, str)
+        assert isinstance(actionEnum, ActionEnum)
+        assert isinstance(action, Action)
+        assert action.action == actionEnum.value, f"Actionenum ({actionEnum}) not matching the action ({action.action})!"
         if actionEnum in [ActionEnum.CHANGE_PARAM, ActionEnum.READY_LOBBY, ActionEnum.ADD_BOT, ActionEnum.UPDATE_BOT]:
             if actionEnum == ActionEnum.CHANGE_PARAM:
                 # The owner of the lobby is trying to change the lobby's settings
@@ -141,7 +145,7 @@ class Lobby(object):
 
     def broadcast_lobby_settings(self) -> None:
         if self.broadcast_func:
-            lobby_settings_message = Action(action=ActionEnum.UPDATE_LOBBY_SETTINGS.value,
+            lobby_settings_message = Action(action=ActionEnum.UPDATE_LOBBY_SETTINGS,
                                             player_id=self.host,
                                             data={"lobby": self.to_json()}
             )
@@ -156,7 +160,7 @@ class Lobby(object):
             # Broadcast that a new player has joined the lobby
             '''
             if self.broadcast_func:
-                join_message = Action(action=ActionEnum.PLAYER_JOINED.value,
+                join_message = Action(action=ActionEnum.PLAYER_JOINED,
                                       player_id=player.player_id,
                                       data={
                                                 "PlayerID": player.player_id,
@@ -206,7 +210,7 @@ class Lobby(object):
             # Broadcast that a new player has joined the lobby
             
             if self.broadcast_func:
-                join_message = Action(action=ActionEnum.ADD_BOT.value,
+                join_message = Action(action=ActionEnum.ADD_BOT,
                                       player_id=bot.player_id,
                                       data={
                                                 "lobby": self.to_json()
@@ -317,8 +321,7 @@ class Game:
 
     def start_game(self) -> None:
         # Broadcast the start game message to all players
-        start_game_message = Action(
-            ActionEnum.START_GAME.value, self.host, self.to_json())
+        start_game_message = Action(ActionEnum.START_GAME, self.host, self.to_json())
         # Send the initial game state, including the board, to all players
         self.broadcast_func(self.lobby_id, start_game_message)
         # Transition from WAITING_FOR_PLAYERS to TURN_START
@@ -351,7 +354,7 @@ class Game:
             self.current_player_index = next_index  # Update to the next player's index
             self.state = GameState.WAITING_FOR_MOVE
             # Inform all players whose turn it is now
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.START_TURN.value, next_player.player_id, self.to_json()))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.START_TURN, next_player.player_id, self.to_json()))
         else:
             # Handle the scenario where no non-spectator players are found
             pass  # This could involve checking game end conditions or handling errors
@@ -359,6 +362,9 @@ class Game:
             # self.winner_determined()
 
     def handle_action(self, player_id: str, actionEnum: 'ActionEnum', action: 'Action') -> None:
+        assert isinstance(player_id, str)
+        assert isinstance(actionEnum, ActionEnum)
+        assert isinstance(action, Action)
         if actionEnum == ActionEnum.PICK_WORD:
             self.process_word_choice(player_id, action.data)
         elif actionEnum == ActionEnum.PICK_ROTATE_POWERUP:
@@ -394,8 +400,7 @@ class Game:
                 self.current_player_index + 1) % len(self.players)
 
         current_player = self.players[self.current_player_index]
-        self.broadcast_func(self.lobby_id, Action(
-            ActionEnum.START_TURN.value, current_player.player_id, {"message": "Your turn"}))
+        self.broadcast_func(self.lobby_id, Action(ActionEnum.START_TURN, current_player.player_id, {"message": "Your turn"}))
         self.state = GameState.WAITING_FOR_MOVE
 
     def retry_current_player_turn(self) -> None:
@@ -414,7 +419,7 @@ class Game:
             raise Exception("Could not find the player_id which is to be eliminated!")
         if player_to_kill.lives > 1:
             player_to_kill.lives -= 1
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.LOSE_LIFE.value, player_id, {
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.LOSE_LIFE, player_id, {
                                 "player_id": player_id, "lobby": self.to_json()}))
             self.state = GameState.TURN_END
             self.transition_to_next_player()
@@ -467,7 +472,7 @@ class Game:
             assert player is not None
             player.add_money(self.dictionary.get_word_score(word_to_check))
             # Broadcast the lobby state to all
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_ACCEPTED.value, player_id, {'lobby': self.to_json(), 'path': move_data}))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_ACCEPTED, player_id, {'lobby': self.to_json(), 'path': move_data}))
             # Record that the word was used
             self.used_words.add(word_to_check)
             self.state = GameState.TURN_END
@@ -479,13 +484,13 @@ class Game:
             # self.winner_determined()
             self.transition_to_next_player()
         else:
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_DENIED.value, player_id, {'lobby': self.to_json(), 'path': move_data}))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.WORD_DENIED, player_id, {'lobby': self.to_json(), 'path': move_data}))
             self.state = GameState.WAITING_FOR_MOVE
 
     def winner_determined(self, winner: 'Player') -> None:
         self.state = GameState.GAME_OVER
         winner_player_id = winner.player_id
-        self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_WIN.value, winner_player_id, self.to_json()))
+        self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_WIN, winner_player_id, {'lobby': self.to_json()}))
         # else:
         #    self.state = GameState.TURN_START
         #    self.current_player_index = (self.current_player_index + 1) % len(self.players)
@@ -499,13 +504,13 @@ class Game:
                 break
         if player_to_eliminate.is_bot:
             # Remove the bot after telling it that it died
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED.value, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.LEAVE_GAME.value, player_to_eliminate.player_id, self.to_json()))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.LEAVE_GAME, player_to_eliminate.player_id, self.to_json()))
             self.players = [player for player in self.players if player.player_id != player_id]
         else:
             # Let the player watch the rest of the game as a spectator
             player_to_eliminate.is_spectator = True
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED.value, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
 
         remaining_players = [
             player for player in self.players if not player.is_spectator]
@@ -559,12 +564,10 @@ class Game:
             self.board.rotate(data['type'], data['index'], data['rotations'])
 
             # Broadcast success message to ALL players
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.ROTATE_POWERUP_ACCEPTED.value, player_id, {
-                                'lobby': self.to_json(), 'powerup_data': data}))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.ROTATE_POWERUP_ACCEPTED, player_id, {'lobby': self.to_json(), 'powerup_data': data}))
         else:
             # Broadcast denial due to insufficient funds
-            self.broadcast_func(self.lobby_id, Action(
-                ActionEnum.POWERUP_DENIED.value, player_id, self.to_json()))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED, player_id, self.to_json()))
 
     def apply_transform_powerup(self, player_id: str, data: dict) -> None:
         print(f"Applying transform powerup! Data is {data}")
@@ -575,12 +578,11 @@ class Game:
             # Apply transform logic here
             self.board.set_letter(tile[1], tile[0], new_char)
             # Broadcast success message
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.TRANSFORM_POWERUP_ACCEPTED.value, player_id, {'lobby': self.to_json(), 'powerup_data': data}))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.TRANSFORM_POWERUP_ACCEPTED, player_id, {'lobby': self.to_json(), 'powerup_data': data}))
             pass
         else:
             # Broadcast denial due to insufficient funds
-            self.broadcast_func(self.lobby_id, Action(
-                ActionEnum.POWERUP_DENIED.value, player_id, self.to_json()))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED, player_id, self.to_json()))
 
     def apply_swap_powerup(self, player_id: str, data: list) -> None:
         print(f"Applying swap powerup! Data is {data}")
@@ -590,12 +592,11 @@ class Game:
             self.board.swap_tiles(
                 [data['tiles'][0][1], data['tiles'][0][0]],  [data['tiles'][1][1], data['tiles'][1][0]])
             # Broadcast success message
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.SWAP_POWERUP_ACCEPTED.value, player_id, {
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.SWAP_POWERUP_ACCEPTED, player_id, {
                                 'lobby': self.to_json(), 'powerup_data': data}))
         else:
             # Broadcast denial due to insufficient funds
-            self.broadcast_func(self.lobby_id, Action(
-                ActionEnum.POWERUP_DENIED.value, player_id, self.to_json()))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED, player_id, self.to_json()))
 
     def apply_scramble_powerup(self, player_id: str) -> None:
         print(f"Applying scramble powerup!")
@@ -604,12 +605,10 @@ class Game:
             # Apply scramble logic here
             self.board.scramble()
             # Broadcast success message
-            self.broadcast_func(self.lobby_id, Action(
-                ActionEnum.SCRAMBLE_POWERUP_ACCEPTED.value, player_id, {"lobby": self.to_json()}))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.SCRAMBLE_POWERUP_ACCEPTED, player_id, {"lobby": self.to_json()}))
         else:
             # Broadcast denial due to insufficient funds
-            self.broadcast_func(self.lobby_id, Action(
-                ActionEnum.POWERUP_DENIED.value, player_id, self.to_json()))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED, player_id, self.to_json()))
 
     # def to_json(self) -> dict[str, Any]:
     #     return {
@@ -663,6 +662,7 @@ class Player(object):
         self.currency += money_to_add
 
     def send_message(self, message: 'Action') -> None:
+        assert isinstance(message, Action)
         # This is a real player, so we need to send a websocket message
         if self.send_func:
             print(f"Player with id {self.player_id} is sending a message to the associated websocket for this connection: {message}")
@@ -720,12 +720,14 @@ class Bot(Player, object):
         return load_words_from_scowl(dict_path)
 
     def send_message(self, message: 'Action') -> None:
+        assert isinstance(message, Action)
         # Send a message from the game to the bot
         # For local bots, directly process the message
         print(f"Bot with name {self.name} and id {self.player_id} received message: {message}")
         self.process_bot_action(message)
 
     def send_message_to_game(self, action_enum: 'ActionEnum', message_data: Any) -> None:
+        assert isinstance(action_enum, ActionEnum)
         # Send a message from the bot to the game
         # Normal players use websockets to do this, but this is a local way for the bots to accomplish the same thing
         self.send_to_game_func(self.player_id, action_enum, Action(action_enum, self.player_id, message_data))
@@ -736,8 +738,9 @@ class Bot(Player, object):
         self.fail_probability = BOT_FAIL_PROBABILITY[self.difficulty.value]
 
     def process_bot_action(self, message: 'Action') -> None:
+        assert isinstance(message, Action)
         # Process the message and simulate a bot response/action
-        #print(f"Bot is processing message of action {message}")
+        print(f"Bot is processing message of action {message}")
         if message.action == ActionEnum.START_GAME.value:
             print(f"Bot {self.player_id} is ready to start game!")
             # Update the time limit with the actual lobby's time limit
@@ -754,11 +757,17 @@ class Bot(Player, object):
                 print(f"It's my turn! Bot: {self.player_id}")
                 self.do_turn(message)
         elif message.action in [ActionEnum.TRANSFORM_POWERUP_ACCEPTED.value, ActionEnum.SWAP_POWERUP_ACCEPTED.value]:
-            if message.data['lobby']['state']['curr_turn'] == self.player_id:
-                self.finish_turn_after_powerup()
+            if 'lobby' in message.data:
+                if message.data['lobby']['state']['curr_turn'] == self.player_id:
+                    self.finish_turn_after_powerup()
+            else:
+                raise Exception(f"How come lobby wasn't in this dict: {message.data}")
         elif message.action in [ActionEnum.ROTATE_POWERUP_ACCEPTED.value, ActionEnum.SCRAMBLE_POWERUP_ACCEPTED.value]:
-            if message.data['lobby']['state']['curr_turn'] == self.player_id:
-                self.do_turn(message)
+            if 'lobby' in message.data:
+                if message.data['lobby']['state']['curr_turn'] == self.player_id:
+                    self.do_turn(message)
+            else:
+                raise Exception(f"How come lobby wasn't in this dict: {message.data}")
         elif message.action == ActionEnum.WORD_ACCEPTED.value:
             # We need to remember which words were used, so we don't repeat them
             # Follow the path to see what the word is
@@ -769,12 +778,15 @@ class Bot(Player, object):
             print(f"Bot {self.player_id} is adding word '{word}' to its list of used up words.")
             self.memory.add(word.lower())
         elif message.action == ActionEnum.WORD_DENIED.value:
-            if message.data['lobby']['state']['curr_turn'] == self.player_id:
-                print(f"Crap, I'm bot {self.player_id} and my word got denied! Redoing the bot stuff and trying to submit a new action.")
-                self.do_turn(message)
+            if 'lobby' in message.data:
+                if message.data['lobby']['state']['curr_turn'] == self.player_id:
+                    print(f"Crap, I'm bot {self.player_id} and my word got denied! Redoing the bot stuff and trying to submit a new action.")
+                    self.do_turn(message)
+                else:
+                    print(f"I'm bot {self.player_id} and phew, someone else's word got denied bwahaha")
+                    pass
             else:
-                print(f"I'm bot {self.player_id} and phew, someone else's word got denied bwahaha")
-                pass
+                raise Exception(f"How come lobby wasn't in this dict: {message.data} and the whole message was {message}")
         else:
             pass
             #print(f"Bot is ignoring the action {message}")
@@ -814,6 +826,10 @@ class Bot(Player, object):
 
     def do_turn(self, message: 'Action') -> None:
         self.start_time_s = time.perf_counter()
+        message = copy.deepcopy(message)
+        if 'lobby' in message.data:
+            # Bit of a hack to handle the different dict formats used
+            message.data = message.data['lobby']
         game_board: list[list[str]] = message.data['state']['board']
         print(message.data)
         bot_representation_in_lobby: dict[str, Any] = get_player_from_id_dicts(message.data['players'], self.player_id)
@@ -885,7 +901,7 @@ class Bot(Player, object):
         print(f"Random: {random_number}, fail prob: {self.fail_probability}")
         if random_number < self.fail_probability:
             print(f"Bot purposely fails to find a word and is sleeping for {self.min_time_to_submit_turn} s")
-            time.sleep(self.min_time_to_submit_turn)
+            time.sleep(self.time_limit_s)
             self.send_message_to_game(ActionEnum.END_TURN, {})
             return
 
@@ -900,7 +916,7 @@ class Bot(Player, object):
                     return
             if can_afford_rotate and i % 100 == 0:
                 if random.random() < 0.1:
-                    self.use_rotate_powerup(random.choice(['row', 'col']), random.randint(0, board_size), random.randint(1, board_size - 1))
+                    self.use_rotate_powerup(random.choice(['row', 'col']), random.randint(0, board_size - 1), random.randint(1, board_size - 1))
                     return
             if time.perf_counter() - self.start_time_s >= self.time_limit_s:
                 break
@@ -919,6 +935,7 @@ class Bot(Player, object):
                 return
         print("Failed to find a word this turn.")
         self.send_message_to_game(ActionEnum.END_TURN, {})
+        return
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -996,8 +1013,7 @@ class WordGrid:
     def rotate_row(self, row_index: int, rotations: int) -> None:
         # Ensure rotations are within the bounds of the grid size
         rotations %= self.size
-        self.grid[row_index] = self.grid[row_index][-rotations:] + \
-            self.grid[row_index][:-rotations]
+        self.grid[row_index] = self.grid[row_index][-rotations:] + self.grid[row_index][:-rotations]
 
     def rotate_column(self, col_index: int, rotations: int) -> None:
         # Extract the column
@@ -1091,7 +1107,9 @@ class Swap(Powerup, object):
 
 class Action(object):
     def __init__(self, action: 'ActionEnum', player_id: str, data: Optional[dict[str, Any]] = None) -> None:
-        self.action = action
+        assert isinstance(action, ActionEnum)
+        assert isinstance(player_id, str)
+        self.action: str = action.value
         self.player_id = player_id
         self.data = data
         self.sequence_number: int = -1  # This gets set before sending!
