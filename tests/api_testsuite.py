@@ -334,7 +334,7 @@ async def full_lobby(url, time_out, wait_time):
         for i in range(idx, len(send_recv)):
             assert await send_and_check_rcv(websocket, send_recv[i][0], player_id, send_recv[i][1], time_out, wait_time) is not None
         bobJoinReq = {"action": "join_lobby", "data": {"player_name": "Bob", "lobby_code": lobbyCode}, "sequence_number": 0}
-        assert await send_and_check_rcv(websocket, bobJoinReq, player_id, ["lobby_full"], time_out, wait_time) is not None
+        assert await send_and_check_rcv(websocket, bobJoinReq, player_id, ["lobby_is_full"], time_out, wait_time) is not None
 
 
 async def use_rotate(url, time_out, wait_time):
