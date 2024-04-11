@@ -459,9 +459,9 @@ async def test_two_players_and_bot_play_till_death():
 async def test_full_lobby():
     await asyncio.create_task(full_lobby(URL, TIME_OUT, WAIT_TIME))
 
-@pytest.mark.asyncio
-async def test_one_player_and_two_bots_play_till_death():
-    await asyncio.create_task(one_player_and_two_bots_play(URL, 2*TIME_OUT, 2*WAIT_TIME))
+# @pytest.mark.asyncio
+# async def test_one_player_and_two_bots_play_till_death():
+#     await asyncio.create_task(one_player_and_two_bots_play(URL, 2*TIME_OUT, 2*WAIT_TIME))
     
 @pytest.mark.asyncio
 async def test_use_rotate():

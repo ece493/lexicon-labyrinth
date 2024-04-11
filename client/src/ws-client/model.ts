@@ -19,7 +19,7 @@ export enum ActionsList {
     return_lobby_code = "return_lobby_code",
     return_player_id = "return_player_id",
     lobby_does_not_exist = "lobby_does_not_exist",
-    lobby_full = "lobby_full", 
+    lobby_full = "lobby_is_full", 
     successfully_joined_lobby = "successfully_joined_lobby",
     success = "success",
     error = "error",
