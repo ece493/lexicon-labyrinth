@@ -333,7 +333,7 @@ class Game:
         """Finds the next non-spectator player starting from a given index."""
         next_index = start_index
         for _ in range(len(self.players)):  # Prevent infinite loops
-            if not self.players[next_index].is_spectator:
+            if not self.players[next_index].is_spectator and self.players[next_index].lives >= 1:
                 return next_index  # Found a non-spectator player
             next_index = (next_index + 1) % len(self.players)
         return -1  # In case all players are spectators or list is empty
@@ -348,7 +348,7 @@ class Game:
             return -1, None  # No non-spectator player found
 
     def next_turn(self) -> None:
-        """Transitions to the next player's turn, skipping spectators."""
+        """Transitions to the next player's turn, skipping spectators and dead player"""
         next_index, next_player = self.get_next_non_spectator_player()
         if next_player is not None:
             self.current_player_index = next_index  # Update to the next player's index
@@ -385,8 +385,7 @@ class Game:
     def transition_to_next_player(self) -> None:
         """Transitions to the next player's turn."""
         print(f"Transitioning to next player from {self.current_player_index}")
-        self.current_player_index = (
-            self.current_player_index + 1) % len(self.players)
+        self.current_player_index = (self.current_player_index + 1) % len(self.players)
 
         self.next_turn()
 
@@ -419,8 +418,7 @@ class Game:
             raise Exception("Could not find the player_id which is to be eliminated!")
         if player_to_kill.lives > 1:
             player_to_kill.lives -= 1
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.LOSE_LIFE, player_id, {
-                                "player_id": player_id, "lobby": self.to_json()}))
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.LOSE_LIFE, player_id, {"player_id": player_id, "lobby": self.to_json()}))
             self.state = GameState.TURN_END
             self.transition_to_next_player()
         elif player_to_kill.lives == 1:
@@ -505,15 +503,14 @@ class Game:
         if player_to_eliminate.is_bot:
             # Remove the bot after telling it that it died
             self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.LEAVE_GAME, player_to_eliminate.player_id, self.to_json()))
-            self.players = [player for player in self.players if player.player_id != player_id]
+            #self.broadcast_func(self.lobby_id, Action(ActionEnum.LEAVE_GAME, player_to_eliminate.player_id, self.to_json()))
+            #self.players = [player for player in self.players if player.player_id != player_id]
         else:
             # Let the player watch the rest of the game as a spectator
             player_to_eliminate.is_spectator = True
             self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
 
-        remaining_players = [
-            player for player in self.players if not player.is_spectator]
+        remaining_players = [player for player in self.players if not player.is_spectator and player.lives >= 1]
         if len(remaining_players) == 1:
             # Last player standing
             print(f"Only one last player standing. The game has ended!")
