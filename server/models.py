@@ -106,12 +106,13 @@ class Lobby(object):
     def to_json(self) -> dict[str, Any]:
         # SHOULD BE UNUSED!
         if self.game is not None:
+            assert isinstance(self.game, Game)
             game_dict = self.game.to_json()
         else:
-            game_dict = {'board': [[]]}
+            game_dict = {'state': {'board': [[]]}}
         state = {
             "curr_turn": 0,  # TODO, index of player of whose turn it is
-            "board": game_dict['board'],
+            "board": game_dict['state']['board'],
             "timer": 123.4,
             "memory": [],
         }
@@ -500,6 +501,8 @@ class Game:
             if player.player_id == player_id:
                 player_to_eliminate = player
                 break
+        # Force their lives to 0
+        player_to_eliminate.lives = 0
         if player_to_eliminate.is_bot:
             # Remove the bot after telling it that it died
             self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))

@@ -17,6 +17,12 @@ from utils import *
 
 # TODO: Delete finished lobbies/games from the list
 
+def get_player_from_id(player_list: list[Player], player_id: str) -> Player | None:
+    for player in player_list:
+        if player.player_id == player_id:
+            return player
+    return None
+
 class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
     connections: set['GameWebSocketHandler'] = set()
     lobbies: dict[str, Lobby] = {} # each lobby is assigned to a player UUID
@@ -34,8 +40,8 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         #         message.player_id = connection.id # Overwrite the player ID to be the ID of the player we're sending this to
         #         connection.send_message(message)
 
-        if message.action == ActionEnum.WORD_DENIED.value:
-            print(f"BROADCASTING WORD DENIED MESSAGE: {message}")
+        #if message.action == ActionEnum.WORD_DENIED.value:
+        #    print(f"BROADCASTING WORD DENIED MESSAGE: {message}")
 
         for lobby in cls.lobbies.values():
             print(f"Checking lobby {lobby.lobby_id=} {lobby_id=}")
@@ -54,11 +60,13 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 message.player_id = player_id # Overwrite the player ID to be the ID of the player we're sending this to
                 connection.send_message(message)
                 return
-        raise Exception("Player to send to is not in the list of connections!")
+        #raise Exception("Player to send to is not in the list of connections!")
 
     @classmethod
     def garbage_collect_lobbies(cls) -> None:
+        original_lobby_amount = len(cls.lobbies)
         cls.lobbies = {lobby_code: lobby for lobby_code, lobby in cls.lobbies.items() if not lobby.game_complete}
+        print(f"Running lobby garbage collection! Went from {original_lobby_amount} lobbies down to {len(cls.lobbies)}")
 
 
     def open(self) -> None:
@@ -74,10 +82,13 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def send_message(self, message: Action) -> None:
         # Sends a message to this specific player attached to this connection
-        print(message)
+        #print(message)
         message.sequence_number = self.sequence_number # Set the monotonic sequence number
         print(f"Sending message #{self.sequence_number} {message} to player {self.id} in lobby {self.lobby_id}")
-        self.write_message(json.dumps(message.to_json()))
+        try:
+            self.write_message(json.dumps(message.to_json()))
+        except Exception as e:
+            print(f"Exception while sending message to websocket: {e}")
         self.sequence_number += 1
 
     def on_message(self, message) -> None:
@@ -223,12 +234,17 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 assert action.player_id != action.data['player_id'], f"The lobby host shouldn't be removing themself with this method! Please send the leave lobby message instead, thx."
                 if self.lobby_id in self.lobbies:
                     lobby = self.lobbies[self.lobby_id]
+                    player_to_kick = get_player_from_id(lobby.players, action.data['player_id'])
                     is_host_leaving = lobby.remove_player(action.data['player_id'])
                     assert not is_host_leaving, f"This shouldn't be the host!!"
                     # Broadcast to all players (including the original player) that this player has left the lobby
                     leave_message = Action(ActionEnum.REMOVE_PLAYER, self.id, {"lobby": lobby.to_json(), "player_id_removed": action.data['player_id']})
                     self.broadcast_to_lobby(self.lobby_id, leave_message)
-
+                    # Since the player was removed from the lobby, they didn't receive the broadcast. Send the message to them separately.
+                    if player_to_kick is not None:
+                        player_to_kick.send_message(leave_message)
+                    else:
+                        raise Exception(f"The player to kick was None for some reason! Can't send them a message kicking them.")
                 else:
                     print(f"Player {self.id} attempted to kick someone out of a lobby, but wasn't themselves part of any.")
                     # Send a message back to the player that they weren't in a lobby
@@ -251,8 +267,19 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 print(f"Lobby {self.lobby_id} not found for action {actionEnum}.")
 
     def on_close(self) -> None:
+        for lobby_code, lobby in self.lobbies.items():
+            for player in lobby.players:
+                if player.player_id == self.id:
+                    if lobby.is_in_game:
+                        print("Eliminating player from in-game")
+                        lobby.game.eliminate_player(self.id)
+                        GameWebSocketHandler.broadcast_to_lobby(lobby_code, Action(ActionEnum.PLAYER_LEFT, self.id, {'lobby': lobby.game.to_json(), 'lobby_code': lobby_code}))
+                    else:
+                        # In the lobby
+                        print("Eliminating player from lobby")
+                        GameWebSocketHandler.broadcast_to_lobby(lobby_code, Action(ActionEnum.REMOVE_PLAYER, self.id, {'lobby': lobby.to_json(), 'player_id_removed': self.id}))
         self.connections.remove(self)
-        print(f"WebSocket connection {self.id} closed")
+        print(f"WebSocket connection {self.id} closed. Current list of connections: {self.connections}")
         # TODO: handle removing a player from their lobby in the game logic, since the game/lobby needs to react to a player disconnecting (e.g. redistributing player turns)
 
     def check_origin(self, origin) -> bool:
