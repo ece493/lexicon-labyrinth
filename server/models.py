@@ -753,8 +753,12 @@ class Bot(Player, object):
             else:
                 print(f"It's my turn! Bot: {self.player_id}")
                 self.do_turn(message)
-        elif message.action in [ActionEnum.TRANSFORM_POWERUP_ACCEPTED, ActionEnum.SWAP_POWERUP_ACCEPTED]:
-            self.finish_turn_after_powerup()
+        elif message.action in [ActionEnum.TRANSFORM_POWERUP_ACCEPTED.value, ActionEnum.SWAP_POWERUP_ACCEPTED.value]:
+            if message.data['lobby']['state']['curr_turn'] == self.player_id:
+                self.finish_turn_after_powerup()
+        elif message.action in [ActionEnum.ROTATE_POWERUP_ACCEPTED.value, ActionEnum.SCRAMBLE_POWERUP_ACCEPTED.value]:
+            if message.data['lobby']['state']['curr_turn'] == self.player_id:
+                self.do_turn(message)
         elif message.action == ActionEnum.WORD_ACCEPTED.value:
             # We need to remember which words were used, so we don't repeat them
             # Follow the path to see what the word is
@@ -767,12 +771,13 @@ class Bot(Player, object):
         elif message.action == ActionEnum.WORD_DENIED.value:
             if message.data['lobby']['state']['curr_turn'] == self.player_id:
                 print(f"Crap, I'm bot {self.player_id} and my word got denied! Redoing the bot stuff and trying to submit a new action.")
-                self.do_turn()
+                self.do_turn(message)
             else:
                 print(f"I'm bot {self.player_id} and phew, someone else's word got denied bwahaha")
                 pass
         else:
-            print(f"Bot is ignoring the action {message}")
+            pass
+            #print(f"Bot is ignoring the action {message}")
         pass
 
     def use_scramble_powerup(self) -> None:
@@ -804,6 +809,8 @@ class Bot(Player, object):
             self.send_message_to_game(ActionEnum.PICK_WORD, self.pre_board_change_found_path)
             self.pre_board_change_found_path = None
             return
+        else:
+            raise Exception("ERROR, the bot is finishing its turn but it didn't have a path planned out! Could this be for a different player's powerup being accepted?")
 
     def do_turn(self, message: 'Action') -> None:
         self.start_time_s = time.perf_counter()
