@@ -212,7 +212,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                         print(f"Lobby {self.lobby_id} deleted as the host has left.")
                         # Send a message to each player saying that they were removed from the game
                         for player in lobby.players:
-                            msg = Action(ActionEnum.PLAYER_LEFT, player.player_id, {"lobby_code": self.lobby_id})
+                            msg = Action(ActionEnum.REMOVE_PLAYER, player.player_id, {"player_id_removed": player.player_id})
                             player.send_message(msg)
                         # Delete the lobby if the host is leaving
                         del lobby
@@ -277,7 +277,8 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                     else:
                         # In the lobby
                         print("Eliminating player from lobby")
-                        GameWebSocketHandler.broadcast_to_lobby(lobby_code, Action(ActionEnum.REMOVE_PLAYER, self.id, {'lobby': lobby.to_json(), 'player_id_removed': self.id}))
+                        self.process_message({'action': 'leave_lobby', 'player_id': self.id, 'data': {'lobby_code': self.lobby_id}})
+                        #GameWebSocketHandler.broadcast_to_lobby(lobby_code, Action(ActionEnum.REMOVE_PLAYER, self.id, {'lobby': lobby.to_json(), 'player_id_removed': self.id}))
         self.connections.remove(self)
         print(f"WebSocket connection {self.id} closed. Current list of connections: {self.connections}")
         # TODO: handle removing a player from their lobby in the game logic, since the game/lobby needs to react to a player disconnecting (e.g. redistributing player turns)
