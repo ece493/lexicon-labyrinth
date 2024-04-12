@@ -6,6 +6,7 @@ import uuid
 import json
 import random
 import string
+import itertools
 
 from typing import Optional, Any
 
@@ -42,13 +43,25 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
 
         #if message.action == ActionEnum.WORD_DENIED.value:
         #    print(f"BROADCASTING WORD DENIED MESSAGE: {message}")
-
+        print("\nBroadcasting message to lobby!")
         for lobby in cls.lobbies.values():
-            print(f"Checking lobby {lobby.lobby_id=} {lobby_id=}")
+            #print(f"Checking lobby {lobby.lobby_id=} {lobby_id=}")
             if lobby.lobby_id == lobby_id:
+                # Since players are asynchronous and bots are synchronous, we need to first send the message to ALL the players, before sending to the bots one at a time.
+                # If it's the bot's turn, only one of the bots will perform a synchronous action.
+                # We just want to avoid the situation where a bot gets the message that it's their turn, and it does the action BEFORE the player after the bot in the list even was told it's the bot's turn!
+                # And yes this was a bug that took hours to fix, RIP
+                non_bot_players: list[Player] = []
+                bot_players: list[Player] = []
                 for player in lobby.players:
+                    if player.is_bot:
+                        bot_players.append(player)
+                    else:
+                        non_bot_players.append(player)
+                for player in itertools.chain(non_bot_players, bot_players):
                     message.player_id = player.player_id  # Overwrite the player ID to be the ID of the player we're sending this to
                     player.send_message(message)
+                print("End broadcast\n")
                 return
         raise Exception("Lobby to broadcast to is not in the list of lobbies!")
 
@@ -270,11 +283,11 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         for lobby_code, lobby in self.lobbies.items():
             for player in lobby.players:
                 if player.player_id == self.id:
-                    if lobby.is_in_game:
+                    if lobby.is_in_game and player.lives > 0:
                         print("Eliminating player from in-game")
                         lobby.game.eliminate_player(self.id)
                         GameWebSocketHandler.broadcast_to_lobby(lobby_code, Action(ActionEnum.PLAYER_LEFT, self.id, {'lobby': lobby.game.to_json(), 'lobby_code': lobby_code}))
-                    else:
+                    elif not lobby.is_in_game:
                         # In the lobby
                         print("Eliminating player from lobby")
                         self.process_message({'action': 'leave_lobby', 'player_id': self.id, 'data': {'lobby_code': self.lobby_id}})

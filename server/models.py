@@ -105,6 +105,7 @@ class Lobby(object):
 
     def to_json(self) -> dict[str, Any]:
         # SHOULD BE UNUSED!
+        #raise Exception("THIS CODE SHOULD BE UNUSED!!!")
         if self.game is not None:
             assert isinstance(self.game, Game)
             game_dict = self.game.to_json()
@@ -358,7 +359,6 @@ class Game:
             self.broadcast_func(self.lobby_id, Action(ActionEnum.START_TURN, next_player.player_id, self.to_json()))
         else:
             # Handle the scenario where no non-spectator players are found
-            pass  # This could involve checking game end conditions or handling errors
             raise Exception("No players remaining!")
             # self.winner_determined()
 
@@ -385,19 +385,16 @@ class Game:
 
     def transition_to_next_player(self) -> None:
         """Transitions to the next player's turn."""
-        print(f"Transitioning to next player from {self.current_player_index}")
+        print(f"Transitioning to next player from {self.current_player_index} to {(self.current_player_index + 1) % len(self.players)}")
         self.current_player_index = (self.current_player_index + 1) % len(self.players)
-
         self.next_turn()
 
     def inform_player_turn(self) -> None:
         """Informs the current player that it's their turn."""
-        print(
-            f"Informing player at index {self.current_player_index} that it's their turn")
-        # Ensure we skip spectators
-        while self.players[self.current_player_index].is_spectator:
-            self.current_player_index = (
-                self.current_player_index + 1) % len(self.players)
+        print(f"Informing player at index {self.current_player_index} that it's their turn")
+        # Ensure we skip spectators and dead guys/girls/nonbinary
+        while self.players[self.current_player_index].is_spectator or self.players[self.current_player_index].lives == 0:
+            self.current_player_index = (self.current_player_index + 1) % len(self.players)
 
         current_player = self.players[self.current_player_index]
         self.broadcast_func(self.lobby_id, Action(ActionEnum.START_TURN, current_player.player_id, {"message": "Your turn"}))
@@ -522,8 +519,8 @@ class Game:
             player_to_eliminate.is_spectator = True
             try:
                 self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
-            except:
-                print("\n\n\n\n\nWHY IN THE HECJ")
+            except Exception as e:
+                print(f"\n\n\n\n\nWHY IN THE HECJ {e} {type(e)}")
 
         remaining_players = [player for player in self.players if not player.is_spectator and player.lives >= 1]
         if len(remaining_players) == 1:
@@ -542,6 +539,7 @@ class Game:
 
     def run_game(self) -> None:
         # UNUSED
+        raise Exception("This code should be unused!")
         # determining who goes first, initializing game timers, etc.
         current_turn = 0
         turn_modulus = len(self.players)
@@ -686,7 +684,7 @@ class Player(object):
         assert isinstance(message, Action)
         # This is a real player, so we need to send a websocket message
         if self.send_func:
-            print(f"Player with id {self.player_id} is sending a message to the associated websocket for this connection: {message}")
+            #print(f"Player with id {self.player_id} is sending a message to the associated websocket for this connection: {message}")
             self.send_func(self.player_id, message)
         else:
             print("No send function set for this player.")
@@ -744,7 +742,7 @@ class Bot(Player, object):
         assert isinstance(message, Action)
         # Send a message from the game to the bot
         # For local bots, directly process the message
-        print(f"Bot with name {self.name} and id {self.player_id} received message: {message}")
+        #print(f"Bot with name {self.name} and id {self.player_id} received message: {message}")
         self.process_bot_action(message)
 
     def send_message_to_game(self, action_enum: 'ActionEnum', message_data: Any) -> None:
@@ -771,7 +769,7 @@ class Bot(Player, object):
             self.min_time_to_submit_turn: float = random.triangular(0.0, self.time_limit_s*BOT_TIME_LIMIT_FRAC_DELAY[self.difficulty.value], 0.0) # FR38, FR43, FR46
             print(f"Bot's time limit is {self.time_limit_s}")
         elif message.action == ActionEnum.START_TURN.value:
-            print(message.data)
+            #print(message.data)
             if message.data['state']['curr_turn'] != self.player_id:
                 #print(f"Next turn. It isn't bot {self.player_id}'s turn")
                 pass
@@ -794,7 +792,7 @@ class Bot(Player, object):
             # We need to remember which words were used, so we don't repeat them
             # Follow the path to see what the word is
             word = ''
-            print(message.data)
+            #print(message.data)
             for (col, row) in message.data['path']:
                 word += message.data['lobby']['state']['board'][row][col]
             print(f"Bot {self.player_id} is adding word '{word}' to its list of used up words.")
@@ -812,7 +810,7 @@ class Bot(Player, object):
         else:
             pass
             #print(f"Bot is ignoring the action {message}")
-        pass
+        print(f"Bot action done!")
 
     def use_scramble_powerup(self) -> None:
         # FR49
@@ -854,7 +852,7 @@ class Bot(Player, object):
             # Bit of a hack to handle the different dict formats used
             message.data = message.data['lobby']
         game_board: list[list[str]] = message.data['state']['board']
-        print(message.data)
+        print("Bot is in do turn, with message: ", message.data)
         bot_representation_in_lobby: dict[str, Any] = get_player_from_id_dicts(message.data['players'], self.player_id)
         available_money: int = bot_representation_in_lobby['money']
         board_size = message.data['board_size']
@@ -923,7 +921,7 @@ class Bot(Player, object):
         random_number = random.random()
         print(f"Random: {random_number}, fail prob: {self.fail_probability}")
         if random_number < self.fail_probability:
-            print(f"Bot purposely fails to find a word and is sleeping for {self.time_limit_s} s")
+            print(f"Bot purposely fails to find a word and is sleeping for {self.time_limit_s} s before ending its turn")
             time.sleep(self.time_limit_s)
             self.send_message_to_game(ActionEnum.END_TURN, {})
             return
@@ -931,13 +929,14 @@ class Bot(Player, object):
         # The search algorithm is akin to how a player looks for words. Trace out a random path and see whether it spells out a known word
         # Try to find a word starting from a random position
         for i in range(2000000):  # Limit attempts
-            # print(f"Bot search iteration {i}")
-            if can_afford_scramble and i % 100 == 0:
+            if i % 10000 == 0:
+                print(f"Bot search iteration {i}")
+            if can_afford_scramble and i % 300 == 0:
                 # Every once in a while, randomly decide whether we want to try swapping the board
                 if random.random() < 0.1:
                     self.use_scramble_powerup()
                     return
-            if can_afford_rotate and i % 100 == 0:
+            if can_afford_rotate and i % 300 == 0:
                 if random.random() < 0.1:
                     self.use_rotate_powerup(random.choice(['row', 'col']), random.randint(0, board_size - 1), random.randint(1, board_size - 1))
                     return
@@ -949,7 +948,7 @@ class Bot(Player, object):
             if isinstance(word, float) and math.isnan(word):
                 return # We already sent the game a message from within, so don't send anything here and just return
             if word is not None and path is not None:
-                print(f"Found word: {word} at path {path}")
+                print(f"Found word: {word} at path {path} so I'm picking it")
                 if time.perf_counter() - self.start_time_s < self.min_time_to_submit_turn:
                     print(f"Sleeping for an additional {self.min_time_to_submit_turn - (time.perf_counter() - self.start_time_s)} s since min time is {self.min_time_to_submit_turn} s and we've only spent {time.perf_counter() - self.start_time_s} s")
                     sleep_time = self.min_time_to_submit_turn - (time.perf_counter() - self.start_time_s)
