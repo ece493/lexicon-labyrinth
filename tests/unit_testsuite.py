@@ -44,7 +44,6 @@ async def get_bot_failure_rate(difficulty: BotDifficulty):
     cnt_found_words = len([log.value for log in bot_msg_log if log==ActionEnum.PICK_WORD])
     # cnt_failed = len([log.value for log in bot_msg_log if log==ActionEnum.END_TURN])
     print(f"bot has {100*cnt_found_words/len(bot_msg_log)}% success rate")
-    print(bot_msg_log)
     return 100*cnt_found_words/len(bot_msg_log)
 
 def test_dictionary():
