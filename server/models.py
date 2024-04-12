@@ -43,9 +43,9 @@ class BotDifficulty(Enum):
     def __str__(self) -> str:
         return self.name
 
-BOT_TIME_LIMIT_FRAC_DELAY = (0.9, 0.5, 0.3)
+BOT_TIME_LIMIT_FRAC_DELAY = (0.9, 0.5, 0.3) # FR43, FR46
 
-BOT_FAIL_PROBABILITY = (0.25, 0.18, 0.10)
+BOT_FAIL_PROBABILITY = (0.25, 0.18, 0.10) # FR42, FR45
 
 def get_player_from_id(player_list: list['Player'], player_id: str) -> 'Player':
     for player in player_list:
@@ -290,14 +290,14 @@ class Game:
         # Callback to send message to specific player
         self.send_to_player_func: Callable = send_to_player_func
         self.board_size: int = board_size
-        self.board: WordGrid = WordGrid(board_size)
+        self.board: WordGrid = WordGrid(board_size) # FR20
         self.max_lives: int = max_lives
         self.host: str = host
         self.timer_setting: float = timer_setting
         self.current_player_index: int = 0
         self.turn_modulus: int = len(players)
         self.dictionary = GameDictionary()
-        self.used_words: set[str] = set()
+        self.used_words: set[str] = set() # FR19
         self.game_complete = False
 
     # def initialize_random_board(self) -> None:
@@ -409,6 +409,7 @@ class Game:
 
     def handle_player_elimination_or_time_out(self, player_id) -> None:
         """Handles the scenario where a player is eliminated or runs out of time."""
+        # FR37
         # Remove the player or deduct life
         player_to_kill = None
         for player in self.players:
@@ -450,6 +451,7 @@ class Game:
         return True
 
     def process_word_choice(self, player_id, move_data) -> None:
+        # FR18
         assert self.state == GameState.WAITING_FOR_MOVE, f"In process move, the current state of {self.state} isn't the expected of WAITING_FOR_MOVE!"
         # Logic to check if the move is valid
         print(f"Processing move: {move_data}")
@@ -487,6 +489,7 @@ class Game:
             self.state = GameState.WAITING_FOR_MOVE
 
     def winner_determined(self, winner: 'Player') -> None:
+        # FR26
         self.state = GameState.GAME_OVER
         winner_player_id = winner.player_id
         self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_WIN, winner_player_id, {'lobby': self.to_json()}))
@@ -505,11 +508,13 @@ class Game:
         player_to_eliminate.lives = 0
         if player_to_eliminate.is_bot:
             # Remove the bot after telling it that it died
+            # FR24
             self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
             #self.broadcast_func(self.lobby_id, Action(ActionEnum.LEAVE_GAME, player_to_eliminate.player_id, self.to_json()))
             #self.players = [player for player in self.players if player.player_id != player_id]
         else:
             # Let the player watch the rest of the game as a spectator
+            # FR25, FR24
             player_to_eliminate.is_spectator = True
             self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
 
@@ -693,7 +698,7 @@ class Bot(Player, object):
         super().__init__(player_id, name)
         self.is_bot = True
         self.difficulty: BotDifficulty = difficulty
-        self.memory: set[str] = set()
+        self.memory: set[str] = set() # FR50
         # Additional properties and methods specific to bot behavior
         self.dictionary: list[str] = self.pull_dictionary(self.difficulty)
         self.dict_trie = Trie()
@@ -739,9 +744,10 @@ class Bot(Player, object):
         self.send_to_game_func(self.player_id, action_enum, Action(action_enum, self.player_id, message_data))
 
     def update_difficulty(self, difficulty_enum: BotDifficulty) -> None:
+        # FR39
         self.difficulty = difficulty_enum
         self.dictionary = self.pull_dictionary(self.difficulty)
-        self.fail_probability = BOT_FAIL_PROBABILITY[self.difficulty.value]
+        self.fail_probability = BOT_FAIL_PROBABILITY[self.difficulty.value] # FR40
 
     def process_bot_action(self, message: 'Action') -> None:
         assert isinstance(message, Action)
@@ -831,6 +837,7 @@ class Bot(Player, object):
             raise Exception("ERROR, the bot is finishing its turn but it didn't have a path planned out! Could this be for a different player's powerup being accepted?")
 
     def do_turn(self, message: 'Action') -> None:
+        # FR48
         self.start_time_s = time.perf_counter()
         message = copy.deepcopy(message)
         if 'lobby' in message.data:

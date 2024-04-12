@@ -14,6 +14,7 @@ def get_random_player_id(length: int = 10) -> str:
 
 def load_words_from_scowl(dictionary_path: str) -> list[str]:
     # Load words from the SCOWL dataset
+    # FR41, FR44, FR47
     words = []
     start_processing = False
     with open(dictionary_path, 'r', encoding='utf8') as file:
