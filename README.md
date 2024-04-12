@@ -1,6 +1,12 @@
-# Lexicon Labyrinth
+# Lexicon Labyrinth (Group 17)
 
-## Setup/Deployment Instructions
+### Members
+
+- Muhammad Fiaz | ccid: mfiaz | studentID: 1623442
+- Joshua Wong | ccid: jyw2 | studentID: 1617843
+- Jie Fan | ccid: jie | studentID: 1573032
+
+# Setup/Deployment Instructions
 1. Deployment has been automated using Docker! Ensure that you have Docker Compose or Docker Desktop installed. To learn how to do so, please visit: [https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/).
 Please view this document on github for the best experience.
 2. After installing Docker, from your cli run:
@@ -13,9 +19,6 @@ docker compose up -d
 ```
 3. All the required dependencies will be installed automatically.
 4. Once the server and client setup process is complete, the game can be accessed at the url [http://localhost:3000/](http://localhost:3000/).
-
-# Test Guide
-1. TO DO!
 
 # User Guide
 ## IMPORTANT!
@@ -144,3 +147,25 @@ Click the continue button to return to the start screen
 
 ![image](https://github.com/ece493/lexicon-labyrinth/assets/74114171/fe16cabd-7651-43b6-87eb-e5915619619b)
 
+
+# Running Automated Python Tests
+1. Install the correct libraries for these tests. Ensure you have `Python v3.11.5`
+installed (may work with other versions, but not guaranteed).
+2. Install the requirements for the tests in the file `server/requirements.txt` using
+Python. This can be done with the following command (when in the `server/`
+directory in a terminal window of your choice):
+
+```pip install -r requirements.txt```
+
+3. Ensure that the server is running before running any of these testsuites. Follow
+the instructions for deploying the server locally in the `Setup/Deployment` section of this README.
+4. Select the testsuite you would like to run. You can learn more about the testsuites
+in the testing plan document located on the group google drive. Select the file you want to run (the tests contained in each are
+described in the testing plan document).
+    1. unit_testsuite.py
+    2. api_testsuite.py
+    3. load_testsuite.py
+5. Move to the tests/ directory in a terminal window of your choice and run the
+following command:
+
+```py -m pytest <testsuite_name>.py```
