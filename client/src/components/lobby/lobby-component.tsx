@@ -49,6 +49,7 @@ const LobbySettingsAdminComponent: React.FC<LobbyProps> = ({ ...p }) => {
                 <p className="m-0 text-slate-100">Lobby Code</p>
                 <div className="m-0 flex flex-row w-full">
                     <h1 className="m-0 text-slate-100 text-3xl mr-2">{p.lobby.lobby_code}</h1>
+                    {/* FR3 - Lobby.Link */}
                     <IconButton className="my-auto" disabled={!navigator.clipboard}
                         onClick={() => navigator.clipboard.writeText(`http://localhost:3000/lobby/${p.lobby.lobby_code}`)}>
                         <ContentCopyIcon className="invert" />
@@ -58,6 +59,7 @@ const LobbySettingsAdminComponent: React.FC<LobbyProps> = ({ ...p }) => {
             <div className="m-0 py-4"></div>
             <div className="m-0 flex flex-col w-full py-1">
                 <p className="m-0 text-slate-100">Number of Lives</p>
+                {/* FR11 - Lobby.Lives */}
                 <Slider
                     size="medium"
                     name="max_lives"
@@ -70,6 +72,7 @@ const LobbySettingsAdminComponent: React.FC<LobbyProps> = ({ ...p }) => {
             </div>
             <div className="m-0 flex flex-col w-full py-1">
                 <p className="m-0 text-slate-100">Turn Timer</p>
+                {/* FR12 - Lobby.Close */}
                 <Slider
                     size="medium"
                     name="timer_setting"
@@ -82,6 +85,7 @@ const LobbySettingsAdminComponent: React.FC<LobbyProps> = ({ ...p }) => {
             </div>
             <div className="m-0 flex flex-col w-full py-1">
                 <p className="m-0 text-slate-100">Board Width</p>
+                {/* FR10 - Lobby.Board.Size */}
                 <Slider
                     size="medium"
                     name="board_size"

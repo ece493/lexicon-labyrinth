@@ -50,7 +50,7 @@ export const wsReceiveHandler = (
       setScreen(ScreenState.LOBBY_CODE_ENTRY_FAILED);
       break;
     case ActionsList.lobby_full:
-      // Code for lobby_does_not_exist
+      // FR6 - Lobby.Full
       setScreen(ScreenState.LOBBY_FULL);
       break;
     case ActionsList.successfully_joined_lobby:
@@ -120,6 +120,8 @@ export const wsReceiveHandler = (
         setScreen(ScreenState.END);
       break;
     case ActionsList.remove_player:
+      // FR12 - Lobby.Close
+      // Also for when the Lobby Owner kicks user
       if (action.player_id === action.data.player_id_removed)
         setScreen(ScreenState.BOOTED_FROM_LOBBY);
       setLobby(action.data.lobby);

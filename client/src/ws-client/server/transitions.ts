@@ -28,6 +28,7 @@ export type ServerTransitions = {
   notifyTurnEnd: (ctx: GameContextData) => void;
 };
 
+// FR1 - Lobby.Initialize
 const initialize = (ctx: GameContextData) => {
   const msg: Action = {
     action: ActionsList.initialize,
@@ -41,6 +42,7 @@ const initialize = (ctx: GameContextData) => {
   ctx.sequenceNumber += 1;
 };
 
+{/* FR4 - Lobby.Join - Via Code */ }
 const joinLobby = (code: string, ctx: GameContextData) => {
   const msg: Action = {
     action: ActionsList.join_lobby,
@@ -66,6 +68,7 @@ const changeParam = (param: string, value: string, ctx: GameContextData) => {
   ctx.sequenceNumber += 1;
 };
 
+// FR7 - Lobby.Bot.Add
 const addBot = (ctx: GameContextData) => {
   const msg: Action = {
     action: ActionsList.add_bot,
@@ -77,6 +80,7 @@ const addBot = (ctx: GameContextData) => {
   ctx.sequenceNumber += 1;
 };
 
+// FR39 - Bot.Difficulty
 const updateBot = (bot_id: string, difficulty: number, ctx: GameContextData) => {
   const msg: Action = {
     action: ActionsList.update_bot,
@@ -88,7 +92,8 @@ const updateBot = (bot_id: string, difficulty: number, ctx: GameContextData) => 
   ctx.sequenceNumber += 1;
 };
 
-
+// FR8 - Lobby.Bot.Remove
+// FR9 - Lobby.Bot.Remove
 const removePlayer = (player_id: string, ctx: GameContextData) => {
   const msg: Action = {
     action: ActionsList.remove_player,
