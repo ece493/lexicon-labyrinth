@@ -85,10 +85,10 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         #print(message)
         message.sequence_number = self.sequence_number # Set the monotonic sequence number
         print(f"Sending message #{self.sequence_number} {message} to player {self.id} in lobby {self.lobby_id}")
-        try:
-            self.write_message(json.dumps(message.to_json()))
-        except Exception as e:
-            print(f"Exception while sending message to websocket: {e}, and the exception type is {type(e)}")
+        #try:
+        self.write_message(json.dumps(message.to_json()))
+        #except Exception as e:
+        #    print(f"Exception while sending message to websocket: {e}, and the exception type is {type(e)}")
         self.sequence_number += 1
 
     def on_message(self, message) -> None:

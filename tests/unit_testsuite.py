@@ -32,9 +32,9 @@ async def get_bot_failure_rate(difficulty: BotDifficulty):
     bot = Bot("id", "bot", difficulty, lambda _, a, _1 : bot_msg_log.append(a))
     async def bot_find_word():
         loop = asyncio.get_event_loop()
-        bot.process_bot_action(Action(ActionEnum.START_GAME.value, "id", {'timer_setting': TIMER_SETTING}))
+        bot.process_bot_action(Action(ActionEnum.START_GAME, "id", {'timer_setting': TIMER_SETTING}))
         game_state = {"state": {"curr_turn": "id", "board": rand_board(BOARD_SIZE), "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 25.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": False, "is_bot": False, "lives": 3, "money": 0, "score": 0}, {"id": "id", "name": "Bob", "is_spectator": False, "is_bot": True, "lives": 3, "money": 0, "score": 0}]}
-        await loop.run_in_executor(None, bot.process_bot_action, Action(ActionEnum.START_TURN.value, "id", game_state))
+        await loop.run_in_executor(None, bot.process_bot_action, Action(ActionEnum.START_TURN, "id", game_state))
 
     bot_msg_log = []
     tasks = [None]*NUM_BOT_RUNS

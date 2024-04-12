@@ -510,7 +510,10 @@ class Game:
         if player_to_eliminate.is_bot:
             # Remove the bot after telling it that it died
             # FR24
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
+            try:
+                self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
+            except:
+                print("\n\n\n\n\nWHY IN THE HECJKKOSDFJIKOSDJFIOSDJFIOSDJIO")
             #self.broadcast_func(self.lobby_id, Action(ActionEnum.LEAVE_GAME, player_to_eliminate.player_id, self.to_json()))
             #self.players = [player for player in self.players if player.player_id != player_id]
         else:
@@ -520,14 +523,17 @@ class Game:
             try:
                 self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
             except:
-                print("\n\n\n\n\nWHY IN THE HECJKKOSDFJIKOSDJFIOSDJFIOSDJIO")
+                print("\n\n\n\n\nWHY IN THE HECJ")
 
         remaining_players = [player for player in self.players if not player.is_spectator and player.lives >= 1]
         if len(remaining_players) == 1:
             # Last player standing
             print(f"Only one last player standing. The game has ended!")
             #self.transition_to_next_player()
-            self.winner_determined(remaining_players[0])
+            try:
+                self.winner_determined(remaining_players[0])
+            except:
+                print(f"FAILED IN BROADCAST WINNER MESSAGE {remaining_players[0]}")
             self.game_complete = True
         else:
             print(f"A player got removed, but there's still players left to fight it out. The game goes on!")
