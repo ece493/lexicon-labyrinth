@@ -17,7 +17,7 @@ PLAYER_LIMIT = 5
 DICTIONARY_PATH = "dictionary.txt"
 
 # The player starts with 10 money
-POWERUP_COSTS = {
+POWERUP_COSTS = { # FR30
     "Rotate": 5,
     "Scramble": 4,
     "Swap": 8,
@@ -540,10 +540,12 @@ class Game:
 
     # Helper function to check player's funds and deduct cost
     def check_and_deduct_funds(self, player_id: str, cost: int) -> bool:
+        # FR28, FR31, FR32
         player = next(
             (p for p in self.players if p.player_id == player_id), None)
         if player is not None and player.currency >= cost:
             player.currency -= cost
+            assert player.currency >= 0, f"Player's currency is {player.currency} and dipped below 0! This should never have happened."
             return True
         return False
 
@@ -555,6 +557,7 @@ class Game:
         return False
 
     def apply_rotate_powerup(self, player_id: str, data: dict) -> None:
+        # FR33
         print(f"Applying rotate powerup! Data is {data}")
         cost = POWERUP_COSTS["Rotate"]
         if self.check_and_deduct_funds(player_id, cost):
@@ -570,6 +573,7 @@ class Game:
             self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED, player_id, self.to_json()))
 
     def apply_transform_powerup(self, player_id: str, data: dict) -> None:
+        # FR36
         print(f"Applying transform powerup! Data is {data}")
         tile = data['tile']
         new_char = data['new_char']
@@ -585,6 +589,7 @@ class Game:
             self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED, player_id, self.to_json()))
 
     def apply_swap_powerup(self, player_id: str, data: list) -> None:
+        # FR35
         print(f"Applying swap powerup! Data is {data}")
         cost = POWERUP_COSTS["Swap"]
         if self.check_and_deduct_funds(player_id, cost):
@@ -599,6 +604,7 @@ class Game:
             self.broadcast_func(self.lobby_id, Action(ActionEnum.POWERUP_DENIED, player_id, self.to_json()))
 
     def apply_scramble_powerup(self, player_id: str) -> None:
+        # FR34
         print(f"Applying scramble powerup!")
         cost = POWERUP_COSTS["Scramble"]
         if self.check_and_deduct_funds(player_id, cost):
