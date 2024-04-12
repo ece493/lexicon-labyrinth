@@ -5,8 +5,10 @@ import pytest
 import random
 
 URL = "ws://localhost:8888/websocket"
-TIME_OUT = 2        #time out fix
+TIME_OUT = 2
 WAIT_TIME = 0.5
+
+# PLEASE NOTE THAT SOME TESTS INVOLVING BOTS MAY FAIL IF YOUR COMPUTER IS TOO SLOW!
 
 async def send_and_check_rcv(websocket, message, player_id, actions, time_out, wait_time):
     await asyncio.sleep(random.random()*wait_time*2) #random waits to simulate user interactions
