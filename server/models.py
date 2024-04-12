@@ -450,6 +450,7 @@ class Game:
     def process_word_choice(self, player_id, move_data) -> None:
         # FR18
         assert self.state == GameState.WAITING_FOR_MOVE, f"In process move, the current state of {self.state} isn't the expected of WAITING_FOR_MOVE!"
+        assert self.players[self.current_player_index].player_id == player_id, f"This isn't the player's turn! Why are they submitting a word?!"
         # Logic to check if the move is valid
         print(f"Processing move: {move_data}")
         word_to_check = ""
@@ -713,6 +714,7 @@ class Bot(Player, object):
         self.pre_board_change_found_path = None
 
     def check_whether_prefix_is_in_dictionary(self, prefix: str) -> bool:
+        assert prefix.lower() == prefix, f"PREFIX ISN'T LOWERCASE JSDIOHJFIOSDJFI(SEJI(FOS))"
         # TODO: Optimize using lexicographical stuff
         return self.dict_trie.starts_with(prefix)
         # for word in self.dictionary:
@@ -862,6 +864,7 @@ class Bot(Player, object):
         
         def find_word(x: int, y: int, path: list[tuple[int, int]], prefix: str):
             assert path is not None
+            assert prefix.lower() == prefix, f"COME ON GET YOUR LOWERCASE AND UPPERCASE STRAIGHT"
             #print(f"Bot in find word, path: {path}")
             if not self.check_whether_prefix_is_in_dictionary(prefix):
                 if can_afford_swap and can_afford_transform:
@@ -894,7 +897,7 @@ class Bot(Player, object):
                     nx, ny = x + dx, y + dy
                     assert path is not None
                     if is_valid_move(nx, ny, path):
-                        new_prefix: str = prefix + game_board[nx][ny]
+                        new_prefix: str = (prefix + game_board[nx][ny]).lower()
                         assert path is not None
                         new_path = path + [(ny, nx)] # Order is col, row
                         assert new_path is not None, f"Apparently nonnone path {path} plus {[(nx, ny)]} gives a none path"

@@ -9,8 +9,8 @@ from models import Bot, BotDifficulty, Action, ActionEnum
 from generate_dict import load_dict, DICT_PATH, EASY_DICT_PATH, MED_DICT_PATH, HARD_DICT_PATH
 import random
 
-NUM_BOT_RUNS = 50
-TIMER_SETTING = 2.5
+NUM_BOT_RUNS = 100
+TIMER_SETTING = 5
 BOARD_SIZE = 10
 
 # here we generate the boards the same way we do in-game
@@ -25,7 +25,7 @@ letter_weights = {
 }
 letters, weights = zip(*letter_weights.items())
 def rand_letter():
-    return random.choices(letters, weights=weights, k=1)[0]
+    return random.choices(letters, weights=weights, k=1)[0].lower()
 def rand_board(N):
     return [[rand_letter() for i in range(N)] for i in range(N)]
 async def get_bot_failure_rate(difficulty: BotDifficulty):
