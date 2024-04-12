@@ -875,7 +875,7 @@ class Bot(Player, object):
                     word_without_last_letter = prefix[:-1]
                     assert self.check_whether_prefix_is_in_dictionary(word_without_last_letter), f'Why is this prefix {word_without_last_letter} not in the dict?!!?! I know {prefix} isnt but without the last letter it should be!'
                     for letter in string.ascii_lowercase:
-                        if self.check_whether_prefix_is_in_dictionary(word_without_last_letter + letter):
+                        if (word_without_last_letter + letter) in self.dictionary:#self.check_whether_prefix_is_in_dictionary(word_without_last_letter + letter):
                             # Great, we can get a word with this.
                             print(f"BOT HAS FOUND WORD IF IT CHANGES THE END, word is {word_without_last_letter + letter}")
                             # Remember the path we should be submitting once it's our turn again after this powerup works

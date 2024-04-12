@@ -186,6 +186,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                     random.seed(0)
                     print("Setting the seed to 0")
                 else:
+                    print(f"{action.data['player_name']} did not match alice")
                     random.seed()
                 resp = Action(ActionEnum.RETURN_LOBBY_CODE, self.id, lobby_code)
                 self.send_message(resp)
