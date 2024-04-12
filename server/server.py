@@ -320,7 +320,7 @@ def make_app() -> Application:
 
 
 if __name__ == "__main__":
-    random.seed(0)
+    # random.seed(0)
     app = make_app()
     app.listen(8888)  # Specify the port to listen on
     print("Lexicon Labyrinth server is running on http://localhost:8888")
