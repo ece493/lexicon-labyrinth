@@ -182,6 +182,11 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
                 assert success, f"How come failed to add the host of the lobby to the lobby they just created?!"
                 self.lobby_id = lobby_code
                 # Send them back the lobby code we created for them
+                if action.data['player_name'].lower() == "alice":
+                    random.seed(0)
+                    print("Setting the seed to 0")
+                else:
+                    random.seed()
                 resp = Action(ActionEnum.RETURN_LOBBY_CODE, self.id, lobby_code)
                 self.send_message(resp)
                 # Tell the player they joined their own lobby. Technically we should be telling everyone within the lobby, but it's only the player in there right now.

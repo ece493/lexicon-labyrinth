@@ -810,22 +810,26 @@ class Bot(Player, object):
     def use_scramble_powerup(self) -> None:
         # FR49
         print("BOT IS USING SCRAMBLE!")
+        time.sleep(random.uniform(0, 1))
         self.send_message_to_game(ActionEnum.PICK_SCRAMBLE_POWERUP, {})
 
     def use_swap_powerup(self, a: list[int], b: list[int]) -> None:
         # FR49
         # a and b are [row, col]
         print("BOT IS USING SWAP!")
+        time.sleep(random.uniform(0, 1))
         self.send_message_to_game(ActionEnum.PICK_SWAP_POWERUP, {'tiles': [a, b]})
 
     def use_rotate_powerup(self, type: str, index: int, rotations: int) -> None:
         # FR49
         print("BOT IS USING ROTATE!")
+        time.sleep(random.uniform(0, 1))
         assert type in ['row', 'col'], f"Bot's rotate type {type} isn't either row or col!"
         self.send_message_to_game(ActionEnum.PICK_ROTATE_POWERUP, {'type': type, 'index': index, 'rotations': rotations})
 
     def use_transform_powerup(self, tile, new_char) -> None:
         # FR49
+        time.sleep(random.uniform(0, 1))
         print(f"BOT IS USING TRANSFORM! Converting to {new_char}")
         self.send_message_to_game(ActionEnum.PICK_TRANSFORM_POWERUP, {'tile': tile, 'new_char': new_char})
 
@@ -873,6 +877,7 @@ class Bot(Player, object):
                     for letter in string.ascii_lowercase:
                         if self.check_whether_prefix_is_in_dictionary(word_without_last_letter + letter):
                             # Great, we can get a word with this.
+                            print(f"BOT HAS FOUND WORD IF IT CHANGES THE END, word is {word_without_last_letter + letter}")
                             # Remember the path we should be submitting once it's our turn again after this powerup works
                             self.pre_board_change_found_path = path
 
