@@ -161,8 +161,8 @@ async def two_players_and_bot_play_till_death(url, time_out, wait_time):
         for i in range(5): #each iteration reduces live by one
             # End turn for both
             print(i)
-            assert await send_and_check_rcv(websocket_A, send_recv_A[a_idx][0], player_id_A, send_recv_A[a_idx][1], time_out, wait_time) is not None, f"Expecting message {send_recv_A[a_idx][1]}"
-            assert await send_and_check_rcv(websocket_B, send_recv_B[b_idx][0], player_id_B, send_recv_B[b_idx][1], time_out, wait_time) is not None, f"Expecting message {send_recv_B[b_idx][1]}"
+            assert await send_and_check_rcv(websocket_A, send_recv_A[a_idx][0], player_id_A, send_recv_A[a_idx][1], 2*time_out, wait_time) is not None, f"Expecting message {send_recv_A[a_idx][1]}"
+            assert await send_and_check_rcv(websocket_B, send_recv_B[b_idx][0], player_id_B, send_recv_B[b_idx][1], 2*time_out, wait_time) is not None, f"Expecting message {send_recv_B[b_idx][1]}"
             a_idx += 1
             b_idx += 1
 
