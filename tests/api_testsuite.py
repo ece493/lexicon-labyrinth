@@ -6,7 +6,9 @@ import random
 
 URL = "ws://localhost:8888/websocket"
 TIME_OUT = 2
-WAIT_TIME = 2
+WAIT_TIME = 0.5
+
+# PLEASE NOTE THAT SOME TESTS INVOLVING BOTS MAY FAIL IF YOUR COMPUTER IS TOO SLOW!
 
 async def send_and_check_rcv(websocket, message, player_id, actions, time_out, wait_time):
     await asyncio.sleep(random.random()*wait_time*2) #random waits to simulate user interactions
@@ -107,7 +109,7 @@ async def two_players_play_till_death(url, time_out, wait_time):
 async def two_players_and_bot_play_till_death(url, time_out, wait_time):
     send_recv_A = [
         ({"action": "initialize", "data": {"player_name": "Alice"}, "sequence_number": 0}, ["successfully_joined_lobby"]),
-        ({"action": "change_param", "data": {"max_lives": 5}, "sequence_number": 0}, ["update_lobby_settings"]),
+        ({"action": "change_param", "data": {"timer_setting": 2}, "sequence_number": 0}, ["update_lobby_settings"]),
         ({"action": "add_bot", "data": {}, "sequence_number": 0}, ["add_bot"]),
         ({"action": "ready_lobby", "sequence_number": 0}, ["start_game"]),
         ({"action": "end_turn", "data": None, "sequence_number": 0}, ["lose_life"]),
@@ -137,9 +139,11 @@ async def two_players_and_bot_play_till_death(url, time_out, wait_time):
 
         a_idx = 0
         b_idx = 0
+        # A sends initialize
         assert await send_and_check_rcv(websocket_A, send_recv_A[a_idx][0], player_id_A, send_recv_A[a_idx][1], time_out, wait_time) is not None
-        a_idx += 1
         
+        a_idx += 1
+        # A sends change_param
         lobbyResp = await send_and_check_rcv(websocket_A, send_recv_A[a_idx][0], player_id_A, send_recv_A[a_idx][1], time_out, wait_time)
         lobbyResp = json.loads(lobbyResp)
         lobbyCode = lobbyResp["data"]["lobby"]["lobby_code"]
@@ -151,11 +155,14 @@ async def two_players_and_bot_play_till_death(url, time_out, wait_time):
         # add bot
         assert await send_and_check_rcv(websocket_A, send_recv_A[a_idx][0], player_id_A, send_recv_A[a_idx][1], time_out, wait_time) is not None
         a_idx += 1
+        # Ready lobby
         assert await send_and_check_rcv(websocket_A, send_recv_A[a_idx][0], player_id_A, send_recv_A[a_idx][1], time_out, wait_time) is not None
         a_idx += 1
         for i in range(5): #each iteration reduces live by one
-            assert await send_and_check_rcv(websocket_A, send_recv_A[a_idx][0], player_id_A, send_recv_A[a_idx][1], time_out, wait_time) is not None
-            assert await send_and_check_rcv(websocket_B, send_recv_B[b_idx][0], player_id_B, send_recv_B[b_idx][1], time_out, wait_time) is not None
+            # End turn for both
+            print(i)
+            assert await send_and_check_rcv(websocket_A, send_recv_A[a_idx][0], player_id_A, send_recv_A[a_idx][1], 2*time_out, wait_time) is not None, f"Expecting message {send_recv_A[a_idx][1]}"
+            assert await send_and_check_rcv(websocket_B, send_recv_B[b_idx][0], player_id_B, send_recv_B[b_idx][1], 2*time_out, wait_time) is not None, f"Expecting message {send_recv_B[b_idx][1]}"
             a_idx += 1
             b_idx += 1
 
@@ -167,7 +174,7 @@ async def one_player_and_two_bots_play(url, time_out, wait_time, base_difficulty
         ({"action": "add_bot", "data": {}, "sequence_number": 0}, ["add_bot"]),
         ({"action": "update_bot", "data": {"difficulty": base_difficulty}, "sequence_number": 0}, ["update_bot"]),
         ({"action": "update_bot", "data": {"difficulty": base_difficulty+1}, "sequence_number": 0}, ["update_bot"]),
-        ({"action": "change_param", "data": {"timer_setting": 5}, "sequence_number": 0}, ["update_lobby_settings"]),
+        ({"action": "change_param", "data": {"timer_setting": 1}, "sequence_number": 0}, ["update_lobby_settings"]),
         ({"action": "ready_lobby", "sequence_number": 0}, ["start_game"]),
         ({"action": "end_turn", "data": None, "sequence_number": 0}, ["lose_life"]),
         ({"action": "end_turn", "data": None, "sequence_number": 0}, ["lose_life"]),
@@ -207,7 +214,7 @@ async def lobby_owner_leaves(url, time_out, wait_time):
     ]
     send_recv_B = [
         ({"action": "join_lobby", "data": {"player_name": "Bob"}, "sequence_number": 0}, ["successfully_joined_lobby"]),
-        (None, ["player_left"])
+        (None, ["remove_player"])
     ]
     async with websockets.connect(url) as websocket_A, websockets.connect(url) as websocket_B:
         init_A = await asyncio.wait_for(websocket_A.recv(), timeout=5)
@@ -233,11 +240,11 @@ async def lobby_owner_leaves(url, time_out, wait_time):
         
         assert await send_and_check_rcv(websocket_B, send_recv_B[b_idx][0], player_id_B, send_recv_B[b_idx][1], time_out, wait_time) is not None
         b_idx += 1
-        websocket_A.close()
+        await websocket_A.close()
         
-        assert await send_and_check_rcv(websocket_B, send_recv_B[b_idx][0], player_id_B, send_recv_B[b_idx][1], time_out, wait_time) is not None
-        # resp = json.loads(resp)
-        # assert resp["pla"]
+        resp = await send_and_check_rcv(websocket_B, send_recv_B[b_idx][0], player_id_B, send_recv_B[b_idx][1], time_out, wait_time)
+        resp = json.loads(resp)
+        assert resp["data"]["player_id_removed"] == player_id_B
         
 
 async def remove_a_bot(url, time_out, wait_time):
@@ -334,7 +341,7 @@ async def full_lobby(url, time_out, wait_time):
         for i in range(idx, len(send_recv)):
             assert await send_and_check_rcv(websocket, send_recv[i][0], player_id, send_recv[i][1], time_out, wait_time) is not None
         bobJoinReq = {"action": "join_lobby", "data": {"player_name": "Bob", "lobby_code": lobbyCode}, "sequence_number": 0}
-        assert await send_and_check_rcv(websocket, bobJoinReq, player_id, ["lobby_full"], time_out, wait_time) is not None
+        assert await send_and_check_rcv(websocket, bobJoinReq, player_id, ["lobby_is_full"], time_out, wait_time) is not None
 
 
 async def use_rotate(url, time_out, wait_time):

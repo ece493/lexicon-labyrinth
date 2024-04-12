@@ -13,6 +13,7 @@ const JoinLobbyComponent: React.FC = () => {
             <input defaultValue={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
                 className="p-1 text-3xl"></input>
             <div className="flex flex-row gap-2">
+                {/* FR4 - Lobby.Join - Via Code */}
                 <Button
                     onClick={() => ctx.sock && ctx.transitions.initialize(ctx)}
                     className="bg-white h-10 py-2 px-4 text-blue-600"

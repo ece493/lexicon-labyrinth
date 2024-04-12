@@ -14,6 +14,8 @@ def load_dict(path) -> list[str]:
             line = line.strip()
             if start_processing:
                 if line:  # Check if the line is not empty
+                    # FR13 - Dictionary
+                    # FR14 - Dictionary.Restrictions
                     if (len(line) > 1 or line.lower() in ['i', 'a']) and line.isalpha():
                         words.append(line)
             elif line == '---':

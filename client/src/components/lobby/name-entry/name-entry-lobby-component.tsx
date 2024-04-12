@@ -10,6 +10,7 @@ const NameEntryLobbyComponent: React.FC = () => {
     return (
         <DefaultLayout>
             <h1 className="m-0 text-slate-100">Enter Your Nickname Here</h1>
+            {/* FR5 - Lobby.Player.Name */}
             <input defaultValue={""} onChange={(e) => ctx.setPlayerName(e.target.value)}
                 className="p-1 text-3xl"></input>
             <Button

@@ -45,6 +45,7 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   lobbyCode,
   setLobbyCode,
 }) => {
+  {/* FR4 - Lobby.Join - Via URL */ }
   const { lobbyId } = useParams();
   const [screen, setScreen] = useState<ScreenState>(initScreen);
   const [lobby, setLobby] = useState<Lobby | null>(null);

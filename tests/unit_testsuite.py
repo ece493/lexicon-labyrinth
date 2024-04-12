@@ -9,9 +9,9 @@ from models import Bot, BotDifficulty, Action, ActionEnum
 from generate_dict import load_dict, DICT_PATH, EASY_DICT_PATH, MED_DICT_PATH, HARD_DICT_PATH
 import random
 
-NUM_BOT_RUNS = 30
-TIMER_SETTING = 3
-BOARD_SIZE = 7
+NUM_BOT_RUNS = 100
+TIMER_SETTING = 5
+BOARD_SIZE = 10
 
 # here we generate the boards the same way we do in-game
 # https://www3.nd.edu/~busiforc/handouts/cryptography/letterfrequencies.html
@@ -25,16 +25,16 @@ letter_weights = {
 }
 letters, weights = zip(*letter_weights.items())
 def rand_letter():
-    return random.choices(letters, weights=weights, k=1)[0]
+    return random.choices(letters, weights=weights, k=1)[0].lower()
 def rand_board(N):
     return [[rand_letter() for i in range(N)] for i in range(N)]
 async def get_bot_failure_rate(difficulty: BotDifficulty):
     bot = Bot("id", "bot", difficulty, lambda _, a, _1 : bot_msg_log.append(a))
     async def bot_find_word():
         loop = asyncio.get_event_loop()
-        bot.process_bot_action(Action(ActionEnum.START_GAME.value, "id", {'timer_setting': TIMER_SETTING}))
-        game_state = {"state": {"curr_turn": "id", "board": rand_board(BOARD_SIZE), "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 5.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": False, "is_bot": False, "lives": 3, "money": 0, "score": 0}, {"id": "id", "name": "Bob", "is_spectator": False, "is_bot": True, "lives": 3, "money": 0, "score": 0}]}
-        await loop.run_in_executor(None, bot.process_bot_action, Action(ActionEnum.START_TURN.value, "id", game_state))
+        bot.process_bot_action(Action(ActionEnum.START_GAME, "id", {'timer_setting': TIMER_SETTING}))
+        game_state = {"state": {"curr_turn": "id", "board": rand_board(BOARD_SIZE), "timer": 123.4, "memory": []}, "max_lives": 5, "host": "yWAcqGFzYt", "board_size": 4, "timer_setting": 25.0, "lobby_code": "ZJXF", "players": [{"id": "yWAcqGFzYt", "name": "Alice", "is_spectator": False, "is_bot": False, "lives": 3, "money": 0, "score": 0}, {"id": "id", "name": "Bob", "is_spectator": False, "is_bot": True, "lives": 3, "money": 0, "score": 0}]}
+        await loop.run_in_executor(None, bot.process_bot_action, Action(ActionEnum.START_TURN, "id", game_state))
 
     bot_msg_log = []
     tasks = [None]*NUM_BOT_RUNS
@@ -72,13 +72,14 @@ def test_med_hard_bot_vocab_comparison():
 
 
 # Expected percentage of successes
-p_easy = 0.75 
-p_medium = 0.80
-p_hard = 0.85
+BOT_FAIL_PROBABILITY = (0.25, 0.18, 0.10)
+p_easy = 1 - BOT_FAIL_PROBABILITY[0]
+p_medium = 1 - BOT_FAIL_PROBABILITY[1]
+p_hard = 1 - BOT_FAIL_PROBABILITY[2]
 standard_error_easy = (p_easy * (1 - p_easy) / NUM_BOT_RUNS) ** 0.5
 standard_error_medium = (p_medium * (1 - p_medium) / NUM_BOT_RUNS) ** 0.5
 standard_error_hard = (p_hard * (1 - p_hard) / NUM_BOT_RUNS) ** 0.5
-z = norm.ppf(0.975)  # Z-score for 95% confidence
+z = norm.ppf(0.995)  # Z-score for 99% confidence
 confidence_interval_easy = (p_easy - z * standard_error_easy, p_easy + z * standard_error_easy)
 confidence_interval_medium = (p_medium - z * standard_error_medium, p_medium + z * standard_error_medium)
 confidence_interval_hard = (p_hard - z * standard_error_hard, p_hard + z * standard_error_hard)
