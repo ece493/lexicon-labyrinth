@@ -88,7 +88,7 @@ class GameWebSocketHandler(tornado.websocket.WebSocketHandler):
         try:
             self.write_message(json.dumps(message.to_json()))
         except Exception as e:
-            print(f"Exception while sending message to websocket: {e}")
+            print(f"Exception while sending message to websocket: {e}, and the exception type is {type(e)}")
         self.sequence_number += 1
 
     def on_message(self, message) -> None:

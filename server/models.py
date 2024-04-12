@@ -453,6 +453,7 @@ class Game:
     def process_word_choice(self, player_id, move_data) -> None:
         # FR18
         assert self.state == GameState.WAITING_FOR_MOVE, f"In process move, the current state of {self.state} isn't the expected of WAITING_FOR_MOVE!"
+        assert self.players[self.current_player_index].player_id == player_id, f"This isn't the player's turn! Why are they submitting a word?!"
         # Logic to check if the move is valid
         print(f"Processing move: {move_data}")
         word_to_check = ""
@@ -516,7 +517,10 @@ class Game:
             # Let the player watch the rest of the game as a spectator
             # FR25, FR24
             player_to_eliminate.is_spectator = True
-            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
+            try:
+                self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
+            except:
+                print("\n\n\n\n\nWHY IN THE HECJKKOSDFJIKOSDJFIOSDJFIOSDJIO")
 
         remaining_players = [player for player in self.players if not player.is_spectator and player.lives >= 1]
         if len(remaining_players) == 1:
@@ -913,7 +917,7 @@ class Bot(Player, object):
         random_number = random.random()
         print(f"Random: {random_number}, fail prob: {self.fail_probability}")
         if random_number < self.fail_probability:
-            print(f"Bot purposely fails to find a word and is sleeping for {self.min_time_to_submit_turn} s")
+            print(f"Bot purposely fails to find a word and is sleeping for {self.time_limit_s} s")
             time.sleep(self.time_limit_s)
             self.send_message_to_game(ActionEnum.END_TURN, {})
             return
