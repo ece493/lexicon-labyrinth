@@ -9,8 +9,8 @@ from models import Bot, BotDifficulty, Action, ActionEnum
 from generate_dict import load_dict, DICT_PATH, EASY_DICT_PATH, MED_DICT_PATH, HARD_DICT_PATH
 import random
 
-NUM_BOT_RUNS = 100
-TIMER_SETTING = 25.0
+NUM_BOT_RUNS = 50
+TIMER_SETTING = 2.5
 BOARD_SIZE = 10
 
 # here we generate the boards the same way we do in-game
@@ -44,6 +44,7 @@ async def get_bot_failure_rate(difficulty: BotDifficulty):
     cnt_found_words = len([log.value for log in bot_msg_log if log==ActionEnum.PICK_WORD])
     # cnt_failed = len([log.value for log in bot_msg_log if log==ActionEnum.END_TURN])
     print(f"bot has {100*cnt_found_words/len(bot_msg_log)}% success rate")
+    print(bot_msg_log)
     return 100*cnt_found_words/len(bot_msg_log)
 
 def test_dictionary():
