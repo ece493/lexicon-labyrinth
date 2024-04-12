@@ -5,7 +5,7 @@ import pytest
 import random
 
 URL = "ws://localhost:8888/websocket"
-TIME_OUT = 2
+TIME_OUT = 2        #time out fix
 WAIT_TIME = 0.5
 
 async def send_and_check_rcv(websocket, message, player_id, actions, time_out, wait_time):
@@ -107,7 +107,7 @@ async def two_players_play_till_death(url, time_out, wait_time):
 async def two_players_and_bot_play_till_death(url, time_out, wait_time):
     send_recv_A = [
         ({"action": "initialize", "data": {"player_name": "Alice"}, "sequence_number": 0}, ["successfully_joined_lobby"]),
-        ({"action": "change_param", "data": {"max_lives": 5}, "sequence_number": 0}, ["update_lobby_settings"]),
+        ({"action": "change_param", "data": {"timer_setting": 2}, "sequence_number": 0}, ["update_lobby_settings"]),
         ({"action": "add_bot", "data": {}, "sequence_number": 0}, ["add_bot"]),
         ({"action": "ready_lobby", "sequence_number": 0}, ["start_game"]),
         ({"action": "end_turn", "data": None, "sequence_number": 0}, ["lose_life"]),
@@ -158,6 +158,7 @@ async def two_players_and_bot_play_till_death(url, time_out, wait_time):
         a_idx += 1
         for i in range(5): #each iteration reduces live by one
             # End turn for both
+            print(i)
             assert await send_and_check_rcv(websocket_A, send_recv_A[a_idx][0], player_id_A, send_recv_A[a_idx][1], time_out, wait_time) is not None, f"Expecting message {send_recv_A[a_idx][1]}"
             assert await send_and_check_rcv(websocket_B, send_recv_B[b_idx][0], player_id_B, send_recv_B[b_idx][1], time_out, wait_time) is not None, f"Expecting message {send_recv_B[b_idx][1]}"
             a_idx += 1
