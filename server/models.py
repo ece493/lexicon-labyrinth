@@ -930,8 +930,8 @@ class Bot(Player, object):
                 if random.random() < 0.1:
                     self.use_rotate_powerup(random.choice(['row', 'col']), random.randint(0, board_size - 1), random.randint(1, board_size - 1))
                     return
-            # if time.perf_counter() - self.start_time_s >= self.time_limit_s:
-            #     break
+            if time.perf_counter() - self.start_time_s >= self.time_limit_s:
+                break
             start_x, start_y = random.randint(0, board_size - 1), random.randint(0, board_size - 1)
             start_letter = game_board[start_x][start_y].lower()
             word, path = find_word(start_x, start_y, [(start_y, start_x)], start_letter)
