@@ -1,4 +1,10 @@
-# Lexicon Labyrinth
+# Lexicon Labyrinth (Group 17)
+
+### Members
+
+- Muhammad Fiaz | ccid: mfiaz | studentID: 1623442
+- Joshua Wong | ccid: jyw2 | studentID: 1617843
+- Jie Fan | ccid: jie | studentID: 1573032
 
 ## Setup/Deployment Instructions
 1. Deployment has been automated using Docker! Ensure that you have Docker Compose or Docker Desktop installed. To learn how to do so, please visit: [https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/).
