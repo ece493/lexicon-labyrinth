@@ -207,7 +207,7 @@ async def lobby_owner_leaves(url, time_out, wait_time):
     ]
     send_recv_B = [
         ({"action": "join_lobby", "data": {"player_name": "Bob"}, "sequence_number": 0}, ["successfully_joined_lobby"]),
-        (None, ["player_left"])
+        (None, ["remove_player"])
     ]
     async with websockets.connect(url) as websocket_A, websockets.connect(url) as websocket_B:
         init_A = await asyncio.wait_for(websocket_A.recv(), timeout=5)
@@ -233,11 +233,11 @@ async def lobby_owner_leaves(url, time_out, wait_time):
         
         assert await send_and_check_rcv(websocket_B, send_recv_B[b_idx][0], player_id_B, send_recv_B[b_idx][1], time_out, wait_time) is not None
         b_idx += 1
-        websocket_A.close()
+        await websocket_A.close()
         
-        assert await send_and_check_rcv(websocket_B, send_recv_B[b_idx][0], player_id_B, send_recv_B[b_idx][1], time_out, wait_time) is not None
-        # resp = json.loads(resp)
-        # assert resp["pla"]
+        resp = await send_and_check_rcv(websocket_B, send_recv_B[b_idx][0], player_id_B, send_recv_B[b_idx][1], time_out, wait_time)
+        resp = json.loads(resp)
+        assert resp["data"]["player_id_removed"] == player_id_B
         
 
 async def remove_a_bot(url, time_out, wait_time):
