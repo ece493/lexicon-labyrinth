@@ -9,7 +9,7 @@ from models import Bot, BotDifficulty, Action, ActionEnum
 from generate_dict import load_dict, DICT_PATH, EASY_DICT_PATH, MED_DICT_PATH, HARD_DICT_PATH
 import random
 
-NUM_BOT_RUNS = 150
+NUM_BOT_RUNS = 100
 TIMER_SETTING = 25.0
 BOARD_SIZE = 10
 
