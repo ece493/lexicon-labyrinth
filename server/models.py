@@ -450,7 +450,6 @@ class Game:
     def process_word_choice(self, player_id, move_data) -> None:
         # FR18
         assert self.state == GameState.WAITING_FOR_MOVE, f"In process move, the current state of {self.state} isn't the expected of WAITING_FOR_MOVE!"
-        assert self.players[self.current_player_index].player_id == player_id, f"This isn't the player's turn! Why are they submitting a word?!"
         # Logic to check if the move is valid
         print(f"Processing move: {move_data}")
         word_to_check = ""
@@ -507,10 +506,7 @@ class Game:
         if player_to_eliminate.is_bot:
             # Remove the bot after telling it that it died
             # FR24
-            try:
-                self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
-            except:
-                print("\n\n\n\n\nWHY IN THE HECJKKOSDFJIKOSDJFIOSDJFIOSDJIO")
+            self.broadcast_func(self.lobby_id, Action(ActionEnum.YOU_DIED, player_to_eliminate.player_id, {"lobby": self.to_json(), "player_id": player_to_eliminate.player_id}))
             #self.broadcast_func(self.lobby_id, Action(ActionEnum.LEAVE_GAME, player_to_eliminate.player_id, self.to_json()))
             #self.players = [player for player in self.players if player.player_id != player_id]
         else:
@@ -527,10 +523,7 @@ class Game:
             # Last player standing
             print(f"Only one last player standing. The game has ended!")
             #self.transition_to_next_player()
-            try:
-                self.winner_determined(remaining_players[0])
-            except:
-                print(f"FAILED IN BROADCAST WINNER MESSAGE {remaining_players[0]}")
+            self.winner_determined(remaining_players[0])
             self.game_complete = True
         else:
             print(f"A player got removed, but there's still players left to fight it out. The game goes on!")
@@ -893,8 +886,7 @@ class Bot(Player, object):
                             self.use_transform_powerup(path[-1], letter)
                             return math.nan, math.nan # Nan signifies that we want to return and do nothing, since we already did an action from within the loop
                     return None, None
-                else:
-                    return None, None
+                return None, None
             for dx in [-1, 0, 1]:
                 for dy in [-1, 0, 1]:
                     if dx == 0 and dy == 0:
@@ -943,7 +935,7 @@ class Bot(Player, object):
             if time.perf_counter() - self.start_time_s >= self.time_limit_s:
                 break
             start_x, start_y = random.randint(0, board_size - 1), random.randint(0, board_size - 1)
-            start_letter = game_board[start_x][start_y]
+            start_letter = game_board[start_x][start_y].lower()
             word, path = find_word(start_x, start_y, [(start_y, start_x)], start_letter)
             if isinstance(word, float) and math.isnan(word):
                 return # We already sent the game a message from within, so don't send anything here and just return
